@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RevitAddIns>
+  <AddIn Type="Command">
+    <Text>Command RevitFamilyImagePrinter</Text>
+    <Description>Some description for RevitFamilyImagePrinter</Description>
+    <Assembly>RevitFamilyImagePrinter.dll</Assembly>
+    <FullClassName>RevitFamilyImagePrinter.Command</FullClassName>
+    <ClientId>39a97f8e-5542-40f8-a645-b6322d636267</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+  <AddIn Type="Application">
+    <Name>Application RevitFamilyImagePrinter</Name>
+    <Assembly>RevitFamilyImagePrinter.dll</Assembly>
+    <FullClassName>RevitFamilyImagePrinter.App</FullClassName>
+    <ClientId>e557e55d-f9df-4626-88cc-4b365ced2f9d</ClientId>
+    <VendorId>com.typepad.thebuildingcoder</VendorId>
+    <VendorDescription>The Building Coder, http://thebuildingcoder.typepad.com</VendorDescription>
+  </AddIn>
+</RevitAddIns>
