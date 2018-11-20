@@ -21,6 +21,7 @@ namespace RevitFamilyImagePrinter.Commands
     {
         public int UserScale { get; set; }
         public int UserImageSize { get; set; }
+        // TODO - Get Folder from FBD
         string imagePath = "D:\\TypeImages\\";
         IList<ElementId> views = new List<ElementId>();
 
@@ -75,11 +76,13 @@ namespace RevitFamilyImagePrinter.Commands
         {
             int indexDot = doc.Title.IndexOf('.');
             var name = doc.Title.Substring(0, indexDot);
+            //TODO - use Path.Combine
             var tempFile = imagePath + name + ".png";
 
             IList<ElementId> views = new List<ElementId>();
             views.Add(doc.ActiveView.Id);
 
+            //TODO - Get User settings for this options
             var exportOptions = new ImageExportOptions
             {
                 ViewName = "temp",
