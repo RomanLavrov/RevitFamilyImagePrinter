@@ -54,6 +54,8 @@ namespace RevitFamilyImagePrinter.Commands
             }
 
             ShowOptions();
+
+            //TODO - Move transaction to separate method
             using (Transaction transaction = new Transaction(doc))
             {
                 transaction.Start("SetView");
