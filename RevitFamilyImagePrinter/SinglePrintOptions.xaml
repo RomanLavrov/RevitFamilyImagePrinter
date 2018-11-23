@@ -6,50 +6,237 @@
     xmlns:local="clr-namespace:RevitFamilyImagePrinter"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Width="240"
-    Height="160"
-    mc:Ignorable="d">
-    <Grid>
-        <Grid
-            Width="200"
-            Height="160"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top">
-            <TextBox
-                x:Name="SizeValue"
-                Width="108"
-                Height="23"
-                Margin="82,19,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Text="64"
-                TextWrapping="Wrap" />
-            <Label
-                Margin="16,15,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Content="Image size" />
-            <TextBox
-                x:Name="ScaleValue"
-                Width="108"
-                Height="22"
-                Margin="82,47,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Text="25"
-                TextWrapping="Wrap" />
-            <Label
-                Margin="23,43,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Content="Scale" />
-            <Button
-                Width="75"
-                Margin="73,97,0,0"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Click="Button_Click"
-                Content="Ok" />
+    Height="240"
+    mc:Ignorable="d"
+    Loaded="UserControl_Loaded">
+    <Grid 
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Margin="5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="6*"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <GroupBox
+                BorderBrush="#d1ecff"
+                Grid.Row="0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition Height="0.22*"/>
+                    </Grid.RowDefinitions>
+                    <Grid
+                    Grid.Row="0"
+                    HorizontalAlignment="Center"
+                    MinWidth="200"
+                    Margin="5">
+                        <Grid.Resources>
+                            <Style TargetType="Label">
+                                <Setter Property="Margin" Value="0 0 10 0"/>
+                                <Setter Property="HorizontalAlignment" Value="Right"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                            </Style>
+                            <Style TargetType="TextBox">
+                                <Setter Property="MinHeight" Value="20"/>
+                                <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                                <Setter Property="VerticalAlignment" Value="Center"/>
+                                <Setter Property="TextWrapping" Value="Wrap"/>
+                                <Setter Property="MaxLength" Value="7"/>
+                                <EventSetter Event="KeyDown" Handler="TextBox_KeyDown"/>
+                            </Style>
+                        </Grid.Resources>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="100"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <Label
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Content="Image size" />
+                        <TextBox
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    x:Name="SizeValue"
+                    Text="64"
+                    MinHeight="20"/>
+                        <Label
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    Content="Scale" />
+                        <TextBox
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    x:Name="ScaleValue"
+                    Text="64"/>
+                        <Label
+                    Grid.Column="0"
+                    Grid.Row="2"
+                    Content="Zoom" />
+                        <TextBox
+                    Grid.Column="1"
+                    Grid.Row="2"
+                    x:Name="ZoomValue"
+                    Text="90"/>
+                        <Label
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    Content="Image resolution" />
+                        <ComboBox 
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    Name="ResolutionValue"
+                    MinHeight="20" 
+                    SelectedIndex="0"
+                    VerticalAlignment="Center"
+                    SelectionChanged="ComboBox_SelectionChanged">
+                            <TextBlock Tag="72">Web Low</TextBlock>
+                            <TextBlock Tag="150">Web High</TextBlock>
+                            <TextBlock Tag="300">Print Low</TextBlock>
+                            <TextBlock Tag="600">Print High</TextBlock>
+                        </ComboBox>
+                        <Label
+                    Grid.Column="0"
+                    Grid.Row="4"
+                    Content="Detail Level" />
+                        <ComboBox 
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    Name="DetailLevelValue"
+                    MinHeight="20" 
+                    SelectedIndex="1"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Left" 
+                    SelectionChanged="ComboBox_SelectionChanged">
+                            <ComboBox.Resources>
+                                <Style TargetType="StackPanel">
+                                    <Setter Property="Orientation" Value="Horizontal"/>
+                                </Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Width" Value="17"/>
+                                    <Setter Property="Height" Value="13"/>
+                                    <Setter Property="Margin" Value="0 0 5 0"/>
+                                </Style>
+                            </ComboBox.Resources>
+                            <ComboBoxItem Tag="Coarse">
+                                <StackPanel>
+                                    <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/coarse.png"/>
+                                    <TextBlock>Coarse</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem  Tag="Medium">
+                                <StackPanel>
+                                    <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/medium.png"/>
+                                    <TextBlock>Medium</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                            <ComboBoxItem  Tag="Fine">
+                                <StackPanel>
+                                    <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/fine.png"/>
+                                    <TextBlock>Fine</TextBlock>
+                                </StackPanel>
+                            </ComboBoxItem>
+                        </ComboBox>
+                    </Grid>
+                    <Grid 
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Margin="3 3 0 3">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="0.62*"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Label
+                        Grid.Column="0"
+                        VerticalAlignment="Center"
+                        Content="Image format" />
+                        <StackPanel
+                        Grid.Column="1"
+                        Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                            <StackPanel.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="-5 0 0 0"/>
+                                </Style>
+                                <Style TargetType="RadioButton">
+                                    <Setter Property="Margin" Value="3 0 0 0"/>
+                                    <EventSetter Event="Checked" Handler="RadioButton_Checked"/>
+                                </Style>
+                            </StackPanel.Resources>
+                            <RadioButton IsChecked="True" Tag=".png">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="-3 0 0 0 ">PNG</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton  Tag=".jpeg">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="-3 0 0 0 ">JPEG</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton Tag=".bmp">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="-3 0 0 0 ">BMP</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+                    </Grid>
+                </Grid>
+            </GroupBox>
+            <Grid 
+                    Grid.Row="2" >
+                <Grid.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Width" Value="75"/>
+                        <Setter Property="Height" Value="23"/>
+                        <Setter Property="HorizontalAlignment" Value="Center"/>
+                        <Setter Property="VerticalAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                    </Style>
+                </Grid.Resources>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Button
+                    Grid.Column="0"
+                    x:Name="btnApply"
+                    Click="Button_Click_Apply">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Width="12" Height="12" Margin="0 0 5 0">
+                            <Path Fill="Black" Data="m.3,14c-0.2-0.2-0.3-0.5-0.3-0.7s0.1-0.5 0.3-0.7l1.4-1.4c0.4-0.4 1-0.4 1.4,0l.1,.1 5.5,5.9c0.2,0.2 0.5,0.2
+                                  0.7,0l13.4-13.9h0.1v-8.88178e-16c0.4-0.4 1-0.4 1.4,0l1.4,1.4c0.4,0.4 0.4,1 
+                                  0,1.4l0,0-16,16.6c-0.2,0.2-0.4,0.3-0.7,0.3-0.3,0-0.5-0.1-0.7-0.3l-7.8-8.4-.2-.3z"/>
+                        </Viewbox>
+                        <TextBlock>Apply</TextBlock>
+                    </StackPanel>
+                </Button>
+                <Button
+                    Grid.Column="1"
+                    x:Name="btnPrint"
+                    Click="Button_Click_Print">
+                    <StackPanel Orientation="Horizontal">
+                        <Viewbox Width="12" Height="12" Margin="0 0 5 0">
+                            <Path Fill="Black" Data="M399.25,98.9h-12.4V71.3c0-39.3-32-71.3-71.3-71.3h-149.7c-39.3,0-71.3,32-71.3,71.3v27.6h-11.3
+			                            c-39.3,0-71.3,32-71.3,71.3v115c0,39.3,32,71.3,71.3,71.3h11.2v90.4c0,19.6,16,35.6,35.6,35.6h221.1c19.6,0,35.6-16,35.6-35.6
+			                            v-90.4h12.5c39.3,0,71.3-32,71.3-71.3v-115C470.55,130.9,438.55,98.9,399.25,98.9z M121.45,71.3c0-24.4,19.9-44.3,44.3-44.3h149.6
+			                            c24.4,0,44.3,19.9,44.3,44.3v27.6h-238.2V71.3z M359.75,447.1c0,4.7-3.9,8.6-8.6,8.6h-221.1c-4.7,0-8.6-3.9-8.6-8.6V298h238.3
+			                            V447.1z M443.55,285.3c0,24.4-19.9,44.3-44.3,44.3h-12.4V298h17.8c7.5,0,13.5-6,13.5-13.5s-6-13.5-13.5-13.5h-330
+			                            c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h19.9v31.6h-11.3c-24.4,0-44.3-19.9-44.3-44.3v-115c0-24.4,19.9-44.3,44.3-44.3h316
+			                            c24.4,0,44.3,19.9,44.3,44.3V285.3z M154.15,364.4h171.9c7.5,0,13.5-6,13.5-13.5s-6-13.5-13.5-13.5h-171.9c-7.5,0-13.5,6-13.5,13.5S146.75,364.4,154.15,364.4
+			                            z M327.15,392.6h-172c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h171.9c7.5,0,13.5-6,13.5-13.5S334.55,392.6,327.15,392.6z 
+                                        M398.95,151.9h-27.4c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h27.4c7.5,0,13.5-6,13.5-13.5S406.45,151.9,398.95,151.9z"/>
+                        </Viewbox>
+                        <TextBlock>Print</TextBlock>
+                    </StackPanel>
+                </Button>
+            </Grid>
         </Grid>
-
     </Grid>
 </UserControl>

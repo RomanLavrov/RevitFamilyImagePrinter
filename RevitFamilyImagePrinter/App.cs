@@ -12,9 +12,12 @@ namespace RevitFamilyImagePrinter
 {
     class App : IExternalApplication
     {
-        public Result OnStartup(UIControlledApplication a)
-        {
-            string tabName = "Image Printer";
+		public static string Version { get; private set; }
+		public Result OnStartup(UIControlledApplication a)
+		{
+			ControlledApplication c = a.ControlledApplication;
+			Version = c.VersionNumber;
+			string tabName = "Image Printer";
             a.CreateRibbonTab(tabName);
 
             var assembly = Assembly.GetExecutingAssembly().Location;

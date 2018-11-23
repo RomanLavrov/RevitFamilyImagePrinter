@@ -13,133 +13,218 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using MessageBox = System.Windows.MessageBox;
 using View = Autodesk.Revit.DB.View;
+using Ookii.Dialogs.Wpf;
 
 namespace RevitFamilyImagePrinter.Commands
 {
-    [Transaction(TransactionMode.Manual)]
-    class Print2D : IExternalCommand
-    {
-        public int UserScale { get; set; }
-        public int UserImageSize { get; set; }
-        // TODO - Get Folder from FBD
-        string imagePath = "D:\\TypeImages\\";
-        IList<ElementId> views = new List<ElementId>();
+	[Transaction(TransactionMode.Manual)]
+	class Print2D : IExternalCommand
+	{
+		#region Variables
+		private IList<ElementId> views = new List<ElementId>();
+		private Document doc;
+		private UIDocument uidoc;
+		#endregion
 
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            UIApplication uiapp = commandData.Application;
-            UIDocument uidoc = uiapp.ActiveUIDocument;
-            Document doc = uidoc.Document;
+		#region Constants
+		private const int WindowHeightOffset = 40;
+		private const int WindowWidthOffset = 10;
+		#endregion
 
-            FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
-            viewCollector.OfClass(typeof(View));
-            
-            foreach (Element viewElement in viewCollector)
-            {
-                View view = (View)viewElement;
+		#region User Values
+		public int UserScale { get; set; }
+		public int UserImageSize { get; set; }
+		public ImageResolution UserImageResolution { get; set; }
+		public string UserExtension { get; set; }
+		public double UserZoomValue { get; set; }
+		public ViewDetailLevel UserDetailLevel { get; set; }
+		#endregion
 
-                if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
-                {
-                    views.Add(view.Id);
-                    uidoc.ActiveView = view;
-                }
-            }
 
-            IList<UIView> uiviews = uidoc.GetOpenUIViews();
-            foreach (var item in uiviews)
-            {
-                //item.ZoomToFit();
-                //item.Zoom(0.95);
-                uidoc.RefreshActiveView();
-            }
 
-            ShowOptions();
+		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+		{
+			UIApplication uiapp = commandData.Application;
+			uidoc = uiapp.ActiveUIDocument;
+			doc = uidoc.Document;
 
-            //TODO - Move transaction to separate method
-            using (Transaction transaction = new Transaction(doc))
-            {
-                transaction.Start("SetView");
-                doc.ActiveView.DetailLevel = ViewDetailLevel.Medium;
-                doc.ActiveView.Scale = UserScale;
-                transaction.Commit();
-            }
+			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+			viewCollector.OfClass(typeof(View));
 
-            using (Transaction transaction = new Transaction(doc))
-            {
-                transaction.Start("Print");
-                PrintImage(doc);
-                transaction.Commit();
-            }
+			foreach (Element viewElement in viewCollector)
+			{
+				View view = (View)viewElement;
 
-            return Result.Succeeded;
-        }
+				if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+				{
+					views.Add(view.Id);
+					uidoc.ActiveView = view;
+				}
+			}
 
-        private void PrintImage(Document doc)
-        {
-            int indexDot = doc.Title.IndexOf('.');
-            var name = doc.Title.Substring(0, indexDot);
-            //TODO - use Path.Combine
-            var tempFile = imagePath + name + ".png";
+			if (!ShowOptionsDialog())
+				return Result.Failed;
+			ViewChangesCommit();
+			PrintCommit();
 
-            IList<ElementId> views = new List<ElementId>();
-            views.Add(doc.ActiveView.Id);
+			return Result.Succeeded;
+		}
 
-            //TODO - Get User settings for this options
-            var exportOptions = new ImageExportOptions
-            {
-                ViewName = "temp",
-                FilePath = tempFile,
-                FitDirection = FitDirectionType.Vertical,
-                HLRandWFViewsFileType = ImageFileType.PNG,
-                ImageResolution = ImageResolution.DPI_300,
-                ShouldCreateWebSite = false,
-                PixelSize = UserImageSize
-                /*,
-                ZoomType = ZoomFitType.FitToPage*/
-            };
+		public void ViewChangesCommit()
+		{
+			IList<UIView> uiviews = uidoc.GetOpenUIViews();
+			foreach (var item in uiviews)
+			{
+				item.ZoomToFit();
+				item.Zoom(UserZoomValue);
+				uidoc.RefreshActiveView();
+			}
 
-            if (views.Count > 0)
-            {
-                exportOptions.SetViewsAndSheets(views);
-                exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
-            }
-            else
-            {
-                exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
-            }
+			using (Transaction transaction = new Transaction(doc))
+			{
+				transaction.Start("SetView");
+				doc.ActiveView.DetailLevel = UserDetailLevel;
+				doc.ActiveView.Scale = UserScale;
+				transaction.Commit();
+			}
+		}
 
-            exportOptions.ViewName = "temp";
+		private void PrintCommit()
+		{
+			using (Transaction transaction = new Transaction(doc))
+			{
+				transaction.Start("Print");
+				PrintImage();
+				transaction.Commit();
+			}
+		}
 
-            if (ImageExportOptions.IsValidFileName(tempFile))
-            {
-                doc.ExportImage(exportOptions);
-            }
-        }
+		private void PrintImage()
+		{
+			string initialName = GetFileName();
+			string userImagePath = SelectFileNameDialog(initialName);
+			if (userImagePath == initialName) return;
 
-        private void ShowOptions()
-        {
-            SinglePrintOptions options = new SinglePrintOptions();
-            Window window = new Window
-            {
-                Height = 180,
-                Width = 260,
-                Title = "Image Print Settings",
-                Content = options,
-                Background = System.Windows.Media.Brushes.WhiteSmoke,
-                WindowStyle = WindowStyle.ToolWindow,
-                Name = "Options",
-                ResizeMode = ResizeMode.NoResize,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
+			IList<ElementId> views = new List<ElementId>();
+			views.Add(doc.ActiveView.Id);
 
-            };
+			var exportOptions = new ImageExportOptions
+			{
+				ViewName = "temp",
+				FilePath = userImagePath,
+				FitDirection = FitDirectionType.Vertical,
+				HLRandWFViewsFileType = GetImageFileType(UserExtension),
+				ImageResolution = UserImageResolution,
+				ShouldCreateWebSite = false,
+				PixelSize = UserImageSize
+			};
 
-            window.ShowDialog();
+			if (views.Count > 0)
+			{
+				exportOptions.SetViewsAndSheets(views);
+				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
+			}
+			else
+			{
+				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
+			}
 
-            if (window.DialogResult == true)
-            {
-                UserScale = options.userScale;
-                UserImageSize = options.userImageSize;
-            }
-        }
-    }
+			exportOptions.ViewName = "temp";
+
+			if (ImageExportOptions.IsValidFileName(userImagePath))
+			{
+				doc.ExportImage(exportOptions);
+			}
+		}
+
+		private string SelectFileNameDialog(string name)
+		{
+			string path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			VistaFileDialog dialog = new VistaSaveFileDialog()
+			{
+				InitialDirectory = path,
+				RestoreDirectory = true,
+				Title = "Choose a directory",
+				FilterIndex = 0,
+				Filter = "Image Files (*.PNG, *.JPG, *.BMP) | *.png;*.jpg;*.bmp",
+				FileName = name
+			};
+
+			if ((bool)dialog.ShowDialog())
+			{
+				path = dialog.FileName;
+				return path;
+			}
+			return name;
+		}
+
+		private string GetFileName()
+		{
+			switch (App.Version)
+			{
+				case "2018":
+					{
+						int indexDot = doc.Title.IndexOf('.');
+						var name = doc.Title.Substring(0, indexDot);
+						return name;
+					}
+				case "2019":
+					{
+						return doc.Title;
+					}
+				default: throw new Exception("Unknown Revit Version");
+			}
+		}
+
+		private ImageFileType GetImageFileType(string userImagePath)
+		{
+			switch (Path.GetExtension(userImagePath).ToLower())
+			{
+				case ".png": return ImageFileType.PNG;
+				case ".jpeg": return ImageFileType.JPEGLossless;
+				case ".bmp": return ImageFileType.BMP;
+				case ".tiff": return ImageFileType.TIFF;
+				case ".targa": return ImageFileType.TARGA;
+				default: throw new Exception("Unknown Image Format");
+			}
+		}
+
+		private bool ShowOptionsDialog()
+		{
+			SinglePrintOptions options = new SinglePrintOptions()
+			{
+				Doc = this.doc,
+				UIDoc = this.uidoc
+			};
+			Window window = new Window
+			{
+				Height = options.Height + WindowHeightOffset,
+				Width = options.Width + WindowWidthOffset,
+				Title = "Image Print Settings",
+				Content = options,
+				Background = System.Windows.Media.Brushes.WhiteSmoke,
+				WindowStyle = WindowStyle.ToolWindow,
+				Name = "Options",
+				ResizeMode = ResizeMode.NoResize,
+				WindowStartupLocation = WindowStartupLocation.CenterScreen
+			};
+
+			window.ShowDialog();
+
+			if (window.DialogResult != true)
+				return false;
+			InitializeVariables(options);
+			return true;
+		}
+
+		private void InitializeVariables(SinglePrintOptions options)
+		{
+			UserScale = options.UserScale;
+			UserImageSize = options.UserImageSize;
+			UserImageResolution = options.UserImageResolution;
+			UserZoomValue = options.UserZoomValue;
+			UserExtension = options.UserExtension;
+			UserDetailLevel = options.UserDetailLevel;
+		}
+	}
 }
