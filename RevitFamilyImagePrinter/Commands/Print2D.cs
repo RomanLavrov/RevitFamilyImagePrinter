@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
-using Autodesk.Revit.Attributes;
+﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using MessageBox = System.Windows.MessageBox;
+using System.Collections.Generic;
+using System.Windows;
 using View = Autodesk.Revit.DB.View;
 
 namespace RevitFamilyImagePrinter.Commands
@@ -70,7 +61,6 @@ namespace RevitFamilyImagePrinter.Commands
                 PrintImage(doc);
                 transaction.Commit();
             }
-
             return Result.Succeeded;
         }
 

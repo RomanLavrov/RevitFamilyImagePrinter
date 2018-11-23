@@ -1,16 +1,10 @@
-﻿using System;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using View = Autodesk.Revit.DB.View;
 
 namespace RevitFamilyImagePrinter.Commands
@@ -20,6 +14,7 @@ namespace RevitFamilyImagePrinter.Commands
     {
         public int UserScale { get; set; }
         public int UserImageSize { get; set; }
+        //TODO Add FBD for images output
         string imagePath = "D:\\TypeImages\\";
         IList<ElementId> views = new List<ElementId>();
 
@@ -29,6 +24,7 @@ namespace RevitFamilyImagePrinter.Commands
             UIDocument uidoc = uiapp.ActiveUIDocument;           
 
             ShowOptions();
+            //TODO Add FBD for rvt projects as input
             var fileList = Directory.GetFiles("D:\\Test");
             foreach (var item in fileList)
             {
@@ -57,6 +53,7 @@ namespace RevitFamilyImagePrinter.Commands
                         foreach (var uiView in uiviews)
                         {
                             uiView.ZoomToFit();
+                            //TODO - set zoom from user settings
                             uiView.Zoom(0.95);
                             
                             uidoc.RefreshActiveView();
@@ -110,7 +107,7 @@ namespace RevitFamilyImagePrinter.Commands
                 ImageResolution = ImageResolution.DPI_300,
                 ShouldCreateWebSite = false,
                 PixelSize = UserImageSize,
-                //ZoomType = ZoomFitType.FitToPage
+                ZoomType = ZoomFitType.FitToPage
             };
 
             if (views.Count > 0)
@@ -144,7 +141,6 @@ namespace RevitFamilyImagePrinter.Commands
                 Name = "Options",
                 ResizeMode = ResizeMode.NoResize,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
-
             };
 
             window.ShowDialog();
