@@ -100,8 +100,8 @@ namespace RevitFamilyImagePrinter.Commands
 
             if (window.DialogResult == true)
             {
-                UserScale = options.userScale;
-                UserImageSize = options.userImageSize;
+                UserScale = options.UserScale;
+                UserImageSize = options.UserImageSize;
             }
         }
 
