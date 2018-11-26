@@ -12,6 +12,8 @@ namespace RevitFamilyImagePrinter.Commands
     [Transaction(TransactionMode.Manual)]
     class Print2DFolder : IExternalCommand
     {
+        private const int windowHeightOffset = 40;
+        private const int windowWidthOffset = 40;
         public int UserScale { get; set; }
         public int UserImageSize { get; set; }
         //TODO Add FBD for images output
@@ -132,8 +134,8 @@ namespace RevitFamilyImagePrinter.Commands
             SinglePrintOptions options = new SinglePrintOptions();
             Window window = new Window
             {
-                Height = 180,
-                Width = 260,
+                Height = options.Height + windowHeightOffset,
+                Width = options.Width + windowWidthOffset,
                 Title = "Image Print Settings",
                 Content = options,
                 Background = System.Windows.Media.Brushes.WhiteSmoke,
