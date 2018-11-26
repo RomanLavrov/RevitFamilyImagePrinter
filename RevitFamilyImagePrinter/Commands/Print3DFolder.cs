@@ -29,8 +29,8 @@ namespace RevitFamilyImagePrinter.Commands
             uiapp = commandData.Application;
             uidoc = uiapp.ActiveUIDocument;
             doc = uidoc.Document;
-            /*
-            var fileList = Directory.GetFiles("D:\\TypesForWeb_0.1");
+            
+            var fileList = Directory.GetFiles("D:\\Test");
             foreach (var item in fileList)
             {
                 try
@@ -46,12 +46,20 @@ namespace RevitFamilyImagePrinter.Commands
                     {
                         trans.Start("Add view");
                         view3d = View3D.CreateIsometric(doc, viewFamilyType.Id);
-
                         trans.Commit();
                     }
                     uidoc.ActiveView = view3d;
+                    
                     FilteredElementCollector collector = new FilteredElementCollector(doc);
                     collector.OfClass(typeof(View3D));
+
+                    IList<UIView> uIViews = uidoc.GetOpenUIViews();
+                    foreach (var uiview in uIViews)
+                    {
+                        uiview.ZoomToFit();
+                        uiview.Zoom(0.95);
+                        uidoc.RefreshActiveView();
+                    }
                     foreach (View3D VARIABLE in collector)
                     {
                         if (VARIABLE != null)
@@ -61,6 +69,7 @@ namespace RevitFamilyImagePrinter.Commands
                                 transaction.Start("SetView");
                                 uidoc.ActiveView.DetailLevel = ViewDetailLevel.Fine;
                                 uidoc.ActiveView.Scale = 10;
+                                
                                 transaction.Commit();
                             }
                         }
@@ -76,30 +85,21 @@ namespace RevitFamilyImagePrinter.Commands
                     uidoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
                     doc.Close();
                 }
-                catch { }
-              
-            }*/
+                catch { }              
+            }
 
             var picturesList =  Directory.GetFiles(imagePath);
             foreach (var item in picturesList)
-            {
-                
-                    
+            {                    
                 if (item.IndexOf("- 3D View - 3D View") > 0)
                 {
                     try
                     {
-                        var index = item.IndexOf("- 3D View - 3D View");
-                        
-                            // var index = item.IndexOf("- Structural Plan - Level 1");
-                        //System.Windows.MessageBox.Show(picturesList[10].Substring(0, index));
+                        var index = item.IndexOf("- 3D View - 3D View");                           
                         System.IO.File.Move(item, item.Substring(0, index) + ".png");
-
                     }
                     catch{};
-
                 }
-
             }
 
 
@@ -120,18 +120,18 @@ namespace RevitFamilyImagePrinter.Commands
             var exportOptions = new ImageExportOptions
             {
                 FilePath = tempFile,
-                // FitDirection = FitDirectionType.Vertical,
+                 FitDirection = FitDirectionType.Vertical,
                 HLRandWFViewsFileType = ImageFileType.PNG,
                 ImageResolution = ImageResolution.DPI_300,
                 ShouldCreateWebSite = false,
-                PixelSize = 512, // UserImageSize,
+                PixelSize = 460, // UserImageSize,
                 ZoomType = ZoomFitType.Zoom
             };
 
             if (views.Count > 0)
             {
                 exportOptions.SetViewsAndSheets(views);
-                exportOptions.ExportRange = ExportRange.SetOfViews;
+                exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
             }
             else
             {
@@ -186,7 +186,7 @@ namespace RevitFamilyImagePrinter.Commands
                     {
                         transaction.Start("SetView");
                         uidoc.ActiveView.DetailLevel = ViewDetailLevel.Fine;
-                        uidoc.ActiveView.Scale = 10;
+                        uidoc.ActiveView.Scale = 50;
                         transaction.Commit();
                     }
                 }
@@ -198,8 +198,6 @@ namespace RevitFamilyImagePrinter.Commands
                 PrintImage(doc);
                 transaction.Commit();
             }
-
-
         }
     }
 }

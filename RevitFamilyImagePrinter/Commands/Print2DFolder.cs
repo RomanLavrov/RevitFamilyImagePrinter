@@ -1,16 +1,10 @@
-﻿using System;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using View = Autodesk.Revit.DB.View;
 
 namespace RevitFamilyImagePrinter.Commands
@@ -18,8 +12,11 @@ namespace RevitFamilyImagePrinter.Commands
     [Transaction(TransactionMode.Manual)]
     class Print2DFolder : IExternalCommand
     {
-		public int UserScale { get; set; }
-		public int UserImageSize { get; set; }
+        private const int windowHeightOffset = 40;
+        private const int windowWidthOffset = 40;
+        public int UserScale { get; set; }
+        public int UserImageSize { get; set; }
+        //TODO Add FBD for images output
         string imagePath = "D:\\TypeImages\\";
         IList<ElementId> views = new List<ElementId>();
 
@@ -29,8 +26,9 @@ namespace RevitFamilyImagePrinter.Commands
             UIDocument uidoc = uiapp.ActiveUIDocument;           
 
             ShowOptions();
+            //TODO Add FBD for rvt projects as input
             var fileList = Directory.GetFiles("D:\\Test");
-			foreach (var item in fileList)
+            foreach (var item in fileList)
             {
                 if (!item.Contains("000"))
                 {
@@ -57,6 +55,7 @@ namespace RevitFamilyImagePrinter.Commands
                         foreach (var uiView in uiviews)
                         {
                             uiView.ZoomToFit();
+                            //TODO - set zoom from user settings
                             uiView.Zoom(0.95);
                             
                             uidoc.RefreshActiveView();
@@ -77,8 +76,8 @@ namespace RevitFamilyImagePrinter.Commands
                             transaction.Commit();
                         }
 
-						uidoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
-						doc.Close();
+                        uidoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
+                        doc.Close();
                     }
                     catch
                     {
@@ -110,8 +109,8 @@ namespace RevitFamilyImagePrinter.Commands
                 ImageResolution = ImageResolution.DPI_300,
                 ShouldCreateWebSite = false,
                 PixelSize = UserImageSize,
-				//ZoomType = ZoomFitType.FitToPage
-			};
+                ZoomType = ZoomFitType.FitToPage
+            };
 
             if (views.Count > 0)
             {
@@ -135,8 +134,8 @@ namespace RevitFamilyImagePrinter.Commands
             SinglePrintOptions options = new SinglePrintOptions();
             Window window = new Window
             {
-                Height = 180,
-                Width = 260,
+                Height = options.Height + windowHeightOffset,
+                Width = options.Width + windowWidthOffset,
                 Title = "Image Print Settings",
                 Content = options,
                 Background = System.Windows.Media.Brushes.WhiteSmoke,
@@ -144,7 +143,6 @@ namespace RevitFamilyImagePrinter.Commands
                 Name = "Options",
                 ResizeMode = ResizeMode.NoResize,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen
-
             };
 
             window.ShowDialog();
