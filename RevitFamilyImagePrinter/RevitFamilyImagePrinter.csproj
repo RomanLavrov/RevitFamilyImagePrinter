@@ -41,7 +41,7 @@
   <ItemGroup>
     <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\bin\Debug\Ookii.Dialogs.Wpf.dll</HintPath>
+      <HintPath>C:\Users\user\Desktop\RevitFamilyImagePrinter-master\RevitFamilyImagePrinter\bin\Debug\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />

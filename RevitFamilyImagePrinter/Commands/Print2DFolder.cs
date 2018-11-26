@@ -18,8 +18,8 @@ namespace RevitFamilyImagePrinter.Commands
     [Transaction(TransactionMode.Manual)]
     class Print2DFolder : IExternalCommand
     {
-        public int UserScale { get; set; }
-        public int UserImageSize { get; set; }
+		public int UserScale { get; set; }
+		public int UserImageSize { get; set; }
         string imagePath = "D:\\TypeImages\\";
         IList<ElementId> views = new List<ElementId>();
 
@@ -30,7 +30,7 @@ namespace RevitFamilyImagePrinter.Commands
 
             ShowOptions();
             var fileList = Directory.GetFiles("D:\\Test");
-            foreach (var item in fileList)
+			foreach (var item in fileList)
             {
                 if (!item.Contains("000"))
                 {
@@ -77,8 +77,8 @@ namespace RevitFamilyImagePrinter.Commands
                             transaction.Commit();
                         }
 
-                        uidoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
-                        doc.Close();
+						uidoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
+						doc.Close();
                     }
                     catch
                     {
@@ -110,8 +110,8 @@ namespace RevitFamilyImagePrinter.Commands
                 ImageResolution = ImageResolution.DPI_300,
                 ShouldCreateWebSite = false,
                 PixelSize = UserImageSize,
-                //ZoomType = ZoomFitType.FitToPage
-            };
+				//ZoomType = ZoomFitType.FitToPage
+			};
 
             if (views.Count > 0)
             {
