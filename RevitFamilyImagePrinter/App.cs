@@ -34,17 +34,23 @@ namespace RevitFamilyImagePrinter
             PushButtonData buttontPrint3DMulti = new PushButtonData("Print 3D Folder", " 3D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print3DFolder");
             buttontPrint3DMulti.ToolTip = "Create 3D family image from selected folder";
 
-            RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
+			PushButtonData buttonRemoveEmptyFamilies = new PushButtonData("Remove empty families", "Remove Families", assembly, "RevitFamilyImagePrinter.Commands.RemoveEmptyFamilies");
+			buttonRemoveEmptyFamilies.ToolTip = "Remove all families without instances.";
+
+			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
             printPanel.AddItem(buttontPrint2DSingle);
             printPanel.AddItem(buttontPrint2DMulti);
             printPanel.AddItem(buttontPrint3DSingle);
             printPanel.AddItem(buttontPrint3DMulti);
+			printPanel.AddSeparator();
+			printPanel.AddItem(buttonRemoveEmptyFamilies);
 
             return Result.Succeeded;
         }
 
         public Result OnShutdown(UIControlledApplication a)
         {
+			//to clean folder, from which files were printed
             return Result.Succeeded;
         }
     }
