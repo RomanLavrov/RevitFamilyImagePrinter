@@ -20,71 +20,68 @@ namespace RevitFamilyImagePrinter.Commands
 	[Transaction(TransactionMode.Manual)]
 	class Print2D : IExternalCommand
 	{
+		#region User Values
+		public UserImageValues userValues { get; set; } = new UserImageValues();
+		#endregion
+		
 		#region Variables
 		private IList<ElementId> views = new List<ElementId>();
 		private Document doc;
-		private UIDocument uidoc;
+		private UIDocument uiDoc;
 		#endregion
 
 		#region Constants
-		private const int WindowHeightOffset = 40;
-		private const int WindowWidthOffset = 10;
-		#endregion
-
-		#region User Values
-		public int UserScale { get; set; }
-		public int UserImageSize { get; set; }
-		public ImageResolution UserImageResolution { get; set; }
-		public string UserExtension { get; set; }
-		public double UserZoomValue { get; set; }
-		public ViewDetailLevel UserDetailLevel { get; set; }
-		#endregion
-
-
+		private const int windowHeightOffset = 40;
+		private const int windowWidthOffset = 10;
+		#endregion	
 
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
 			UIApplication uiapp = commandData.Application;
-			uidoc = uiapp.ActiveUIDocument;
-			doc = uidoc.Document;
-
-			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
-			viewCollector.OfClass(typeof(View));
-
-			foreach (Element viewElement in viewCollector)
+			uiDoc = uiapp.ActiveUIDocument;
+			using (doc = uiDoc.Document)
 			{
-				View view = (View)viewElement;
+				FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+				viewCollector.OfClass(typeof(View));
 
-				if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+				foreach (Element viewElement in viewCollector)
 				{
-					views.Add(view.Id);
-					uidoc.ActiveView = view;
-				}
-			}
+					View view = (View)viewElement;
 
-			if (!ShowOptionsDialog())
-				return Result.Failed;
-			ViewChangesCommit();
-			PrintCommit();
+					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+					{
+						views.Add(view.Id);
+						uiDoc.ActiveView = view;
+					}
+				}
+
+				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(doc, uiDoc, 40, 10);
+				if (userInputValues == null)
+					return Result.Failed;
+				this.userValues = userInputValues;
+
+				ViewChangesCommit();
+				PrintCommit();
+			}
 
 			return Result.Succeeded;
 		}
 
 		public void ViewChangesCommit()
 		{
-			IList<UIView> uiviews = uidoc.GetOpenUIViews();
+			IList<UIView> uiviews = uiDoc.GetOpenUIViews();
 			foreach (var item in uiviews)
 			{
 				item.ZoomToFit();
-				item.Zoom(UserZoomValue);
-				uidoc.RefreshActiveView();
+				item.Zoom(userValues.UserZoomValue);
+				uiDoc.RefreshActiveView();
 			}
 
 			using (Transaction transaction = new Transaction(doc))
 			{
 				transaction.Start("SetView");
-				doc.ActiveView.DetailLevel = UserDetailLevel;
-				doc.ActiveView.Scale = UserScale;
+				doc.ActiveView.DetailLevel = userValues.UserDetailLevel;
+				doc.ActiveView.Scale = userValues.UserScale;
 				transaction.Commit();
 			}
 		}
@@ -101,8 +98,8 @@ namespace RevitFamilyImagePrinter.Commands
 
 		private void PrintImage()
 		{
-			string initialName = GetFileName();
-			string userImagePath = SelectFileNameDialog(initialName);
+			string initialName = RevitPrintHelper.GetFileName(doc);
+			string userImagePath = RevitPrintHelper.SelectFileNameDialog(initialName);
 			if (userImagePath == initialName) return;
 
 			IList<ElementId> views = new List<ElementId>();
@@ -113,10 +110,10 @@ namespace RevitFamilyImagePrinter.Commands
 				ViewName = "temp",
 				FilePath = userImagePath,
 				FitDirection = FitDirectionType.Vertical,
-				HLRandWFViewsFileType = GetImageFileType(UserExtension),
-				ImageResolution = UserImageResolution,
+				HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(userValues.UserExtension),
+				ImageResolution = userValues.UserImageResolution,
 				ShouldCreateWebSite = false,
-				PixelSize = UserImageSize
+				PixelSize = userValues.UserImageSize
 			};
 
 			if (views.Count > 0)
@@ -128,8 +125,6 @@ namespace RevitFamilyImagePrinter.Commands
 			{
 				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 			}
-
-			exportOptions.ViewName = "temp";
 
 			if (ImageExportOptions.IsValidFileName(userImagePath))
 			{
@@ -158,24 +153,6 @@ namespace RevitFamilyImagePrinter.Commands
 			return name;
 		}
 
-		private string GetFileName()
-		{
-			switch (App.Version)
-			{
-				case "2018":
-					{
-						int indexDot = doc.Title.IndexOf('.');
-						var name = doc.Title.Substring(0, indexDot);
-						return name;
-					}
-				case "2019":
-					{
-						return doc.Title;
-					}
-				default: throw new Exception("Unknown Revit Version");
-			}
-		}
-
 		private ImageFileType GetImageFileType(string userImagePath)
 		{
 			switch (Path.GetExtension(userImagePath).ToLower())
@@ -189,42 +166,42 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private bool ShowOptionsDialog()
-		{
-			SinglePrintOptions options = new SinglePrintOptions()
-			{
-				Doc = this.doc,
-				UIDoc = this.uidoc
-			};
-			Window window = new Window
-			{
-				Height = options.Height + WindowHeightOffset,
-				Width = options.Width + WindowWidthOffset,
-				Title = "Image Print Settings",
-				Content = options,
-				Background = System.Windows.Media.Brushes.WhiteSmoke,
-				WindowStyle = WindowStyle.ToolWindow,
-				Name = "Options",
-				ResizeMode = ResizeMode.NoResize,
-				WindowStartupLocation = WindowStartupLocation.CenterScreen
-			};
+		//private bool ShowOptionsDialog()
+		//{
+		//	SinglePrintOptions options = new SinglePrintOptions()
+		//	{
+		//		Doc = this.doc,
+		//		UIDoc = this.uiDoc
+		//	};
+		//	Window window = new Window
+		//	{
+		//		Height = options.Height + windowHeightOffset,
+		//		Width = options.Width + windowWidthOffset,
+		//		Title = "Image Print Settings",
+		//		Content = options,
+		//		Background = System.Windows.Media.Brushes.WhiteSmoke,
+		//		WindowStyle = WindowStyle.ToolWindow,
+		//		Name = "Options",
+		//		ResizeMode = ResizeMode.NoResize,
+		//		WindowStartupLocation = WindowStartupLocation.CenterScreen
+		//	};
 
-			window.ShowDialog();
+		//	window.ShowDialog();
 
-			if (window.DialogResult != true)
-				return false;
-			InitializeVariables(options);
-			return true;
-		}
+		//	if (window.DialogResult != true)
+		//		return false;
+		//	/(options);
+		//	return true;
+		//}
 
-		private void InitializeVariables(SinglePrintOptions options)
-		{
-			UserScale = options.UserScale;
-			UserImageSize = options.UserImageSize;
-			UserImageResolution = options.UserImageResolution;
-			UserZoomValue = options.UserZoomValue;
-			UserExtension = options.UserExtension;
-			UserDetailLevel = options.UserDetailLevel;
-		}
+		//private void InitializeVariables(SinglePrintOptions options)
+		//{
+		//	userValues.UserScale = options.UserScale;
+		//	userValues.UserImageSize = options.UserImageSize;
+		//	userValues.UserImageResolution = options.UserImageResolution;
+		//	userValues.UserZoomValue = options.UserZoomValue;
+		//	userValues.UserExtension = options.UserExtension;
+		//	userValues.UserDetailLevel = options.UserDetailLevel;
+		//}
 	}
 }
