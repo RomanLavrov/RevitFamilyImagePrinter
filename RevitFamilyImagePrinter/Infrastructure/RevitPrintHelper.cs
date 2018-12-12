@@ -13,29 +13,35 @@ namespace RevitFamilyImagePrinter
 {
 	public static class RevitPrintHelper
 	{
-		public static UserImageValues ShowOptionsDialog(Document doc, UIDocument uiDoc, int windowHeightOffset = 40, int windowWidthOffset = 10, bool isApplyButtonVisible = true)
+		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40, int windowWidthOffset = 10, bool isApplyButtonVisible = true)
 		{
-			SinglePrintOptions options = new SinglePrintOptions()
+			Window window = null;
+			SinglePrintOptions options = null;
+			using (Document doc = uiDoc.Document)
 			{
-				Doc = doc,
-				UIDoc = uiDoc,
-				IsPreview = isApplyButtonVisible
-			};
-			Window window = new Window
-			{
-				Height = options.Height + windowHeightOffset,
-				Width = options.Width + windowWidthOffset,
-				Title = "Image Print Settings",
-				Content = options,
-				Background = System.Windows.Media.Brushes.WhiteSmoke,
-				WindowStyle = WindowStyle.ToolWindow,
-				Name = "Options",
-				ResizeMode = ResizeMode.NoResize,
-				WindowStartupLocation = WindowStartupLocation.CenterScreen
-			};
-			window.Closing += Window_Closing;
+				options = new SinglePrintOptions()
+				{
+					Doc = doc,
+					UIDoc = uiDoc,
+					IsPreview = isApplyButtonVisible
+				};
+				window = new Window
+				{
+					Height = options.Height + windowHeightOffset,
+					Width = options.Width + windowWidthOffset,
+					Title = "Image Print Settings",
+					Content = options,
+					Background = System.Windows.Media.Brushes.WhiteSmoke,
+					WindowStyle = WindowStyle.ToolWindow,
+					Name = "Options",
+					ResizeMode = ResizeMode.NoResize,
+					WindowStartupLocation = WindowStartupLocation.CenterScreen
+				};
+				window.Closing += Window_Closing;
 
-			window.ShowDialog();
+				window.ShowDialog();
+			}
+
 
 			if (window.DialogResult != true)
 				return null;

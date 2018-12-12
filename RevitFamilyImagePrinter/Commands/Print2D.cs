@@ -11,7 +11,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
-using MessageBox = System.Windows.MessageBox;
+using Application = Autodesk.Revit.ApplicationServices.Application;
 using View = Autodesk.Revit.DB.View;
 using Ookii.Dialogs.Wpf;
 
@@ -21,13 +21,23 @@ namespace RevitFamilyImagePrinter.Commands
 	class Print2D : IExternalCommand
 	{
 		#region User Values
-		public UserImageValues userValues { get; set; } = new UserImageValues();
+		public UserImageValues UserValues { get; set; } = new UserImageValues();
+		public string UserImagePath { get; set; }
 		#endregion
 		
 		#region Variables
 		private IList<ElementId> views = new List<ElementId>();
-		private Document doc;
-		private UIDocument uiDoc;
+		private Document doc
+		{
+			get
+			{
+				if (UIDoc != null)
+					return UIDoc.Document;
+				return null;
+			}
+		}
+		public UIDocument UIDoc;
+		public bool IsAuto = false;
 		#endregion
 
 		#region Constants
@@ -38,50 +48,50 @@ namespace RevitFamilyImagePrinter.Commands
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
 			UIApplication uiapp = commandData.Application;
-			uiDoc = uiapp.ActiveUIDocument;
-			using (doc = uiDoc.Document)
+			UIDoc = uiapp.ActiveUIDocument;
+
+			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+			viewCollector.OfClass(typeof(View));
+
+			foreach (Element viewElement in viewCollector)
 			{
-				FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
-				viewCollector.OfClass(typeof(View));
+				View view = (View)viewElement;
 
-				foreach (Element viewElement in viewCollector)
+				if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
 				{
-					View view = (View)viewElement;
-
-					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
-					{
-						views.Add(view.Id);
-						uiDoc.ActiveView = view;
-					}
+					views.Add(view.Id);
+					UIDoc.ActiveView = view;
 				}
+			}
 
-				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(doc, uiDoc, 40, 10);
+			if(!message.Equals("FamilyPrint"))
+			{
+				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, 40, 10);
 				if (userInputValues == null)
 					return Result.Failed;
-				this.userValues = userInputValues;
-
-				ViewChangesCommit();
-				PrintCommit();
+				this.UserValues = userInputValues;
 			}
+
+			ViewChangesCommit();
+			PrintCommit();
 
 			return Result.Succeeded;
 		}
 
 		public void ViewChangesCommit()
 		{
-			IList<UIView> uiviews = uiDoc.GetOpenUIViews();
+			IList<UIView> uiviews = UIDoc.GetOpenUIViews();
 			foreach (var item in uiviews)
 			{
 				item.ZoomToFit();
-				item.Zoom(userValues.UserZoomValue);
-				uiDoc.RefreshActiveView();
+				item.Zoom(UserValues.UserZoomValue);
+				UIDoc.RefreshActiveView();
 			}
-
 			using (Transaction transaction = new Transaction(doc))
 			{
 				transaction.Start("SetView");
-				doc.ActiveView.DetailLevel = userValues.UserDetailLevel;
-				doc.ActiveView.Scale = userValues.UserScale;
+				doc.ActiveView.DetailLevel = UserValues.UserDetailLevel;
+				doc.ActiveView.Scale = UserValues.UserScale;
 				transaction.Commit();
 			}
 		}
@@ -99,8 +109,9 @@ namespace RevitFamilyImagePrinter.Commands
 		private void PrintImage()
 		{
 			string initialName = RevitPrintHelper.GetFileName(doc);
-			string userImagePath = RevitPrintHelper.SelectFileNameDialog(initialName);
-			if (userImagePath == initialName) return;
+			if (!IsAuto)
+				UserImagePath = RevitPrintHelper.SelectFileNameDialog(initialName);
+			if (UserImagePath == initialName) return;
 
 			IList<ElementId> views = new List<ElementId>();
 			views.Add(doc.ActiveView.Id);
@@ -108,12 +119,12 @@ namespace RevitFamilyImagePrinter.Commands
 			var exportOptions = new ImageExportOptions
 			{
 				ViewName = "temp",
-				FilePath = userImagePath,
+				FilePath = UserImagePath,
 				FitDirection = FitDirectionType.Vertical,
-				HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(userValues.UserExtension),
-				ImageResolution = userValues.UserImageResolution,
+				HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(UserValues.UserExtension),
+				ImageResolution = UserValues.UserImageResolution,
 				ShouldCreateWebSite = false,
-				PixelSize = userValues.UserImageSize
+				PixelSize = UserValues.UserImageSize
 			};
 
 			if (views.Count > 0)
@@ -126,7 +137,7 @@ namespace RevitFamilyImagePrinter.Commands
 				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 			}
 
-			if (ImageExportOptions.IsValidFileName(userImagePath))
+			if (ImageExportOptions.IsValidFileName(UserImagePath))
 			{
 				doc.ExportImage(exportOptions);
 			}

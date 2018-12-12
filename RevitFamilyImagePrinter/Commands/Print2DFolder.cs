@@ -41,16 +41,14 @@ namespace RevitFamilyImagePrinter.Commands
 				uiDoc = uiapp.ActiveUIDocument;
 				using (doc = uiDoc.Document)
 				{
-					UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(doc, uiDoc, 40, 10, false);
+					UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(uiDoc, 40, 10, false);
 					if (userInputValues == null)
 						return Result.Failed;
 					this.userValues = userInputValues;
 				}
-
 				userFolderFrom = RevitPrintHelper.SelectFolderDialog("Select folder with needed files to be printed");
 				userFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
-				if (userFolderFrom == null || userFolderTo == null)
-					return Result.Failed;
+				if (userFolderFrom == null || userFolderTo == null) return Result.Failed;
 				var fileList = Directory.GetFiles(userFolderFrom.FullName);
 				foreach (var item in fileList)
 				{
@@ -92,6 +90,7 @@ namespace RevitFamilyImagePrinter.Commands
 			{
 				TaskDialog.Show($"ERROR", $"{exc.Message} // {exc.Source} // {exc.StackTrace}");
 				Debug.Print($"### EXCEPTION ### - {exc.Message} // {exc.Source} // {exc.StackTrace}");
+				return Result.Failed;
 			}
 			return Result.Succeeded;
 		}
