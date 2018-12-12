@@ -8,9 +8,8 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("RevitFamilyImagePrinter")]
 [assembly: AssemblyDescription("Revit Add-In Description for RevitFamilyImagePrinter")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Autodesk Inc.")]
+[assembly: AssemblyCompany("Building360.ch")]
 [assembly: AssemblyProduct("RevitFamilyImagePrinter Revit C# .NET Add-In")]
-[assembly: AssemblyCopyright("Copyright 2017 (C) Jeremy Tammik, Autodesk Inc.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

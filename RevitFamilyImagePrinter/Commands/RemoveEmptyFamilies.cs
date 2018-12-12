@@ -21,6 +21,14 @@ namespace RevitFamilyImagePrinter.Commands
 
 			UIApplication uiapp = commandData.Application;
 			UIDocument uidoc = uiapp.ActiveUIDocument;
+
+			DeleteOperation(uidoc);
+
+			return Result.Succeeded;
+		}
+
+		public void DeleteOperation(UIDocument uidoc)
+		{
 			using (Document doc = uidoc.Document)
 			{
 				FilteredElementCollector famCollector
@@ -50,7 +58,6 @@ namespace RevitFamilyImagePrinter.Commands
 				}
 				doc.Save();
 			}
-			return Result.Succeeded;
 		}
 
 		private void DeleteCommit(Document doc, Element element)

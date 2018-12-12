@@ -1,7 +1,9 @@
 #region Namespaces
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
+using System.Threading;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
@@ -15,6 +17,8 @@ namespace RevitFamilyImagePrinter
 		public static string Version { get; private set; }
 		public Result OnStartup(UIControlledApplication a)
 		{
+			Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us"); // for exception messages in english
+
 			ControlledApplication c = a.ControlledApplication;
 			Version = c.VersionNumber;
 			string tabName = "Image Printer";
@@ -37,6 +41,10 @@ namespace RevitFamilyImagePrinter
 			PushButtonData buttonRemoveEmptyFamilies = new PushButtonData("Remove empty families", "Remove Families", assembly, "RevitFamilyImagePrinter.Commands.RemoveEmptyFamilies");
 			buttonRemoveEmptyFamilies.ToolTip = "Remove all families without instances.";
 
+
+			PushButtonData buttonProjectCreator = new PushButtonData("Project creator", "Project creator", assembly, "RevitFamilyImagePrinter.Commands.ProjectCreator");
+			buttonProjectCreator.ToolTip = "dunno";
+
 			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
             printPanel.AddItem(buttontPrint2DSingle);
             printPanel.AddItem(buttontPrint2DMulti);
@@ -44,6 +52,7 @@ namespace RevitFamilyImagePrinter
             printPanel.AddItem(buttontPrint3DMulti);
 			printPanel.AddSeparator();
 			printPanel.AddItem(buttonRemoveEmptyFamilies);
+			printPanel.AddItem(buttonProjectCreator);
 
             return Result.Succeeded;
         }
