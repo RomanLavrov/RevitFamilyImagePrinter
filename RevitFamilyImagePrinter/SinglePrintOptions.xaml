@@ -189,8 +189,7 @@
                     </Grid>
                 </Grid>
             </GroupBox>
-            <Grid 
-                    Grid.Row="2" >
+            <Grid  Grid.Row="1" >
                 <Grid.Resources>
                     <Style TargetType="Button">
                         <Setter Property="Width" Value="75"/>

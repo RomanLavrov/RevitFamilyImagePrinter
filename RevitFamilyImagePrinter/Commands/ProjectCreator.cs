@@ -39,46 +39,45 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region Variables
-		private ExternalCommandData commandData;
-		private ElementSet elements;
-		private UIDocument uiDoc;
-		private Document doc;
-		private UserImageValues userValues;
-		private List<string> allSymbols = new List<string>();
-		private readonly Logger logger;
+		private ExternalCommandData _commandData;
+		private ElementSet _elements;
+		private UIDocument _uiDoc;
+		private Document _doc;
+		private UserImageValues _userValues;
+		private readonly List<string> _allSymbols = new List<string>();
+		private readonly Logger _logger;
+		#endregion
+
+		#region Constants 
+
+		private const int windowWidthOffset = 20;
+		private const int windowHeightOffset = 40;
+
 		#endregion
 
 		public ProjectCreator()
 		{
-			logger = Logger.GetLogger();
+			_logger = Logger.GetLogger();
 		}
 
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
-			this.commandData = commandData;
-			this.elements = elements;
-			UIApplication uiapp = commandData.Application;
-			Application app = uiapp.Application;
-			uiDoc = uiapp.ActiveUIDocument;
-			doc = uiDoc.Document;
+			this._commandData = commandData;
+			this._elements = elements;
+			UIApplication uiApplication = commandData.Application;
+			Application app = uiApplication.Application;
+			_uiDoc = uiApplication.ActiveUIDocument;
+			_doc = _uiDoc.Document;
 
-			//FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
-			//var familyFiles = Directory.GetFiles(FamiliesFolder.FullName).ToList();
-			//var amount = TMPGetAmountOfFiles(familyFiles);
-			//TaskDialog.Show("AMOUNT OF SYMBOLS", $"{amount} symbols in all families");
 			var familyFiles = GetFamilyFilesFromFolder();
 
-			//TaskDialog.Show("RER", $"{Environment.CurrentDirectory}");
 			if (familyFiles == null || familyFiles.Count == 0)
 				return Result.Failed;
 
 			if (!ProcessProjects(familyFiles))
 				return Result.Failed;
 
-			if (!CheckProjectsAmount())
-				return Result.Failed;
-
-			return Result.Succeeded;
+			return !CheckProjectsAmount() ? Result.Failed : Result.Succeeded;
 		}
 
 		private bool CheckProjectsAmount()
@@ -86,23 +85,27 @@ namespace RevitFamilyImagePrinter.Commands
 			if (!ProjectsFolder.Exists)
 				return false;
 			var projectsCreated = Directory.GetFiles(ProjectsFolder.FullName).ToList();
-			logger.NewLine();
+			_logger.NewLine();
 			try
 			{
-				Assert.AreEqual(allSymbols.Count, projectsCreated.Count);
+				Assert.AreEqual(_allSymbols.Count, projectsCreated.Count);
 			}
 			catch(Exception exc)
 			{
-				TaskDialog.Show("Warning!", "Attention! The amount of projects created is not equal to amount of types in families. Check log file.");
-				logger.WriteLine($"### ERROR ###\tThe amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
-				var differences = allSymbols.Except(projectsCreated);
+				new TaskDialog("Warning!")
+				{
+					TitleAutoPrefix = false,
+					MainContent = "Attention! The amount of projects created is not equal to amount of types in families. Check log file."
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\tThe amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
+				var differences = _allSymbols.Except(projectsCreated);
 				foreach(var i in differences)
 				{
-					logger.WriteLine(i);
+					_logger.WriteLine(i);
 				}
 				return false;
 			}
-			logger.EndLogSession();
+			_logger.EndLogSession();
 			return true;
 		}
 
@@ -112,18 +115,37 @@ namespace RevitFamilyImagePrinter.Commands
 			try
 			{
 				FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
-				userValues = RevitPrintHelper.ShowOptionsDialog(uiDoc, 40, 10, false);
-				if (FamiliesFolder == null || userValues == null) return null;
+				if (FamiliesFolder == null) return null;
+
+				var allFilesList = Directory.GetFiles(FamiliesFolder.FullName);
+				var familyFilesList = allFilesList.Where(x => x.EndsWith(".rfa")).ToList();
+				if (!familyFilesList.Any())
+				{
+					new TaskDialog("Fail")
+					{
+						TitleAutoPrefix = false,
+						MainContent = ".rfa files have not been found in specified folder."
+					}.Show();
+					//.Show("Fail", ".rfa files have not been found in specified folder.");
+					return null;
+				}
+
+				_userValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false);
+				if (_userValues == null)
+					return null;
 
 				CreateFolders();
-
-				var fileList = Directory.GetFiles(FamiliesFolder.FullName).ToList();
-				return fileList;
+				return familyFilesList;
 			}
 			catch(Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during getting families from folder.");
-				logger.WriteLine($"### ERROR ###\tError during getting families from folder.\n{exc.Message}");
+				string errorMessage = "Error during getting families from folder.";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 				return null;
 			}
 		}
@@ -142,6 +164,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
+				RemoveExcessFamilies();
 				foreach (var i in fileList)
 				{
 					FileInfo info = new FileInfo(i);
@@ -164,13 +187,16 @@ namespace RevitFamilyImagePrinter.Commands
 					{
 						//string path = $@"D:\TypeImages\Families\{data.FamilyName}&{symbol.Name}.rvt";
 						string nameProject = $"{data.FamilyName}&{symbol.Name}";
-						allSymbols.Add(nameProject);
+						_allSymbols.Add(nameProject);
 						string pathProject = Path.Combine(ProjectsFolder.FullName, $"{nameProject}.rvt");
-						string pathImage = Path.Combine(ImagesFolder.FullName, $"{nameProject}{userValues.UserExtension}");
-						if (File.Exists(pathProject)) continue;
+						string pathImage = Path.Combine(ImagesFolder.FullName, $"{nameProject}{_userValues.UserExtension}");
 
-						SaveFamilySymbol(symbol, pathProject);
-						PrintImage(pathImage);
+						RemoveExistingInstances(symbol.Id);
+						InsertInstanceIntoProject(symbol);
+						if (!File.Exists(pathProject)) //continue; // ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+							_doc.SaveAs(pathProject);
+
+						//PrintImage(pathImage);
 						RemoveTypeFromProject(symbol);
 					}
 					RemoveFamily(family);
@@ -178,11 +204,60 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during processing of project");
-				logger.WriteLine($"### ERROR ###\tError during processing of projects.\n{exc.Message}");
+				string errorMessage = "Error during processing of project";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 				return false;
 			}
 			return true;
+		}
+
+		private void SaveFamilySymbol(FamilySymbol symbol, string pathProject)
+		{
+			RemoveExistingInstances(symbol.Id);
+			InsertInstanceIntoProject(symbol);
+			SaveProjectAs(pathProject);
+		}
+
+		private void RemoveExcessFamilies()
+		{
+			try
+			{
+				FilteredElementCollector famCollector
+					= new FilteredElementCollector(_doc);
+				famCollector.OfClass(typeof(Family));
+
+				var familiesList = famCollector.ToElements();
+
+				for (int i = 0; i < familiesList.Count; i++)
+				{
+					DeleteCommit(familiesList[i]);
+				}
+			}
+			catch (Exception exc)
+			{
+				string errorMessage = "Error during deleting element from project.";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+			}
+		}
+
+		private void DeleteCommit(Element element)
+		{
+			using (Transaction transaction = new Transaction(_doc))
+			{
+				transaction.Start("Delete");
+				_doc.Delete(element.Id);
+				transaction.Commit();
+			}
 		}
 
 		private Family LoadFamily(FileInfo file)
@@ -191,10 +266,10 @@ namespace RevitFamilyImagePrinter.Commands
 			try
 			{
 				bool success = false;
-				using (Transaction transaction = new Transaction(doc))
+				using (Transaction transaction = new Transaction(_doc))
 				{
 					transaction.Start("Load Family");
-					success = doc.LoadFamily(file.FullName, out family);
+					success = _doc.LoadFamily(file.FullName, out family);
 					transaction.Commit();
 				}
 				if (!success)
@@ -202,8 +277,13 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during loading of family from file.");
-				logger.WriteLine($"### ERROR ###\tError during loading of family from file.\n{exc.Message}");
+				string errorMessage = "Error during loading of family from file.";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 			return family;
 		}
@@ -211,83 +291,79 @@ namespace RevitFamilyImagePrinter.Commands
 		private bool FindExistingFamily(ref Family family, FileInfo file)
 		{
 			string familyName = file.Name.Replace(file.Extension, string.Empty);
-			var families = new FilteredElementCollector(uiDoc.Document)
+			var families = new FilteredElementCollector(_uiDoc.Document)
 				  .OfClass(typeof(Family))
 				  .ToElements();
 			foreach(var i in families)
 			{
-				if (i.Name == familyName)
-				{
-					family = i as Family;
-					return true;
-				}
+				if (i.Name != familyName) continue;
+				family = i as Family;
+				return true;
 
 			}
 			return false;
 		}
 
 		#region SaveFamilySymbol
-		private void SaveFamilySymbol(FamilySymbol symbol, string pathProject)
-		{
-			RemoveExistingInstances(symbol.Id);
-			InsertInstanceIntoProject(symbol);
-			SaveProjectAs(symbol, pathProject);
-		}
 
 		private void RemoveExistingInstances(ElementId id)
 		{
 			try
 			{
-				var instances = new FilteredElementCollector(doc)
+				var instances = new FilteredElementCollector(_doc)
 				  .OfClass(typeof(FamilyInstance))
-				  .ToElementIds();
+				  .ToElements();
 				foreach (var i in instances)
 				{
-					if (i != id)
+					if (i.Id != id)
 					{
-						using (Transaction transaction = new Transaction(doc, "Remove Unnecessary Instance"))
-						{
-							transaction.Start();
-							doc.Delete(i);
-							transaction.Commit();
-						}
+						DeleteCommit(i);
 					}
 				}
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during removing of instances");
-				logger.WriteLine($"### ERROR ###\tError during removing of instances.\n{exc.Message}");
+				string errorMessage = "Error during removing of instances.";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 
 		private void InsertInstanceIntoProject(FamilySymbol symbol)
 		{
-			View view = uiDoc.ActiveView;
-			FamilyInstance instance = null;
+			View view = _uiDoc.ActiveView;
 			if (symbol == null) return;
 
 			try
 			{
-				using (var transact = new Transaction(doc, "Insert Symbol"))
+				using (var transact = new Transaction(_doc, "Insert Symbol"))
 				{
 					transact.Start();
 					symbol.Activate();
 					XYZ point = new XYZ(0, 0, 0);
 					Level level = view.GenLevel;
 					Element host = level as Element;
-					instance = doc.Create.NewFamilyInstance(point, symbol, host, StructuralType.NonStructural);
+					_doc.Create.NewFamilyInstance(point, symbol, host, StructuralType.NonStructural);
 					transact.Commit();
 				}
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during inserting of instances");
-				logger.WriteLine($"### ERROR ###\tError during inserting of instances.\n{exc.Message}");
+				string errorMessage = "Error during inserting of instances";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 
-		private void SaveProjectAs(FamilySymbol symbol, string path)
+		private void SaveProjectAs(string path)
 		{
 			try
 			{
@@ -296,14 +372,19 @@ namespace RevitFamilyImagePrinter.Commands
 				  .OfClass(typeof(FamilySymbol))
 				  .ToElementIds();
 				Debug.WriteLine($"SymbolName = {symbol.Name}, symbolId = {symbol.Id} / Amount = {syms.Count}");*/
-				doc.SaveAs(path);
+				_doc.SaveAs(path);
 				// закрыть текущий, открыть пустой и поудалять временные
 				// ОБЯЗАТЕЛЬНО ФАЙЛ-ЗАКЛАДКА
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during saving of project");
-				logger.WriteLine($"### ERROR ###\tError during saving of project.\n{exc.Message}");
+				string errorMessage = "Error during saving of project";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 		#endregion
@@ -313,19 +394,24 @@ namespace RevitFamilyImagePrinter.Commands
 			try
 			{
 				string msg = "FamilyPrint";
-				Print2D print2d = new Print2D()
+				Print2D print2D = new Print2D()
 				{
-					UserValues = userValues,
+					UserValues = _userValues,
 					UserImagePath = path,
 					IsAuto = true,
-					UIDoc = uiDoc,
+					UIDoc = _uiDoc,
 				};
-				print2d.Execute(commandData, ref msg, elements);
+				print2D.Execute(_commandData, ref msg, _elements);
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during printing of type");
-				logger.WriteLine($"### ERROR ###\tError during printing of type.\n{exc.Message}");
+				string errorMessage = "Error during printing of type";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 
@@ -333,21 +419,20 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				View view = uiDoc.ActiveView;
+				View view = _uiDoc.ActiveView;
 				if (symbol == null) return;
 
-				int deletedSymbol = symbol.Id.IntegerValue;
-				using (var transact = new Transaction(doc, "Delete Symbol"))
-				{
-					transact.Start();
-					doc.Delete(symbol.Id);
-					transact.Commit();
-				}
+				DeleteCommit(symbol);
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during removing of type from project");
-				logger.WriteLine($"### ERROR ###\tError during removing of symbol from project.\n{exc.Message}");
+				string errorMessage = "Error during removing of type from project";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 
@@ -355,18 +440,17 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				string deletedFamily = family.Name;
-				using (Transaction transaction = new Transaction(doc))
-				{
-					transaction.Start("Delete Family");
-					doc.Delete(family.Id);
-					transaction.Commit();
-				}
+				DeleteCommit(family);
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", "Error during removing of family from project");
-				logger.WriteLine($"### ERROR ###\tError during removing of family from project.\n{exc.Message}");
+				string errorMessage = "Error during removing of family from project";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
 			}
 		}
 		#endregion

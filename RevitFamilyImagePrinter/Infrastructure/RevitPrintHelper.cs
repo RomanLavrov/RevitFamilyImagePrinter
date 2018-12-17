@@ -1,19 +1,68 @@
-﻿using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Ookii.Dialogs.Wpf;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Ookii.Dialogs.Wpf;
 
-namespace RevitFamilyImagePrinter
+namespace RevitFamilyImagePrinter.Infrastructure
 {
 	public static class RevitPrintHelper
 	{
-		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40, int windowWidthOffset = 10, bool isApplyButtonVisible = true)
+		public static void PrintImage(Document doc, UserImageValues userValues, string filePath, bool isAuto = false)
+		{
+			string initialName = GetFileName(doc);
+			if (!isAuto)
+				filePath = SelectFileNameDialog(initialName);
+			if (filePath == initialName) return;
+
+			IList<ElementId> views = new List<ElementId>();
+			views.Add(doc.ActiveView.Id);
+
+			var exportOptions = new ImageExportOptions
+			{
+				ViewName = "temporary",
+				FilePath = filePath,
+				FitDirection = FitDirectionType.Vertical,
+				HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
+				ImageResolution = userValues.UserImageResolution,
+				ShouldCreateWebSite = false,
+				PixelSize = userValues.UserImageSize
+			};
+
+			if (views.Count > 0)
+			{
+				exportOptions.SetViewsAndSheets(views);
+			}
+			exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
+
+			if (ImageExportOptions.IsValidFileName(filePath))
+			{
+				doc.ExportImage(exportOptions);
+			}
+		}
+
+		public static void SetActive2DView(UIDocument uiDoc)
+		{
+			Document doc = uiDoc.Document;
+			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+			viewCollector.OfClass(typeof(View));
+
+			foreach (Element viewElement in viewCollector)
+			{
+				View view = (View)viewElement;
+
+				if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+				{
+					//views.Add(view.Id);
+					uiDoc.ActiveView = view;
+				}
+			}
+		}
+
+		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40, int windowWidthOffset = 20, bool isApplyButtonVisible = true)
 		{
 			Window window = null;
 			SinglePrintOptions options = null;
@@ -135,7 +184,7 @@ namespace RevitFamilyImagePrinter
 		{
 			Window wnd = sender as Window;
 			SinglePrintOptions options = wnd.Content as SinglePrintOptions;
-			if(!options.IsPreview)
+			if(!options.IsPreview && !options.IsCancelled)
 				options.SaveConfig();
 		}
 
