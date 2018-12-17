@@ -8,132 +8,128 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
+using RevitFamilyImagePrinter.Infrastructure;
 using View = System.Windows.Forms.View;
 
 namespace RevitFamilyImagePrinter.Commands
 {
-    [Transaction(TransactionMode.Manual)]
-    class Print3D : IExternalCommand
-    {
-        public int UserScale { get; set; }
-        public int UserImageSize { get; set; }
-        string imagePath = "D:\\";
-        private Document doc;
-        private UIApplication uiapp;
-        private UIDocument uidoc;
+	[Transaction(TransactionMode.Manual)]
+	class Print3D : IExternalCommand
+	{
+		#region User Values
+		public UserImageValues UserValues { get; set; } = new UserImageValues();
+		public string UserImagePath { get; set; }
+		#endregion
 
-        public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
-        {
-            uiapp = commandData.Application;
-            uidoc = uiapp.ActiveUIDocument;
-            doc = uidoc.Document;
+		#region Variables
+		//private IList<ElementId> views = new List<ElementId>();
+		private Document doc => UIDoc?.Document;
+		private readonly Logger _logger = Logger.GetLogger();
+		public UIDocument UIDoc;
+		public bool IsAuto = false;
+		#endregion
 
-            RevitCommandId commandId = RevitCommandId.LookupPostableCommandId(PostableCommand.Default3DView);
+		#region Constants
+		private const int windowHeightOffset = 40;
+		private const int windowWidthOffset = 20;
+		private readonly string endl = Environment.NewLine;
+		#endregion
 
-            if (commandData.Application.CanPostCommand(commandId))
-            {
-                commandData.Application.PostCommand(commandId);
-            }
+		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+		{
+			UIApplication uiapp = commandData.Application;
+			UIDoc = uiapp.ActiveUIDocument;
+			commandData.Application.ViewActivated += SetViewParameters;
 
-            commandData.Application.ViewActivated += SetViewParameters;
+			RevitCommandId commandId = RevitCommandId.LookupPostableCommandId(PostableCommand.Default3DView);
+			if (commandData.Application.CanPostCommand(commandId))
+			{
+				commandData.Application.PostCommand(commandId);
+			}
 
-            return Result.Succeeded;
-        }
+			if (!message.Equals("FamilyPrint"))
+			{
+				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
+				if (userInputValues == null)
+					return Result.Failed;
+				this.UserValues = userInputValues;
+			}
 
-        private void PrintImage(Document doc)
-        {
-            int indexDot = doc.Title.IndexOf('.');
-            var name = doc.Title.Substring(0, indexDot);
+			return Result.Succeeded;
+		}
 
-            var tempFile = imagePath + name + ".png";
-            IList<ElementId> views = new List<ElementId>();
+		private void SetViewParameters(object sender, ViewActivatedEventArgs args)
+		{
+			try
+			{
+				FilteredElementCollector collector = new FilteredElementCollector(doc);
+				collector.OfClass(typeof(View3D));
 
-            views.Add(uidoc.ActiveView.Id);
+				View3D view3D = Get3DView();
+				if (view3D == null)
+				{
+					var collectorF = new FilteredElementCollector(doc);
+					var viewFamilyType = collectorF.OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+						.FirstOrDefault(x => x.ViewFamily == ViewFamily.ThreeDimensional);
+					using (Transaction trans = new Transaction(doc))
+					{
+						trans.Start("Add view");
+						view3D = View3D.CreateIsometric(doc, viewFamilyType.Id);
+						trans.Commit();
+					}
+				}
 
-            var exportOptions = new ImageExportOptions
-            {
-                FilePath = tempFile,
-               // FitDirection = FitDirectionType.Vertical,
-                HLRandWFViewsFileType = ImageFileType.PNG,
-                ImageResolution = ImageResolution.DPI_300,
-                ShouldCreateWebSite = false,
-                PixelSize = 64,// UserImageSize,
-               // ZoomType = ZoomFitType.Zoom
-            };
+				//UIDoc.RequestViewChange(UIDoc.ActiveView);
+				UIDoc.RefreshActiveView();
+				UIDoc.ActiveView = view3D;
 
-            if (views.Count > 0)
-            {
-                exportOptions.SetViewsAndSheets(views);
-                exportOptions.ExportRange = ExportRange.SetOfViews;
-            }
-            else
-            {
-                exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
-            }
+				IList<UIView> uiViews = UIDoc.GetOpenUIViews();
+				foreach (var item in uiViews)
+				{
+					item.ZoomToFit();
+					item.Zoom(UserValues.UserZoomValue);
+					UIDoc.RefreshActiveView();
+				}
 
-            //exportOptions.ZoomType = ZoomFitType.FitToPage;
-            exportOptions.ViewName = "temp";
+				using (Transaction transaction = new Transaction(doc))
+				{
+					transaction.Start("SetView");
+					UIDoc.ActiveView.DetailLevel = ViewDetailLevel.Fine;
+					UIDoc.ActiveView.Scale = UserValues.UserScale;
+					transaction.Commit();
+				}
 
-            if (ImageExportOptions.IsValidFileName(tempFile))
-            {
-                doc.ExportImage(exportOptions);
-            }
-        }
+				using (Transaction transaction = new Transaction(doc))
+				{
+					transaction.Start("Print");
+					RevitPrintHelper.PrintImage(doc, UserValues, string.Empty);
+					transaction.Commit();
+				}
+			}
+			catch (Exception exc)
+			{
+				string errorMessage = "### ERROR ### Error occured during printing of current view";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}");
+			}
+		}
 
-        private void ShowOptions()
-        {
-            SinglePrintOptions options = new SinglePrintOptions();
-            Window window = new Window
-            {
-                Height = 180,
-                Width = 260,
-                Title = "Image Print Settings",
-                Content = options,
-                Background = System.Windows.Media.Brushes.WhiteSmoke,
-                WindowStyle = WindowStyle.ToolWindow,
-                Name = "Options",
-                ResizeMode = ResizeMode.NoResize,
-                WindowStartupLocation = WindowStartupLocation.CenterScreen
-            };
+		private View3D Get3DView()
+		{
+			FilteredElementCollector collector
+				= new FilteredElementCollector(doc)
+					.OfClass(typeof(View3D));
 
-            window.ShowDialog();
-
-            if (window.DialogResult == true)
-            {
-                UserScale = options.UserScale;
-                UserImageSize = options.UserImageSize;
-            }
-        }
-
-        private void SetViewParameters(object sender, ViewActivatedEventArgs args)
-        {
-            View3D view = null;
-
-            FilteredElementCollector collector = new FilteredElementCollector(doc);
-            collector.OfClass(typeof(View3D));
-            foreach (View3D VARIABLE in collector)
-            {
-                if (VARIABLE != null)
-                {
-                    view = VARIABLE;
-
-                    using (Transaction transaction = new Transaction(doc))
-                    {
-                        transaction.Start("SetView");
-                        uidoc.ActiveView.DetailLevel = ViewDetailLevel.Fine;
-                        uidoc.ActiveView.Scale = 10;
-                        transaction.Commit();
-                    }
-                }
-            }
-
-            using (Transaction transaction = new Transaction(doc))
-            {
-                transaction.Start("Print");
-                PrintImage(doc);
-                transaction.Commit();
-            }
-
-        }
-    }
+			foreach (View3D view in collector)
+			{
+				if (view == null || view.IsTemplate) continue;
+				return view;
+			}
+			return null;
+		}
+	}
 }

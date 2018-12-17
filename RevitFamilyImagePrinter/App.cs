@@ -50,9 +50,9 @@ namespace RevitFamilyImagePrinter
             printPanel.AddItem(buttontPrint2DMulti);
             printPanel.AddItem(buttontPrint3DSingle);
             printPanel.AddItem(buttontPrint3DMulti);
-			printPanel.AddSeparator();
-			printPanel.AddItem(buttonRemoveEmptyFamilies);
-			printPanel.AddItem(buttonProjectCreator);
+			//printPanel.AddSeparator();
+			//printPanel.AddItem(buttonRemoveEmptyFamilies);
+			//printPanel.AddItem(buttonProjectCreator);
 
             return Result.Succeeded;
         }

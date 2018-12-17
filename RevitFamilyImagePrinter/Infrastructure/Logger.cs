@@ -9,15 +9,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 {
 	public class Logger
 	{
-		private readonly string logFile;
+		private readonly string _logFile;
 		private static Logger _instance;
-		private static object _locker = new object();
+		private static readonly object _locker = new object();
 
 		private Logger()
 		{
-			logFile = Path.Combine(Environment.CurrentDirectory, "log.txt");
-			if (!File.Exists(logFile))
-				File.Create(logFile);
+			_logFile = Path.Combine(
+				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "log.txt");
+			if (!File.Exists(_logFile))
+				File.Create(_logFile);
 		}
 
 		public static Logger GetLogger()
@@ -33,25 +34,25 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public void Write(string text)
 		{
 			text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
-			File.AppendAllText(logFile, text);
+			File.AppendAllText(_logFile, text);
 		}
 
 		public void WriteLine(string text)
 		{
 			text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
-			File.AppendAllText(logFile, $"{text}{Environment.NewLine}");
+			File.AppendAllText(_logFile, $"{text}{Environment.NewLine}");
 		}
 
 		public void EndLogSession()
 		{
 			string endl = $"{Environment.NewLine}";
 			string footer = $"{endl}{new string('=', 150)}{endl}{endl}{endl}";
-			File.AppendAllText(logFile, $"{footer}");
+			File.AppendAllText(_logFile, $"{footer}");
 		}
 
 		public void NewLine()
 		{
-			File.AppendAllText(logFile, $"{Environment.NewLine}");
+			File.AppendAllText(_logFile, $"{Environment.NewLine}");
 		}
 	}
 }
