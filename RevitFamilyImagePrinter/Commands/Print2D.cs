@@ -48,11 +48,11 @@ namespace RevitFamilyImagePrinter.Commands
 
 			RevitPrintHelper.SetActive2DView(UIDoc);
 
-			if (!message.Equals("FamilyPrint"))
+			if (!message.Equals("FolderPrint"))
 			{
 				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
 				if (userInputValues == null)
-					return Result.Failed;
+					return Result.Cancelled;
 				this.UserValues = userInputValues;
 			}
 
@@ -66,25 +66,11 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				IList<UIView> uiViews = UIDoc.GetOpenUIViews();
-				foreach (var item in uiViews)
-				{
-					item.ZoomToFit();
-					item.Zoom(UserValues.UserZoomValue);
-					UIDoc.RefreshActiveView();
-				}
-
-				using (Transaction transaction = new Transaction(doc))
-				{
-					transaction.Start("SetView");
-					doc.ActiveView.DetailLevel = UserValues.UserDetailLevel;
-					doc.ActiveView.Scale = UserValues.UserScale;
-					transaction.Commit();
-				}
+				RevitPrintHelper.View2DChangesCommit(UIDoc, UserValues);
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### Error occured during current view correction";
+				string errorMessage = "### ERROR ### - Error occured during current view correction";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
@@ -98,16 +84,11 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				using (Transaction transaction = new Transaction(doc))
-				{
-					transaction.Start("Print");
-					RevitPrintHelper.PrintImage(doc, UserValues, UserImagePath, IsAuto);
-					transaction.Commit();
-				}
+				RevitPrintHelper.PrintImageTransaction(doc, UserValues, UserImagePath, IsAuto);
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### Error occured during printing of current view";
+				string errorMessage = "### ERROR ### - Error occured during printing of current view";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,

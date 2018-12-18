@@ -37,6 +37,7 @@ namespace RevitFamilyImagePrinter
 		public UIDocument UIDoc { get; set; }
 		public bool IsPreview { get; set; }
 		public bool IsCancelled { get; set; }
+		public bool Is3D { get; set; }
 		#endregion
 
 		#region Constants
@@ -230,7 +231,7 @@ namespace RevitFamilyImagePrinter
 				using (Transaction transaction = new Transaction(Doc))
 				{
 					transaction.Start("SetView");
-					Doc.ActiveView.DetailLevel = UserDetailLevel;
+					Doc.ActiveView.DetailLevel = Is3D ? ViewDetailLevel.Fine : UserDetailLevel;
 					Doc.ActiveView.Scale = UserScale;
 					transaction.Commit();
 				}
@@ -324,7 +325,7 @@ namespace RevitFamilyImagePrinter
 			switch (UserExtension)
 			{
 				case ".png": btn = RadioButtonPng; break;
-				case ".jpeg": btn = RadioButtonJpeg; break;
+				case ".jpg": btn = RadioButtonJpg; break;
 				case ".bmp": btn = RadioButtonBmp; break;
 				default: throw new Exception("Unknown extension");
 			}

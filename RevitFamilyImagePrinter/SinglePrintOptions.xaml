@@ -175,9 +175,9 @@
                                     <TextBlock Margin="-3 0 0 0 ">PNG</TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-                            <RadioButton  Tag=".jpeg"  Name="RadioButtonJpeg">
+                            <RadioButton  Tag=".jpg"  Name="RadioButtonJpg">
                                 <RadioButton.Content>
-                                    <TextBlock Margin="-3 0 0 0 ">JPEG</TextBlock>
+                                    <TextBlock Margin="-3 0 0 0 ">JPG</TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
                             <RadioButton Tag=".bmp" Name="RadioButtonBmp">

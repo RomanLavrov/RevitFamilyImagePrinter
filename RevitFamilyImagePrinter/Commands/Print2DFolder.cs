@@ -35,22 +35,21 @@ namespace RevitFamilyImagePrinter.Commands
 
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
+			_uiDoc = commandData.Application.ActiveUIDocument;
 			try
 			{
-				UIApplication uiapp = commandData.Application;
-				_uiDoc = uiapp.ActiveUIDocument;
-				_doc = _uiDoc.Document;
-				
-				UserFolderFrom = RevitPrintHelper.SelectFolderDialog("Select folder with needed files to be printed");
-				if (UserFolderFrom == null)
+				DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
+				if (familiesFolder == null)
 					return Result.Cancelled;
 				UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
 
-				UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false);
+				UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
 				if (UserValues == null)
 					return Result.Failed;
+
+				CreateProjects(commandData, elements, familiesFolder);
 
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
 				foreach (var item in fileList)
@@ -58,51 +57,57 @@ namespace RevitFamilyImagePrinter.Commands
 					FileInfo info = new FileInfo(item);
 					if (!info.Extension.Equals(".rvt"))
 						continue;
-					using (_uiDoc = commandData.Application.OpenAndActivateDocument(item))
+					_uiDoc = commandData.Application.OpenAndActivateDocument(item);
+					if (info.Length > maxSizeLength)
+						RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
+					using (_doc = _uiDoc.Document)
 					{
-						if (info.Length > maxSizeLength)
-							RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-						using (_doc = _uiDoc.Document)
-						{
-							_doc = _uiDoc.Document;
+						RevitPrintHelper.SetActive2DView(_uiDoc);
+						ViewChangesCommit();
+						PrintCommit();
 
-							RevitPrintHelper.SetActive2DView(_uiDoc);
-
-							ViewChangesCommit();
-							PrintCommit();
-
-							//uiDoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
-						}
 					}
+					//uiDoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
 				}
-
 				//Rename2DImages();
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error occured during command execution";
-				_logger.WriteLine($"### EXCEPTION ### - {errorMessage}\n{exc.Message} ");
+				string errorMessage = "### ERROR ### - - Error occured during command execution";
+				TaskDialog.Show("Error", errorMessage);
+				_logger.WriteLine($"{errorMessage}\n{exc.Message} ");
 				return Result.Failed;
 			}
 			return Result.Succeeded;
 		}
 
+		private void CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
+		{
+			ProjectCreator creator = new ProjectCreator()
+			{
+				FamiliesFolder = familiesFolder,
+				UserValues = this.UserValues
+			};
+			string tmp = string.Empty;
+			creator.Execute(commandData, ref tmp, elements);
+			UserFolderFrom = creator.ProjectsFolder;
+		}
+
 		public void ViewChangesCommit()
 		{
-			IList<UIView> uiviews = _uiDoc.GetOpenUIViews();
-			foreach (var item in uiviews)
+			try
 			{
-				item.ZoomToFit();
-				item.Zoom(UserValues.UserZoomValue);
-				_uiDoc.RefreshActiveView();
+				RevitPrintHelper.View2DChangesCommit(_uiDoc, UserValues);
 			}
-
-			using (Transaction transaction = new Transaction(_doc))
+			catch (Exception exc)
 			{
-				transaction.Start("SetView");
-				_doc.ActiveView.DetailLevel = UserValues.UserDetailLevel;
-				_doc.ActiveView.Scale = UserValues.UserScale;
-				transaction.Commit();
+				string errorMessage = "### ERROR ### - Error occured during current view correction";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
 			}
 		}
 
@@ -112,15 +117,10 @@ namespace RevitFamilyImagePrinter.Commands
 			string filePath = Path.Combine(UserFolderTo.FullName,
 				$"{initialName}{UserValues.UserExtension}");
 
-			using (Transaction transaction = new Transaction(_doc))
-			{
-				transaction.Start("Print");
-				RevitPrintHelper.PrintImage(_doc, UserValues, filePath, true);
-				transaction.Commit();
-			}
+			RevitPrintHelper.PrintImageTransaction(_doc, UserValues, filePath, true);
 		}
 
-		//private void PrintImage()
+		//private void PrintImageTransaction()
 		//{
 		//	string initialName = RevitPrintHelper.GetFileName(doc);
 
