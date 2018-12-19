@@ -12,6 +12,7 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using RevitFamilyImagePrinter.Infrastructure;
+using Application = Autodesk.Revit.Creation.Application;
 
 namespace RevitFamilyImagePrinter.Commands
 {
@@ -47,6 +48,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			_uiDoc = commandData.Application.ActiveUIDocument;
 			_doc = _uiDoc.Document;
+			var initDocPath = _uiDoc.Document.PathName;
 
 			DirectoryInfo familiesFolder =
 				RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
@@ -61,7 +63,8 @@ namespace RevitFamilyImagePrinter.Commands
 			if (UserValues == null)
 				return Result.Failed;
 
-			CreateProjects(commandData, elements, familiesFolder);
+			if (!CreateProjects(commandData, elements, familiesFolder))
+				return Result.Failed;
 
 			var fileList = Directory.GetFiles(UserFolderFrom.FullName);
 			foreach (var item in fileList)
@@ -70,20 +73,21 @@ namespace RevitFamilyImagePrinter.Commands
 				if (!info.Extension.Equals(".rvt"))
 					continue;
 				_uiDoc = commandData.Application.OpenAndActivateDocument(item);
+				if (info.Length > maxSizeLength)
+					RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
 				using (_doc = _uiDoc.Document)
 				{
 					RevitPrintHelper.SetActive3DView(_uiDoc);
 					ViewChangesCommit();
 					PrintCommit();
-
-					//commandData.Application.ViewActivated += SetViewParameters;
 				}
-
 			}
+			_uiDoc.Application.OpenAndActivateDocument(initDocPath);
+
 			return Result.Succeeded;
 		}
 
-		private void CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
+		private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
 		{
 			ProjectCreator creator = new ProjectCreator()
 			{
@@ -91,8 +95,11 @@ namespace RevitFamilyImagePrinter.Commands
 				UserValues = this.UserValues
 			};
 			string tmp = string.Empty;
-			creator.Execute(commandData, ref tmp, elements);
+			var result = creator.Execute(commandData, ref tmp, elements);
+			if (result != Result.Succeeded)
+				return false;
 			UserFolderFrom = creator.ProjectsFolder;
+			return true;
 		}
 
 		public void ViewChangesCommit()
@@ -118,9 +125,8 @@ namespace RevitFamilyImagePrinter.Commands
 			try
 			{
 				string initialName = RevitPrintHelper.GetFileName(_doc);
-				string filePath = Path.Combine(UserFolderTo.FullName,
-					$"{initialName}{UserValues.UserExtension}");
-				RevitPrintHelper.PrintImageTransaction(_doc, UserValues, filePath, true);
+				string filePath = Path.Combine(UserFolderTo.FullName, initialName);
+				RevitPrintHelper.PrintImageTransaction(_uiDoc, UserValues, filePath, true);
 			}
 			catch (Exception exc)
 			{

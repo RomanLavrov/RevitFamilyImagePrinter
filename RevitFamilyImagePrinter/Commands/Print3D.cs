@@ -86,7 +86,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				RevitPrintHelper.PrintImageTransaction(_doc, UserValues, UserImagePath, IsAuto);
+				RevitPrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath, IsAuto);
 			}
 			catch (Exception exc)
 			{

@@ -36,7 +36,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				options.SaveConfig();
 		}
 
-		private static void DeleteCommit(Document doc, Element element)
+		private static void DeleteTransaction(Document doc, Element element)
 		{
 			using (Transaction transaction = new Transaction(doc))
 			{
@@ -56,13 +56,11 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
 				{
-					X = (image.Width - imgSize) / 2,
+					X = (int)(Math.Floor((image.Width - imgSize) / 2d)),
 					Y = (image.Height - imgSize) / 2,
 					Height = imgSize,
 					Width = imgSize
 				};
-
-				//Bitmap target = new Bitmap(cropRectangle.Width, cropRectangle.Height);
 
 				var result = image.Clone(cropRectangle, image.PixelFormat);
 				result.Save($"{imageFile.FullName}");
@@ -90,6 +88,120 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				doc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
 				doc.ActiveView.Scale = userValues.UserScale;
 				transaction.Commit();
+			}
+		}
+
+		private static double GetScaleFromElement(UIDocument uiDoc)
+		{
+			Document doc = uiDoc.Document;
+			var viewType = uiDoc.ActiveView.ViewType;
+			FilteredElementCollector collector = new FilteredElementCollector(doc);
+			collector.OfClass(typeof(FamilyInstance));
+			double scaleFactor = 1;
+			foreach (var item in collector)
+			{
+				var box = item.get_BoundingBox(doc.ActiveView);
+				if (viewType == ViewType.ThreeD)
+				{
+					Scale2DCalculation(box, ref scaleFactor);
+				}
+				else
+				{
+					Scale3DCalculation(box, ref scaleFactor);
+				}
+			}
+
+			if (viewType == ViewType.ThreeD)
+			{
+				var coefficient = 1.55;
+				var finalScaleFactor = coefficient * scaleFactor;
+				if (finalScaleFactor < 1)
+					return finalScaleFactor;
+			}
+			scaleFactor *= 0.95;
+			return scaleFactor;
+		}
+
+		private static void Scale2DCalculation(BoundingBoxXYZ box, ref double scaleFactor)
+		{
+			var width = box.Max.Y - box.Min.Y;
+			var height = box.Max.X - box.Min.X;
+			if (width / height < 1)
+			{
+				scaleFactor = (width / height);
+			}
+		}
+
+		private static void Scale3DCalculation(BoundingBoxXYZ box, ref double scaleFactor)
+		{
+			var width = box.Max.Y - box.Min.Y;
+			var height = box.Max.X - box.Min.X;
+			var depth = box.Max.Z - box.Min.Z;
+
+			var widthTotal = Math.Abs(Math.Cos(Math.PI / 6) * width) + Math.Abs(Math.Cos(Math.PI / 6) * depth);
+			var heightTotal = Math.Abs(Math.Sin(Math.PI / 6) * width) + Math.Abs(Math.Sin(Math.PI / 6) * depth) + Math.Abs(height);
+
+			if (widthTotal / heightTotal < 1)
+			{
+				scaleFactor = (widthTotal / heightTotal);
+			}
+		}
+
+		private static void CorrectFileName(ref string fileName)
+		{
+			string item = fileName;
+			if (fileName.Contains("Ø"))
+			{
+				fileName = fileName.Replace("Ø", "D");
+			}
+
+			if (fileName.Contains("Ä"))
+			{
+				fileName = fileName.Replace("Ä", "AE");
+			}
+
+			if (fileName.Contains("Ö"))
+			{
+				fileName = fileName.Replace("Ö", "OE");
+			}
+
+			if (fileName.Contains("ö"))
+			{
+				fileName = fileName.Replace("ö", "oe");
+			}
+
+			if (fileName.Contains("Ü"))
+			{
+				fileName = fileName.Replace("Ü", "UE");
+			}
+
+			if (fileName.Contains("ä"))
+			{
+				fileName = fileName.Replace("ä", "ae");
+			}
+
+			if (fileName.Contains("ß"))
+			{
+				fileName = fileName.Replace("ß", "ss");
+			}
+
+			if (fileName.Contains("ü"))
+			{
+				fileName = fileName.Replace("ü", "ue");
+			}
+
+			if (item.Contains("von oben nach unten") ||
+			    item.Contains("von unten nach oben") ||
+			    item.Contains("von oben") ||
+			    item.Contains("nach oben") ||
+			    item.Contains("von unten") ||
+			    item.Contains("nach unten") ||
+			    item.Contains("von ob nach un") ||
+			    item.Contains("von un nach ob") ||
+			    item.Contains("nach unten von oben") ||
+			    item.Contains("SCHWENKBAR MIT MOTORZOOM"))
+			{
+				fileName = fileName.Replace(' ', '_');
 			}
 		}
 
@@ -176,8 +288,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#endregion
 
-		public static void PrintImageTransaction(Document doc, UserImageValues userValues, string filePath, bool isAuto = false)
+		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false)
 		{
+			Document doc = uiDoc.Document;
 			using (Transaction transaction = new Transaction(doc))
 			{
 				transaction.Start("Print");
@@ -190,6 +303,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				IList<ElementId> views = new List<ElementId>();
 				views.Add(doc.ActiveView.Id);
 
+				//CorrectFileName(ref filePath);
 				FileInfo imageFile = new FileInfo($"{filePath}{userValues.UserExtension}");
 				var tmpFilePath = Path.Combine(imageFile.DirectoryName,
 					$"{Guid.NewGuid().ToString()}{imageFile.Extension}");
@@ -212,82 +326,92 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				}
 				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 
+				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc));
+
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
 					doc.ExportImage(exportOptions);
 				}
 				transaction.Commit();
+
 				CropImageRectangle(userValues, imageFile, tmpFile);
 			}
+			doc.Dispose();
 		}
 
 		public static void SetActive2DView(UIDocument uiDoc)
 		{
-			Document doc = uiDoc.Document;
-			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
-			viewCollector.OfClass(typeof(View));
-
-			foreach (Element viewElement in viewCollector)
+			using (Document doc = uiDoc.Document)
 			{
-				View view = (View)viewElement;
+				FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+				viewCollector.OfClass(typeof(View));
 
-				if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+				foreach (Element viewElement in viewCollector)
 				{
-					uiDoc.ActiveView = view;
+					View view = (View)viewElement;
+
+					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+					{
+						uiDoc.ActiveView = view;
+						//uiDoc.RefreshActiveView();
+					}
 				}
 			}
 		}
 
 		public static void SetActive3DView(UIDocument uiDoc)
 		{
-			Document doc = uiDoc.Document;
-
-			View3D view3D = null;
-			var collector = new FilteredElementCollector(doc).OfClass(typeof(View3D));
-			foreach (View3D view in collector)
+			using (Document doc = uiDoc.Document)
 			{
-				if (view == null || view.IsTemplate) continue;
-				view3D = view;
-			}
-
-			if (view3D == null)
-			{
-				var viewFamilyType = new FilteredElementCollector(doc)
-					.OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
-					.FirstOrDefault(x => x.ViewFamily == ViewFamily.ThreeDimensional);
-				using (Transaction trans = new Transaction(doc))
+				View3D view3D = null;
+				var collector = new FilteredElementCollector(doc).OfClass(typeof(View3D));
+				foreach (View3D view in collector)
 				{
-					trans.Start("Add view");
-					view3D = View3D.CreateIsometric(doc, viewFamilyType.Id);
-					trans.Commit();
+					if (view == null || view.IsTemplate) continue;
+					view3D = view;
 				}
-			}
 
-			uiDoc.ActiveView = view3D;
+				if (view3D == null)
+				{
+					var viewFamilyType = new FilteredElementCollector(doc)
+						.OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+						.FirstOrDefault(x => x.ViewFamily == ViewFamily.ThreeDimensional);
+					using (Transaction trans = new Transaction(doc))
+					{
+						trans.Start("Add view");
+						view3D = View3D.CreateIsometric(doc, viewFamilyType.Id);
+						trans.Commit();
+					}
+				}
+				uiDoc.ActiveView = view3D;
+			}
 		}
 
 		public static void View2DChangesCommit(UIDocument uiDoc, UserImageValues userValues)
 		{
-			Document doc = uiDoc.Document;
+			using (Document doc = uiDoc.Document)
+			{
+				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+				ActiveViewChangeTransaction(doc, userValues);
 
-			ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
-			ActiveViewChangeTransaction(doc, userValues);
-
-			doc.Dispose();
+				doc.Dispose();
+			}
 		}
 
 		public static void View3DChangesCommit(UIDocument uiDoc, UserImageValues userValues)
 		{
-			Document doc = uiDoc.Document;
-
-			ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
-
-			FilteredElementCollector collector = new FilteredElementCollector(doc);
-			collector.OfClass(typeof(View3D));
-			foreach (View3D view3D in collector)
+			using (Document doc = uiDoc.Document)
 			{
-				if (view3D == null) continue;
-				ActiveViewChangeTransaction(doc, userValues, true);
+				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+
+				FilteredElementCollector collector = new FilteredElementCollector(doc);
+				collector.OfClass(typeof(View3D));
+				foreach (View3D view3D in collector)
+				{
+					if (view3D == null) continue;
+					ActiveViewChangeTransaction(doc, userValues, true);
+				}
+				doc.Dispose();
 			}
 		}
 
@@ -350,9 +474,17 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				for (int i = 0; i < elems.Count(); i++)
 				{
-					DeleteCommit(doc, elems[i]);
+					DeleteTransaction(doc, elems[i]);
 				}
 			}
+		}
+
+		public static void CreateEmptyProject(Autodesk.Revit.ApplicationServices.Application application)
+		{
+			if (File.Exists(App.DefaultProject))
+				return;
+			Document emptyDoc = application.NewProjectDocument(UnitSystem.Metric);
+			emptyDoc.SaveAs(App.DefaultProject);
 		}
 
 		#endregion

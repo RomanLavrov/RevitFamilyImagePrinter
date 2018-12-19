@@ -42,8 +42,7 @@ namespace RevitFamilyImagePrinter
 
 		#region Constants
 		private const string configName = "config.json";
-		private readonly string _configPath = System.IO.Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), configName);
+		private readonly string _configPath = System.IO.Path.Combine(App.DefaultFolder, configName);
 		#endregion
 
 		#region Variables
@@ -238,7 +237,12 @@ namespace RevitFamilyImagePrinter
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", $"Error occured during view update.\n{exc.Message}");
+				string errorMessage = $"### ERROR ### - Error occured during view update.\n{exc.Message}";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
 			}
 		}
 

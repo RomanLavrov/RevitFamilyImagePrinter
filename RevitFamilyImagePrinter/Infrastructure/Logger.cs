@@ -16,7 +16,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private Logger()
 		{
 			_logFile = Path.Combine(
-				Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "log.txt");
+				App.DefaultFolder, "log.txt");
 			if (!File.Exists(_logFile))
 				File.Create(_logFile);
 		}

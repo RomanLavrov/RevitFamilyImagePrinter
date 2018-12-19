@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Threading;
 using Autodesk.Revit.ApplicationServices;
@@ -15,12 +16,16 @@ namespace RevitFamilyImagePrinter
     class App : IExternalApplication
     {
 		public static string Version { get; private set; }
-		public Result OnStartup(UIControlledApplication a)
+		public static string DefaultFolder { get; private set; }
+	    public static string DefaultProject => Path.Combine(DefaultFolder, "Empty.rvt");
+
+	    public Result OnStartup(UIControlledApplication a)
 		{
 			Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us"); // for exception messages in english
-
 			ControlledApplication c = a.ControlledApplication;
 			Version = c.VersionNumber;
+			DefaultFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+
 			string tabName = "Image Printer";
             a.CreateRibbonTab(tabName);
 
@@ -54,11 +59,13 @@ namespace RevitFamilyImagePrinter
 			//printPanel.AddItem(buttonRemoveEmptyFamilies);
 			//printPanel.AddItem(buttonProjectCreator);
 
-            return Result.Succeeded;
+			return Result.Succeeded;
         }
 
         public Result OnShutdown(UIControlledApplication a)
         {
+			if(DefaultFolder.Contains(DefaultProject))
+				File.Delete(DefaultFolder);
 			//to clean folder, from which files were printed
             return Result.Succeeded;
         }
