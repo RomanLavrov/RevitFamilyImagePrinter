@@ -37,19 +37,20 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				UIApplication uiapp = commandData.Application;
-				_uiDoc = uiapp.ActiveUIDocument;
-				_doc = _uiDoc.Document;
-				
-				UserFolderFrom = RevitPrintHelper.SelectFolderDialog("Select folder with needed files to be printed");
-				if (UserFolderFrom == null)
+				_uiDoc = commandData.Application.ActiveUIDocument;
+				var initDocPath = _uiDoc.Document.PathName;
+				DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
+				if (familiesFolder == null)
 					return Result.Cancelled;
 				UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
 
-				UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false);
+				UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
 				if (UserValues == null)
+					return Result.Failed;
+
+				if (!CreateProjects(commandData, elements, familiesFolder))
 					return Result.Failed;
 
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
@@ -58,122 +59,82 @@ namespace RevitFamilyImagePrinter.Commands
 					FileInfo info = new FileInfo(item);
 					if (!info.Extension.Equals(".rvt"))
 						continue;
-					using (_uiDoc = commandData.Application.OpenAndActivateDocument(item))
+					_uiDoc = commandData.Application.OpenAndActivateDocument(item);
+					if (info.Length > maxSizeLength)
+						RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
+					using (_doc = _uiDoc.Document)
 					{
-						if (info.Length > maxSizeLength)
-							RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-						using (_doc = _uiDoc.Document)
-						{
-							_doc = _uiDoc.Document;
-
-							RevitPrintHelper.SetActive2DView(_uiDoc);
-
-							ViewChangesCommit();
-							PrintCommit();
-
-							//uiDoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
-						}
+						RevitPrintHelper.SetActive2DView(_uiDoc);
+						ViewChangesCommit();
+						PrintCommit();
 					}
+					//uiDoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
 				}
-
+				_uiDoc.Application.OpenAndActivateDocument(initDocPath);
 				//Rename2DImages();
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error occured during command execution";
-				_logger.WriteLine($"### EXCEPTION ### - {errorMessage}\n{exc.Message} ");
+				string errorMessage = "### ERROR ### - - Error occured during command execution";
+				TaskDialog.Show("Error", errorMessage);
+				_logger.WriteLine($"{errorMessage}\n{exc.Message} ");
 				return Result.Failed;
 			}
 			return Result.Succeeded;
 		}
 
+		private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
+		{
+			ProjectCreator creator = new ProjectCreator()
+			{
+				FamiliesFolder = familiesFolder,
+				UserValues = this.UserValues
+			};
+			string tmp = string.Empty;
+			var result = creator.Execute(commandData, ref tmp, elements);
+			if (result != Result.Succeeded)
+				return false;
+			UserFolderFrom = creator.ProjectsFolder;
+			return true;
+		}
+
 		public void ViewChangesCommit()
 		{
-			IList<UIView> uiviews = _uiDoc.GetOpenUIViews();
-			foreach (var item in uiviews)
+			try
 			{
-				item.ZoomToFit();
-				item.Zoom(UserValues.UserZoomValue);
-				_uiDoc.RefreshActiveView();
+				RevitPrintHelper.View2DChangesCommit(_uiDoc, UserValues);
 			}
-
-			using (Transaction transaction = new Transaction(_doc))
+			catch (Exception exc)
 			{
-				transaction.Start("SetView");
-				_doc.ActiveView.DetailLevel = UserValues.UserDetailLevel;
-				_doc.ActiveView.Scale = UserValues.UserScale;
-				transaction.Commit();
+				string errorMessage = "### ERROR ### - Error occured during current view correction";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
 			}
 		}
 
 		private void PrintCommit()
 		{
-			string initialName = RevitPrintHelper.GetFileName(_doc);
-			string filePath = Path.Combine(UserFolderTo.FullName,
-				$"{initialName}{UserValues.UserExtension}");
-
-			using (Transaction transaction = new Transaction(_doc))
+			try
 			{
-				transaction.Start("Print");
-				RevitPrintHelper.PrintImage(_doc, UserValues, filePath, true);
-				transaction.Commit();
+				string initialName = RevitPrintHelper.GetFileName(_doc);
+				string filePath = Path.Combine(UserFolderTo.FullName, initialName);
+
+				RevitPrintHelper.PrintImageTransaction(_uiDoc, UserValues, filePath, true);
+			}
+			catch (Exception exc)
+			{
+				string errorMessage = "### ERROR ### - Error occured during printing current view";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
 			}
 		}
-
-		//private void PrintImage()
-		//{
-		//	string initialName = RevitPrintHelper.GetFileName(doc);
-
-		//	string filePath = Path.Combine(UserFolderTo.FullName,
-		//		initialName + UserValues.UserExtension);
-
-		//	IList<ElementId> views = new List<ElementId>();
-		//	views.Add(doc.ActiveView.Id);
-
-		//	var exportOptions = new ImageExportOptions
-		//	{
-		//		ViewName = "temp",
-		//		FilePath = filePath,
-		//		FitDirection = FitDirectionType.Vertical,
-		//		HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(UserValues.UserExtension),
-		//		ImageResolution = UserValues.UserImageResolution,
-		//		ShouldCreateWebSite = false,
-		//		PixelSize = UserValues.UserImageSize,
-		//		ZoomType = ZoomFitType.FitToPage
-		//	};
-
-		//	if (views.Count > 0)
-		//	{
-		//		exportOptions.SetViewsAndSheets(views);
-		//		//exportOptions.ExportRange = ExportRange.SetOfViews;
-		//		exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
-		//	}
-		//	else
-		//	{
-		//		exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
-		//	}
-
-		//	if (ImageExportOptions.IsValidFileName(filePath))
-		//	{
-		//		doc.ExportImage(exportOptions);
-		//	}
-		//}
-
-		//private void Rename2DImages()
-		//{
-		//	var picturesList = Directory.GetFiles(UserFolderTo.FullName);
-		//	foreach (var item in picturesList)
-		//	{
-		//		int index = item.IndexOf("- Structural Plan - Level 1");
-		//		if (index > 0)
-		//		{
-		//			//try
-		//			//{
-		//			File.Move(item, item.Substring(0, index) + ".png");
-		//			//}
-		//			//catch { };
-		//		}
-		//	}
-		//}
 	}
 }

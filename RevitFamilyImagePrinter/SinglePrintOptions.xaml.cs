@@ -37,12 +37,12 @@ namespace RevitFamilyImagePrinter
 		public UIDocument UIDoc { get; set; }
 		public bool IsPreview { get; set; }
 		public bool IsCancelled { get; set; }
+		public bool Is3D { get; set; }
 		#endregion
 
 		#region Constants
 		private const string configName = "config.json";
-		private readonly string _configPath = System.IO.Path.Combine(
-			Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), configName);
+		private readonly string _configPath = System.IO.Path.Combine(App.DefaultFolder, configName);
 		#endregion
 
 		#region Variables
@@ -230,14 +230,19 @@ namespace RevitFamilyImagePrinter
 				using (Transaction transaction = new Transaction(Doc))
 				{
 					transaction.Start("SetView");
-					Doc.ActiveView.DetailLevel = UserDetailLevel;
+					Doc.ActiveView.DetailLevel = Is3D ? ViewDetailLevel.Fine : UserDetailLevel;
 					Doc.ActiveView.Scale = UserScale;
 					transaction.Commit();
 				}
 			}
 			catch (Exception exc)
 			{
-				TaskDialog.Show("Error", $"Error occured during view update.\n{exc.Message}");
+				string errorMessage = $"### ERROR ### - Error occured during view update.\n{exc.Message}";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
 			}
 		}
 
@@ -324,7 +329,7 @@ namespace RevitFamilyImagePrinter
 			switch (UserExtension)
 			{
 				case ".png": btn = RadioButtonPng; break;
-				case ".jpeg": btn = RadioButtonJpeg; break;
+				case ".jpg": btn = RadioButtonJpg; break;
 				case ".bmp": btn = RadioButtonBmp; break;
 				default: throw new Exception("Unknown extension");
 			}

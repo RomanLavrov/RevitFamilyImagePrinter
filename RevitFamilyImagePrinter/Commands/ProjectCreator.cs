@@ -21,21 +21,11 @@ namespace RevitFamilyImagePrinter.Commands
 	class ProjectCreator : IExternalCommand
 	{
 		#region Properties
-		public DirectoryInfo FamiliesFolder { get; private set; }
-		public DirectoryInfo ImagesFolder
-		{
-			get
-			{
-				return new DirectoryInfo(Path.Combine(FamiliesFolder.FullName, "Images"));
-			}
-		}
-		public DirectoryInfo ProjectsFolder
-		{
-			get
-			{
-				return new DirectoryInfo(Path.Combine(FamiliesFolder.FullName, "Projects"));
-			}
-		}
+
+		public DirectoryInfo FamiliesFolder { get; set; }
+		public DirectoryInfo ProjectsFolder => new DirectoryInfo(Path.Combine(FamiliesFolder.FullName, "Projects"));
+		public UserImageValues UserValues { get; set; }
+
 		#endregion
 
 		#region Variables
@@ -43,7 +33,6 @@ namespace RevitFamilyImagePrinter.Commands
 		private ElementSet _elements;
 		private UIDocument _uiDoc;
 		private Document _doc;
-		private UserImageValues _userValues;
 		private readonly List<string> _allSymbols = new List<string>();
 		private readonly Logger _logger;
 		#endregion
@@ -65,7 +54,6 @@ namespace RevitFamilyImagePrinter.Commands
 			this._commandData = commandData;
 			this._elements = elements;
 			UIApplication uiApplication = commandData.Application;
-			Application app = uiApplication.Application;
 			_uiDoc = uiApplication.ActiveUIDocument;
 			_doc = _uiDoc.Document;
 
@@ -114,7 +102,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
+				//FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
 				if (FamiliesFolder == null) return null;
 
 				var allFilesList = Directory.GetFiles(FamiliesFolder.FullName);
@@ -130,11 +118,12 @@ namespace RevitFamilyImagePrinter.Commands
 					return null;
 				}
 
-				_userValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false);
-				if (_userValues == null)
+				//UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
+				if (UserValues == null)
 					return null;
 
-				CreateFolders();
+				if (!Directory.Exists(ProjectsFolder.FullName))
+					Directory.CreateDirectory(ProjectsFolder.FullName);
 				return familyFilesList;
 			}
 			catch(Exception exc)
@@ -150,13 +139,6 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private void CreateFolders()
-		{
-			if (!Directory.Exists(ProjectsFolder.FullName))
-				Directory.CreateDirectory(ProjectsFolder.FullName);
-			if (!Directory.Exists(ImagesFolder.FullName))
-				Directory.CreateDirectory(ImagesFolder.FullName);
-		}
 		#endregion
 
 		#region ProcessProjects
@@ -185,18 +167,16 @@ namespace RevitFamilyImagePrinter.Commands
 
 					foreach (var symbol in data.FamilySymbols)
 					{
-						//string path = $@"D:\TypeImages\Families\{data.FamilyName}&{symbol.Name}.rvt";
 						string nameProject = $"{data.FamilyName}&{symbol.Name}";
 						_allSymbols.Add(nameProject);
 						string pathProject = Path.Combine(ProjectsFolder.FullName, $"{nameProject}.rvt");
-						string pathImage = Path.Combine(ImagesFolder.FullName, $"{nameProject}{_userValues.UserExtension}");
+						//string pathImage = Path.Combine(ImagesFolder.FullName, $"{nameProject}{UserValues.UserExtension}");
 
 						RemoveExistingInstances(symbol.Id);
 						InsertInstanceIntoProject(symbol);
-						if (!File.Exists(pathProject)) //continue; // ERROR !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+						if (!File.Exists(pathProject))
 							_doc.SaveAs(pathProject);
 
-						//PrintImage(pathImage);
 						RemoveTypeFromProject(symbol);
 					}
 					RemoveFamily(family);
@@ -214,13 +194,6 @@ namespace RevitFamilyImagePrinter.Commands
 				return false;
 			}
 			return true;
-		}
-
-		private void SaveFamilySymbol(FamilySymbol symbol, string pathProject)
-		{
-			RemoveExistingInstances(symbol.Id);
-			InsertInstanceIntoProject(symbol);
-			SaveProjectAs(pathProject);
 		}
 
 		private void RemoveExcessFamilies()
@@ -363,63 +336,12 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private void SaveProjectAs(string path)
-		{
-			try
-			{
-				//uidoc.GetOpenUIViews().FirstOrDefault().ZoomToFit(); // Remove in production
-				/*var syms = new FilteredElementCollector(uidoc.Document)
-				  .OfClass(typeof(FamilySymbol))
-				  .ToElementIds();
-				Debug.WriteLine($"SymbolName = {symbol.Name}, symbolId = {symbol.Id} / Amount = {syms.Count}");*/
-				_doc.SaveAs(path);
-				// закрыть текущий, открыть пустой и поудалять временные
-				// ОБЯЗАТЕЛЬНО ФАЙЛ-ЗАКЛАДКА
-			}
-			catch (Exception exc)
-			{
-				string errorMessage = "Error during saving of project";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
-			}
-		}
 		#endregion
-
-		private void PrintImage(string path)
-		{
-			try
-			{
-				string msg = "FamilyPrint";
-				Print2D print2D = new Print2D()
-				{
-					UserValues = _userValues,
-					UserImagePath = path,
-					IsAuto = true,
-					UIDoc = _uiDoc,
-				};
-				print2D.Execute(_commandData, ref msg, _elements);
-			}
-			catch (Exception exc)
-			{
-				string errorMessage = "Error during printing of type";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
-			}
-		}
 
 		private void RemoveTypeFromProject(FamilySymbol symbol)
 		{
 			try
 			{
-				View view = _uiDoc.ActiveView;
 				if (symbol == null) return;
 
 				DeleteCommit(symbol);

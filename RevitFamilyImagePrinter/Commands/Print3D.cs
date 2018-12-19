@@ -17,13 +17,18 @@ namespace RevitFamilyImagePrinter.Commands
 	class Print3D : IExternalCommand
 	{
 		#region User Values
-		public UserImageValues UserValues { get; set; } = new UserImageValues();
-		public string UserImagePath { get; set; }
+
+		public UserImageValues UserValues { get; set; } = new UserImageValues()
+		{
+			UserScale = 100, UserZoomValue = 0.9
+		};
+		public string UserImagePath { get; set; } 
+
 		#endregion
 
 		#region Variables
 		//private IList<ElementId> views = new List<ElementId>();
-		private Document doc => UIDoc?.Document;
+		private Document _doc => UIDoc?.Document;
 		private readonly Logger _logger = Logger.GetLogger();
 		public UIDocument UIDoc;
 		public bool IsAuto = false;
@@ -39,76 +44,35 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
-			commandData.Application.ViewActivated += SetViewParameters;
+			//uiapp.ViewActivated += SetViewParameters;
+			
+			RevitPrintHelper.SetActive3DView(UIDoc);
+			ViewChangesCommit();
 
-			RevitCommandId commandId = RevitCommandId.LookupPostableCommandId(PostableCommand.Default3DView);
-			if (commandData.Application.CanPostCommand(commandId))
+			if (!message.Equals("FolderPrint"))
 			{
-				commandData.Application.PostCommand(commandId);
-			}
-
-			if (!message.Equals("FamilyPrint"))
-			{
-				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
+				UserImageValues userInputValues = 
+					RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, true);
 				if (userInputValues == null)
-					return Result.Failed;
+					return Result.Cancelled;
 				this.UserValues = userInputValues;
+				ViewChangesCommit();
 			}
+
+			PrintCommit();
 
 			return Result.Succeeded;
 		}
 
-		private void SetViewParameters(object sender, ViewActivatedEventArgs args)
+		public void ViewChangesCommit()
 		{
 			try
 			{
-				FilteredElementCollector collector = new FilteredElementCollector(doc);
-				collector.OfClass(typeof(View3D));
-
-				View3D view3D = Get3DView();
-				if (view3D == null)
-				{
-					var collectorF = new FilteredElementCollector(doc);
-					var viewFamilyType = collectorF.OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
-						.FirstOrDefault(x => x.ViewFamily == ViewFamily.ThreeDimensional);
-					using (Transaction trans = new Transaction(doc))
-					{
-						trans.Start("Add view");
-						view3D = View3D.CreateIsometric(doc, viewFamilyType.Id);
-						trans.Commit();
-					}
-				}
-
-				//UIDoc.RequestViewChange(UIDoc.ActiveView);
-				UIDoc.RefreshActiveView();
-				UIDoc.ActiveView = view3D;
-
-				IList<UIView> uiViews = UIDoc.GetOpenUIViews();
-				foreach (var item in uiViews)
-				{
-					item.ZoomToFit();
-					item.Zoom(UserValues.UserZoomValue);
-					UIDoc.RefreshActiveView();
-				}
-
-				using (Transaction transaction = new Transaction(doc))
-				{
-					transaction.Start("SetView");
-					UIDoc.ActiveView.DetailLevel = ViewDetailLevel.Fine;
-					UIDoc.ActiveView.Scale = UserValues.UserScale;
-					transaction.Commit();
-				}
-
-				using (Transaction transaction = new Transaction(doc))
-				{
-					transaction.Start("Print");
-					RevitPrintHelper.PrintImage(doc, UserValues, string.Empty);
-					transaction.Commit();
-				}
+				RevitPrintHelper.View3DChangesCommit(UIDoc, UserValues);
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### Error occured during printing of current view";
+				string errorMessage = "### ERROR ### - Error occured during current view correction";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
@@ -118,18 +82,22 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private View3D Get3DView()
+		private void PrintCommit()
 		{
-			FilteredElementCollector collector
-				= new FilteredElementCollector(doc)
-					.OfClass(typeof(View3D));
-
-			foreach (View3D view in collector)
+			try
 			{
-				if (view == null || view.IsTemplate) continue;
-				return view;
+				RevitPrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath, IsAuto);
 			}
-			return null;
+			catch (Exception exc)
+			{
+				string errorMessage = "### ERROR ### - Error occured during printing of current view";
+				new TaskDialog("Error")
+				{
+					TitleAutoPrefix = false,
+					MainContent = errorMessage
+				}.Show();
+				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}");
+			}
 		}
 	}
 }
