@@ -100,7 +100,7 @@
                             <TextBlock Tag="72">Web Low</TextBlock>
                             <TextBlock Tag="150">Web High</TextBlock>
                             <TextBlock Tag="300">Print Low</TextBlock>
-                            <TextBlock Tag="600">Print High</TextBlock>
+                            <TextBlock Tag="600" Visibility="Collapsed">Print High</TextBlock>
                         </ComboBox>
                         <Label
                     Grid.Column="0"

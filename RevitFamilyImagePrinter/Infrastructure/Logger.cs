@@ -10,6 +10,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	public class Logger
 	{
 		private readonly string _logFile;
+		private readonly string endl = $"{Environment.NewLine}";
 		private static Logger _instance;
 		private static readonly object _locker = new object();
 
@@ -19,6 +20,20 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				App.DefaultFolder, "log.txt");
 			if (!File.Exists(_logFile))
 				File.Create(_logFile);
+			BeginLogSession();
+		}
+
+		private void BeginLogSession()
+		{
+			string paddingSymb = new string('~', 30);
+			string header = $"{endl}{paddingSymb} LOGGER STARTED [{DateTime.Now.ToString()}] {paddingSymb}";
+			File.AppendAllText(_logFile, header);
+		}
+
+		private void ConvertTabSymbols(ref string text)
+		{
+			text = text.Replace("\n", "\r\n");
+			text = text.Replace("\t", "\r\t");
 		}
 
 		public static Logger GetLogger()
@@ -33,20 +48,22 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public void Write(string text)
 		{
+			ConvertTabSymbols(ref text);
 			text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
 			File.AppendAllText(_logFile, text);
 		}
 
 		public void WriteLine(string text)
 		{
-			text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
-			File.AppendAllText(_logFile, $"{text}{Environment.NewLine}");
+			ConvertTabSymbols(ref text);
+			text = text.Insert(0, $"{endl}[{DateTime.Now.ToString()}]: ");
+			File.AppendAllText(_logFile, $"{text}{endl}");
 		}
 
 		public void EndLogSession()
 		{
-			string endl = $"{Environment.NewLine}";
-			string footer = $"{endl}{new string('=', 150)}{endl}{endl}{endl}";
+			string paddingSymb = new string('=', 30);
+			string footer = $"{endl}{paddingSymb} LOGGER FINISHED [{DateTime.Now.ToString()}] {paddingSymb}";
 			File.AppendAllText(_logFile, $"{footer}");
 		}
 

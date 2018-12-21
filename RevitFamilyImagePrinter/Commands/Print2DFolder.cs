@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Windows;
 using RevitFamilyImagePrinter.Infrastructure;
 using View = Autodesk.Revit.DB.View;
@@ -24,7 +25,7 @@ namespace RevitFamilyImagePrinter.Commands
 		//private IList<ElementId> views = new List<ElementId>();
 		private Document _doc;
 		private UIDocument _uiDoc;
-		private readonly Logger _logger = Logger.GetLogger();
+		private readonly Logger _logger = App.Logger;
 		#endregion
 
 		#region Constants
@@ -38,10 +39,13 @@ namespace RevitFamilyImagePrinter.Commands
 			try
 			{
 				_uiDoc = commandData.Application.ActiveUIDocument;
-				var initDocPath = _uiDoc.Document.PathName;
+				var initProjectPath = _uiDoc.Document.PathName;
+				RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
+
 				DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
 				if (familiesFolder == null)
 					return Result.Cancelled;
+
 				UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
@@ -53,9 +57,13 @@ namespace RevitFamilyImagePrinter.Commands
 				if (!CreateProjects(commandData, elements, familiesFolder))
 					return Result.Failed;
 
+				_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
+				var iter = 0;
 				foreach (var item in fileList)
 				{
+					if (iter % 100 == 0)
+						Thread.Sleep(10000);
 					FileInfo info = new FileInfo(item);
 					if (!info.Extension.Equals(".rvt"))
 						continue;
@@ -67,15 +75,17 @@ namespace RevitFamilyImagePrinter.Commands
 						RevitPrintHelper.SetActive2DView(_uiDoc);
 						ViewChangesCommit();
 						PrintCommit();
+						_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
+						//if(_uiDoc.ActiveView.Id != _doc.ActiveView.Id)
+						_doc.Close(false);
 					}
-					//uiDoc = commandData.Application.OpenAndActivateDocument("D:\\Empty.rvt");
+					iter++;
 				}
-				_uiDoc.Application.OpenAndActivateDocument(initDocPath);
-				//Rename2DImages();
+				_uiDoc = commandData.Application.OpenAndActivateDocument(initProjectPath);
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### - - Error occured during command execution";
+				string errorMessage = "### ERROR ### - Error occured during command execution";
 				TaskDialog.Show("Error", errorMessage);
 				_logger.WriteLine($"{errorMessage}\n{exc.Message} ");
 				return Result.Failed;

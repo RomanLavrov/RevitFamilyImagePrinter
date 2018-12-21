@@ -69,12 +69,14 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			File.Delete(tmpFile.FullName);
 		}
 
-		private static void ZoomOpenUIViews(UIDocument uiDoc, double zoomValue)
+		private static void ZoomOpenUIViews(UIDocument uiDoc, double zoomValue, bool isToFit = true)
 		{
 			IList<UIView> uiViews = uiDoc.GetOpenUIViews();
 			foreach (var item in uiViews)
 			{
-				item.ZoomToFit();
+				if (isToFit)
+					item.ZoomToFit();
+				uiDoc.RefreshActiveView();
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
 			}
@@ -103,17 +105,17 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				var box = item.get_BoundingBox(doc.ActiveView);
 				if (viewType == ViewType.ThreeD)
 				{
-					Scale2DCalculation(box, ref scaleFactor);
+					Scale3DCalculation(box, ref scaleFactor);
 				}
 				else
 				{
-					Scale3DCalculation(box, ref scaleFactor);
+					Scale2DCalculation(box, ref scaleFactor);
 				}
 			}
 
 			if (viewType == ViewType.ThreeD)
 			{
-				var coefficient = 1.55;
+				var coefficient = 1.4;
 				var finalScaleFactor = coefficient * scaleFactor;
 				if (finalScaleFactor < 1)
 					return finalScaleFactor;
@@ -211,7 +213,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#region Dialogs
 
-		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40, int windowWidthOffset = 20, bool is3D = false, bool isApplyButtonVisible = true)
+		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40,
+			int windowWidthOffset = 20, bool is3D = false, bool isApplyButtonVisible = true, bool isUpdateView = true)
 		{
 			Window window = null;
 			SinglePrintOptions options = null;
@@ -222,7 +225,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					Doc = doc,
 					UIDoc = uiDoc,
 					IsPreview = isApplyButtonVisible,
-					Is3D = is3D
+					Is3D = is3D,
+					IsUpdateView = isUpdateView
 				};
 				window = new Window
 				{
@@ -326,7 +330,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				}
 				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 
-				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc));
+				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc), false);
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
@@ -393,8 +397,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
 				ActiveViewChangeTransaction(doc, userValues);
-
-				doc.Dispose();
 			}
 		}
 
@@ -435,7 +437,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static ImageFileType GetImageFileType(string userImagePath)
 		{
-			switch (Path.GetExtension(userImagePath).ToLower())
+			switch (Path.GetExtension(userImagePath)?.ToLower())
 			{
 				case ".png": return ImageFileType.PNG;
 				case ".jpg": return ImageFileType.JPEGLossless;
@@ -468,9 +470,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				}
 
 				List<Element> elems = famCollector
-												.Where(x => !x.Name.Equals(elementsType.FirstOrDefault().FamilyName))
-												.Select(x => x)
-												.ToList();
+					.Where(x => !x.Name.Equals(elementsType.FirstOrDefault()?.FamilyName))
+					.Select(x => x)
+					.ToList();
 
 				for (int i = 0; i < elems.Count(); i++)
 				{
