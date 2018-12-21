@@ -75,6 +75,7 @@
     <Compile Include="Commands\Print2DFolder.cs" />
     <Compile Include="Commands\Print3D.cs" />
     <Compile Include="Commands\Print3DFolder.cs" />
+    <Compile Include="Commands\PrintView.cs" />
     <Compile Include="Commands\ProjectCreator.cs" />
     <Compile Include="Commands\RemoveEmptyFamilies.cs" />
     <Compile Include="Infrastructure\FamilyData.cs" />

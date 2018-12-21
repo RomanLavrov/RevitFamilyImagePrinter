@@ -93,7 +93,6 @@ namespace RevitFamilyImagePrinter.Commands
 				}
 				return false;
 			}
-			_logger.EndLogSession();
 			return true;
 		}
 

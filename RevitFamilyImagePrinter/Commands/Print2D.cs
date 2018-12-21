@@ -28,7 +28,6 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region Variables
-		//private IList<ElementId> views = new List<ElementId>();
 		private Document doc => UIDoc?.Document;
 		private readonly Logger _logger = Logger.GetLogger();
 		public UIDocument UIDoc;

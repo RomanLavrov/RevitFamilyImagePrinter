@@ -37,6 +37,7 @@ namespace RevitFamilyImagePrinter
 		public UIDocument UIDoc { get; set; }
 		public bool IsPreview { get; set; }
 		public bool IsCancelled { get; set; }
+		public bool IsUpdateView { get; set; }
 		public bool Is3D { get; set; }
 		#endregion
 
@@ -113,7 +114,8 @@ namespace RevitFamilyImagePrinter
 			InitializeUserFields(userValues);
 			CorrectValues();
 			btnApply.IsEnabled = false;
-			UpdateView();
+			if (IsUpdateView)
+				UpdateView();
 			return true;
 		}
 

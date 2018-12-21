@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -31,7 +32,7 @@ namespace RevitFamilyImagePrinter.Commands
 
 		private Document _doc;
 		private UIDocument _uiDoc;
-		private readonly Logger _logger = Logger.GetLogger();
+		private readonly Logger _logger = App.Logger;
 
 		#endregion
 
@@ -49,6 +50,7 @@ namespace RevitFamilyImagePrinter.Commands
 			_uiDoc = commandData.Application.ActiveUIDocument;
 			_doc = _uiDoc.Document;
 			var initDocPath = _uiDoc.Document.PathName;
+			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
 			DirectoryInfo familiesFolder =
 				RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
@@ -80,6 +82,8 @@ namespace RevitFamilyImagePrinter.Commands
 					RevitPrintHelper.SetActive3DView(_uiDoc);
 					ViewChangesCommit();
 					PrintCommit();
+					_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
+					_doc.Close(false);
 				}
 			}
 			_uiDoc.Application.OpenAndActivateDocument(initDocPath);
