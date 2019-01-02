@@ -295,9 +295,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false)
 		{
 			Document doc = uiDoc.Document;
-			using (Transaction transaction = new Transaction(doc))
+			using (Transaction transaction = new Transaction(doc, "Print"))
 			{
-				transaction.Start("Print");
+				transaction.Start();
 
 				string initialName = GetFileName(doc);
 				if (!isAuto)
@@ -321,16 +321,19 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
 					ImageResolution = userValues.UserImageResolution,
 					ShouldCreateWebSite = false,
-					PixelSize = userValues.UserImageSize
+					PixelSize = userValues.UserImageSize,
+					ExportRange = ExportRange.VisibleRegionOfCurrentView,
+					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
+					ZoomType = ZoomFitType.FitToPage
 				};
 
 				if (views.Count > 0)
 				{
 					exportOptions.SetViewsAndSheets(views);
 				}
-				exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
+				//exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 
-				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc), false);
+				//ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc), false);
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{

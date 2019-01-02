@@ -22,8 +22,7 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region Variables
-		//private IList<ElementId> views = new List<ElementId>();
-		private Document _doc;
+		//private Document _doc;
 		private UIDocument _uiDoc;
 		private readonly Logger _logger = App.Logger;
 		#endregion
@@ -59,27 +58,23 @@ namespace RevitFamilyImagePrinter.Commands
 
 				_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
-				var iter = 0;
 				foreach (var item in fileList)
 				{
-					if (iter % 100 == 0)
-						Thread.Sleep(10000);
 					FileInfo info = new FileInfo(item);
 					if (!info.Extension.Equals(".rvt"))
 						continue;
 					_uiDoc = commandData.Application.OpenAndActivateDocument(item);
 					if (info.Length > maxSizeLength)
 						RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-					using (_doc = _uiDoc.Document)
+					using (Document _doc = _uiDoc.Document)
 					{
 						RevitPrintHelper.SetActive2DView(_uiDoc);
 						ViewChangesCommit();
-						PrintCommit();
+						PrintCommit(_doc);
 						_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
 						//if(_uiDoc.ActiveView.Id != _doc.ActiveView.Id)
 						_doc.Close(false);
 					}
-					iter++;
 				}
 				_uiDoc = commandData.Application.OpenAndActivateDocument(initProjectPath);
 			}
@@ -126,7 +121,7 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private void PrintCommit()
+		private void PrintCommit(Document _doc)
 		{
 			try
 			{
