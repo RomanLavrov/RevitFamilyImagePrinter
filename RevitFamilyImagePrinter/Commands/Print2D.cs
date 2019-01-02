@@ -28,7 +28,6 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region Variables
-		private Document doc => UIDoc?.Document;
 		private readonly Logger _logger = Logger.GetLogger();
 		public UIDocument UIDoc;
 		public bool IsAuto = false;
@@ -44,6 +43,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
+			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
 			RevitPrintHelper.SetActive2DView(UIDoc);
 

@@ -95,9 +95,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
-    <None Include="Resources\coarse.png" />
-    <None Include="Resources\fine.png" />
-    <None Include="Resources\medium.png" />
+    <Resource Include="Resources\coarse.png" />
+    <Resource Include="Resources\fine.png" />
+    <Resource Include="Resources\medium.png" />
     <Content Include="RevitFamilyImagePrinter.addin" />
   </ItemGroup>
   <ItemGroup>
