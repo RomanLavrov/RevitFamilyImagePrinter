@@ -328,16 +328,18 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				var exportOptions = new ImageExportOptions
 				{
-					ViewName = "temporary",
+				    ExportRange = ExportRange.VisibleRegionOfCurrentView,
 					FilePath = tmpFilePath,
 					FitDirection = FitDirectionType.Vertical,
 					HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
 					ImageResolution = userValues.UserImageResolution,
-					ShouldCreateWebSite = false,
 					PixelSize = userValues.UserImageSize,
-					ExportRange = ExportRange.VisibleRegionOfCurrentView,
-					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
-					ZoomType = ZoomFitType.FitToPage
+				    ShouldCreateWebSite = false,
+					ShadowViewsFileType = ImageFileType.PNG,//GetImageFileType(userValues.UserExtension),
+				    ViewName = "temporary",
+				    Zoom = 1,
+                    ZoomType = ZoomFitType.FitToPage
+                    
 				};
 
 				if (views.Count > 0)
@@ -349,7 +351,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
-					doc.ExportImage(exportOptions);
+				   // R2019_HotFix(uiDoc);
+                    doc.ExportImage(exportOptions);
 				}
 				transaction.Commit();
 
@@ -532,6 +535,17 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 			return true;
 		}
+
+	    public static void R2019_HotFix()
+	    {
+	        if (App.Version == "2019" )
+	        {
+	            //TODO - Revrite with updated Revit 2019 Documentation!
+	            var window = new Window();
+	            window.Show();
+	            window.Close();
+	        }
+        }
 
 		#endregion
 	}
