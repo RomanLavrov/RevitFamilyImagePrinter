@@ -71,7 +71,11 @@ namespace RevitFamilyImagePrinter.Commands
 					ViewChangesCommit();
 					PrintCommit(_uiDoc.Document);
 				}
-				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+
+				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
+					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+				else
+					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 			}
 			catch (Exception exc)
 			{

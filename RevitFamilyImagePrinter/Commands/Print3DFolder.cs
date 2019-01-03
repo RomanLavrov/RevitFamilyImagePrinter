@@ -47,7 +47,7 @@ namespace RevitFamilyImagePrinter.Commands
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
 			_uiDoc = commandData.Application.ActiveUIDocument;
-			var initDocPath = _uiDoc.Document.PathName;
+			var initProjectPath = _uiDoc.Document.PathName;
 			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
 			DirectoryInfo familiesFolder =
@@ -80,7 +80,10 @@ namespace RevitFamilyImagePrinter.Commands
 				ViewChangesCommit();
 				PrintCommit(_uiDoc.Document);
 			}
-			_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initDocPath);
+			if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
+				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+			else
+				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 
 			return Result.Succeeded;
 		}
