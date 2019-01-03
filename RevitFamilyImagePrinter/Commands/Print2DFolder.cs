@@ -56,33 +56,28 @@ namespace RevitFamilyImagePrinter.Commands
 				if (!CreateProjects(commandData, elements, familiesFolder))
 					return Result.Failed;
 
-				_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
 				foreach (var item in fileList)
 				{
+					RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 					FileInfo info = new FileInfo(item);
 					if (!info.Extension.Equals(".rvt"))
 						continue;
 					_uiDoc = commandData.Application.OpenAndActivateDocument(item);
+
 					if (info.Length > maxSizeLength)
 						RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-					using (Document _doc = _uiDoc.Document)
-					{
-						RevitPrintHelper.SetActive2DView(_uiDoc);
-						ViewChangesCommit();
-						PrintCommit(_doc);
-						_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
-						//if(_uiDoc.ActiveView.Id != _doc.ActiveView.Id)
-						_doc.Close(false);
-					}
+					RevitPrintHelper.SetActive2DView(_uiDoc);
+					ViewChangesCommit();
+					PrintCommit(_uiDoc.Document);
 				}
-				_uiDoc = commandData.Application.OpenAndActivateDocument(initProjectPath);
+				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
 			}
 			catch (Exception exc)
 			{
 				string errorMessage = "### ERROR ### - Error occured during command execution";
 				TaskDialog.Show("Error", errorMessage);
-				_logger.WriteLine($"{errorMessage}\n{exc.Message} ");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 				return Result.Failed;
 			}
 			return Result.Succeeded;
@@ -117,7 +112,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -138,7 +133,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 	}

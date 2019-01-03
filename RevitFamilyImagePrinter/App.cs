@@ -24,29 +24,29 @@ namespace RevitFamilyImagePrinter
 
 	    public Result OnStartup(UIControlledApplication a)
 		{
-			//Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us"); // for exception messages in english
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
 			ControlledApplication c = a.ControlledApplication;
 			Version = c.VersionNumber;
+			Logger.WriteLine($"Revit Version -> {Version}");
 
 			string tabName = "Image Printer";
             a.CreateRibbonTab(tabName);
 
 			var assembly = Assembly.GetExecutingAssembly().Location;
 
-			PushButtonData buttontPrint2DSingle = new PushButtonData("Print 2D", " 2D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print2D");
-			buttontPrint2DSingle.ToolTip = "Create 2D family image from current view";
+			PushButtonData buttonPrint2DSingle = new PushButtonData("Print 2D", " 2D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print2D");
+			buttonPrint2DSingle.ToolTip = "Create 2D family image from current view";
 
-			PushButtonData buttontPrint2DMulti = new PushButtonData("Print 2D Folder", " 2D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print2DFolder");
-			buttontPrint2DMulti.ToolTip = "Create 2D family images from selected folder";
+			PushButtonData buttonPrint2DMulti = new PushButtonData("Print 2D Folder", " 2D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print2DFolder");
+			buttonPrint2DMulti.ToolTip = "Create 2D family images from selected folder";
 
-			PushButtonData buttontPrint3DSingle = new PushButtonData("Print 3D", " 3D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print3D");
-			buttontPrint3DSingle.ToolTip = "Create 3D family image from current view";
+			PushButtonData buttonPrint3DSingle = new PushButtonData("Print 3D", " 3D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print3D");
+			buttonPrint3DSingle.ToolTip = "Create 3D family image from current view";
 
-			PushButtonData buttontPrint3DMulti = new PushButtonData("Print 3D Folder", " 3D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print3DFolder");
-			buttontPrint3DMulti.ToolTip = "Create 3D family image from selected folder";
+			PushButtonData buttonPrint3DMulti = new PushButtonData("Print 3D Folder", " 3D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print3DFolder");
+			buttonPrint3DMulti.ToolTip = "Create 3D family image from selected folder";
 
 			PushButtonData buttonRemoveEmptyFamilies = new PushButtonData("Remove empty families", "Remove Families", assembly, "RevitFamilyImagePrinter.Commands.RemoveEmptyFamilies");
 			buttonRemoveEmptyFamilies.ToolTip = "Remove all families without instances.";
@@ -58,10 +58,10 @@ namespace RevitFamilyImagePrinter
 			buttonPrintView.ToolTip = "Create a screenshot of current view and save it as a picture";
 
 			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
-			printPanel.AddItem(buttontPrint2DSingle);
-			printPanel.AddItem(buttontPrint2DMulti);
-			printPanel.AddItem(buttontPrint3DSingle);
-			printPanel.AddItem(buttontPrint3DMulti);
+			printPanel.AddItem(buttonPrint2DSingle);
+			printPanel.AddItem(buttonPrint2DMulti);
+			printPanel.AddItem(buttonPrint3DSingle);
+			printPanel.AddItem(buttonPrint3DMulti);
 			printPanel.AddSeparator();
 			printPanel.AddItem(buttonPrintView);
 			//printPanel.AddItem(buttonRemoveEmptyFamilies);
@@ -72,9 +72,9 @@ namespace RevitFamilyImagePrinter
 
         public Result OnShutdown(UIControlledApplication a)
         {
-			if(File.Exists(DefaultProject))
+			if(File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
 				File.Delete(DefaultProject);
-			//Logger.EndLogSession();
+			Logger.EndLogSession();
 			//to clean folder, from which files were printed
             return Result.Succeeded;
         }
