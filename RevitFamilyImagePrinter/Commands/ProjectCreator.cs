@@ -73,7 +73,6 @@ namespace RevitFamilyImagePrinter.Commands
 			if (!ProjectsFolder.Exists)
 				return false;
 			var projectsCreated = Directory.GetFiles(ProjectsFolder.FullName).ToList();
-			_logger.NewLine();
 			try
 			{
 				Assert.AreEqual(_allSymbols.Count, projectsCreated.Count);
@@ -85,7 +84,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = "Attention! The amount of projects created is not equal to amount of types in families. Check log file."
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\tThe amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
+				_logger.WriteLine($"### ERROR ### - The amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
 				var differences = _allSymbols.Except(projectsCreated);
 				string output = string.Empty;
 				foreach(var i in differences)
@@ -135,7 +134,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 				return null;
 			}
 		}
@@ -191,7 +190,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 				return false;
 			}
 			return true;
@@ -220,7 +219,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -257,7 +256,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 			return family;
 		}
@@ -303,7 +302,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -333,7 +332,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -355,7 +354,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -373,7 +372,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"### ERROR ###\t{errorMessage}\n{exc.Message}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 		#endregion

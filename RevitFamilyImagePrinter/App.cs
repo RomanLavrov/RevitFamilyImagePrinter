@@ -24,12 +24,12 @@ namespace RevitFamilyImagePrinter
 
 	    public Result OnStartup(UIControlledApplication a)
 		{
-			//Thread.CurrentThread.CurrentUICulture = new CultureInfo("en-us"); // for exception messages in english
 			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
 			ControlledApplication c = a.ControlledApplication;
 			Version = c.VersionNumber;
+			Logger.WriteLine($"Revit Version -> {Version}");
 
 			string tabName = "Image Printer";
             a.CreateRibbonTab(tabName);
@@ -72,7 +72,7 @@ namespace RevitFamilyImagePrinter
 
         public Result OnShutdown(UIControlledApplication a)
         {
-			if(File.Exists(DefaultProject))
+			if(File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
 				File.Delete(DefaultProject);
 			Logger.EndLogSession();
 			//to clean folder, from which files were printed

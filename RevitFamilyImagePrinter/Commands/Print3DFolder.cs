@@ -30,7 +30,6 @@ namespace RevitFamilyImagePrinter.Commands
 
 		#region Variables
 
-		//private Document _doc;
 		private UIDocument _uiDoc;
 		private readonly Logger _logger = App.Logger;
 
@@ -115,7 +114,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 
@@ -135,7 +134,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 	}

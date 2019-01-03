@@ -77,7 +77,7 @@ namespace RevitFamilyImagePrinter.Commands
 			{
 				string errorMessage = "### ERROR ### - Error occured during command execution";
 				TaskDialog.Show("Error", errorMessage);
-				_logger.WriteLine($"{errorMessage}\n{exc.Message} ");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 				return Result.Failed;
 			}
 			return Result.Succeeded;
@@ -112,7 +112,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -133,7 +133,7 @@ namespace RevitFamilyImagePrinter.Commands
 					TitleAutoPrefix = false,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{Environment.NewLine}{exc.Message}");
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 	}

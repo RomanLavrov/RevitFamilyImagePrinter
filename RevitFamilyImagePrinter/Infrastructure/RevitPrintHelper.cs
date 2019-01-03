@@ -149,6 +149,19 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
+		private static bool IsDocumentActive(UIDocument uiDoc)
+		{
+			if (uiDoc.ActiveView == null)
+				return false;
+			IList<UIView> uiViews = uiDoc.GetOpenUIViews();
+			foreach (var uiView in uiViews)
+			{
+				if (uiView.ViewId == uiDoc.ActiveView.Id)
+					return true;
+			}
+			return false;
+		}
+
 		private static void CorrectFileName(ref string fileName)
 		{
 			string item = fileName;
@@ -483,7 +496,12 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public static void CreateEmptyProject(Autodesk.Revit.ApplicationServices.Application application)
 		{
 			if (File.Exists(App.DefaultProject))
-				return;
+			{
+				if(IsFileAccessible(App.DefaultProject))
+					File.Delete(App.DefaultProject);
+				else
+					return;
+			}
 			Document emptyDoc = application.NewProjectDocument(UnitSystem.Metric);
 			emptyDoc.SaveAs(App.DefaultProject);
 		}
@@ -491,8 +509,28 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
-			uiDoc.Document.Close(false);
+			if(!IsDocumentActive(uiDoc))
+				uiDoc.Document.Close(false);
 			return result;
+		}
+
+		public static bool IsFileAccessible(string path)
+		{
+			FileInfo file = new FileInfo(path);
+			FileStream stream = null;
+			try
+			{
+				stream = file.Open(FileMode.Open, FileAccess.Read, FileShare.None);
+			}
+			catch (IOException)
+			{
+				return false;
+			}
+			finally
+			{
+				stream?.Close();
+			}
+			return true;
 		}
 
 		#endregion
