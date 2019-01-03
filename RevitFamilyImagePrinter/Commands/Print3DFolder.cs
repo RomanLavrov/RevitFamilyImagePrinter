@@ -30,7 +30,7 @@ namespace RevitFamilyImagePrinter.Commands
 
 		#region Variables
 
-		private Document _doc;
+		//private Document _doc;
 		private UIDocument _uiDoc;
 		private readonly Logger _logger = App.Logger;
 
@@ -48,7 +48,6 @@ namespace RevitFamilyImagePrinter.Commands
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
 			_uiDoc = commandData.Application.ActiveUIDocument;
-			_doc = _uiDoc.Document;
 			var initDocPath = _uiDoc.Document.PathName;
 			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
@@ -71,22 +70,18 @@ namespace RevitFamilyImagePrinter.Commands
 			var fileList = Directory.GetFiles(UserFolderFrom.FullName);
 			foreach (var item in fileList)
 			{
+				RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 				FileInfo info = new FileInfo(item);
 				if (!info.Extension.Equals(".rvt"))
 					continue;
 				_uiDoc = commandData.Application.OpenAndActivateDocument(item);
 				if (info.Length > maxSizeLength)
 					RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-				using (_doc = _uiDoc.Document)
-				{
-					RevitPrintHelper.SetActive3DView(_uiDoc);
-					ViewChangesCommit();
-					PrintCommit();
-					_uiDoc.Application.OpenAndActivateDocument(App.DefaultProject);
-					_doc.Close(false);
-				}
+				RevitPrintHelper.SetActive3DView(_uiDoc);
+				ViewChangesCommit();
+				PrintCommit(_uiDoc.Document);
 			}
-			_uiDoc.Application.OpenAndActivateDocument(initDocPath);
+			_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initDocPath);
 
 			return Result.Succeeded;
 		}
@@ -124,11 +119,11 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 		}
 
-		private void PrintCommit()
+		private void PrintCommit(Document doc)
 		{
 			try
 			{
-				string initialName = RevitPrintHelper.GetFileName(_doc);
+				string initialName = RevitPrintHelper.GetFileName(doc);
 				string filePath = Path.Combine(UserFolderTo.FullName, initialName);
 				RevitPrintHelper.PrintImageTransaction(_uiDoc, UserValues, filePath, true);
 			}

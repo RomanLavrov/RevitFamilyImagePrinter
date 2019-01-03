@@ -331,9 +331,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				{
 					exportOptions.SetViewsAndSheets(views);
 				}
-				//exportOptions.ExportRange = ExportRange.VisibleRegionOfCurrentView;
 
-				//ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc), false);
+				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc));
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
@@ -360,7 +359,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
 					{
 						uiDoc.ActiveView = view;
-						//uiDoc.RefreshActiveView();
 					}
 				}
 			}
@@ -463,8 +461,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					= new FilteredElementCollector(doc);
 				instCollector.OfClass(typeof(FamilyInstance));
 
-
-
 				List<ElementType> elementsType = new List<ElementType>();
 				foreach (FamilyInstance fi in instCollector)
 				{
@@ -490,6 +486,13 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				return;
 			Document emptyDoc = application.NewProjectDocument(UnitSystem.Metric);
 			emptyDoc.SaveAs(App.DefaultProject);
+		}
+
+		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
+		{
+			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
+			uiDoc.Document.Close(false);
+			return result;
 		}
 
 		#endregion

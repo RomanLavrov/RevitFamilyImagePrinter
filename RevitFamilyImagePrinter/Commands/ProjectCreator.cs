@@ -87,10 +87,12 @@ namespace RevitFamilyImagePrinter.Commands
 				}.Show();
 				_logger.WriteLine($"### ERROR ###\tThe amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
 				var differences = _allSymbols.Except(projectsCreated);
+				string output = string.Empty;
 				foreach(var i in differences)
 				{
-					_logger.WriteLine(i);
+					output += $"{i}\n";
 				}
+				_logger.WriteLine(output);
 				return false;
 			}
 			return true;
