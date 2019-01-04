@@ -78,7 +78,6 @@ namespace RevitFamilyImagePrinter.Commands
 					RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
 				RevitPrintHelper.SetActive3DView(_uiDoc);
 				ViewChangesCommit();
-                RevitPrintHelper.R2019_HotFix();
 				PrintCommit(_uiDoc.Document);
 			}
 			if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))

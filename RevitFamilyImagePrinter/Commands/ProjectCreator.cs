@@ -65,36 +65,41 @@ namespace RevitFamilyImagePrinter.Commands
 			if (!ProcessProjects(familyFiles))
 				return Result.Failed;
 
-			return !CheckProjectsAmount() ? Result.Failed : Result.Succeeded;
+			CheckProjectsAmount();
+			return Result.Succeeded;
 		}
 
-		private bool CheckProjectsAmount()
+		private void CheckProjectsAmount()
 		{
 			if (!ProjectsFolder.Exists)
-				return false;
-			var projectsCreated = Directory.GetFiles(ProjectsFolder.FullName).ToList();
+				throw new Exception("Projects folder does not exist");
+			var projectsCreated = Directory.GetFiles(ProjectsFolder.FullName)
+				.Select(x => new FileInfo(x))
+				.Select(x => x.Name.Replace(x.Extension, ""))
+				.ToList();
 			try
 			{
 				Assert.AreEqual(_allSymbols.Count, projectsCreated.Count);
 			}
-			catch(Exception exc)
+			catch (AssertFailedException exc)
 			{
 				new TaskDialog("Warning!")
 				{
 					TitleAutoPrefix = false,
-					MainContent = "Attention! The amount of projects created is not equal to amount of types in families. Check log file."
+					MainContent =
+						"Attention! The amount of projects created is not equal to amount of types in families. Check log file."
 				}.Show();
-				_logger.WriteLine($"### ERROR ### - The amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
+				_logger.WriteLine(
+					$"### ERROR ### - The amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
 				var differences = _allSymbols.Except(projectsCreated);
 				string output = string.Empty;
-				foreach(var i in differences)
+				foreach (var i in differences)
 				{
 					output += $"{i}\n";
 				}
+
 				_logger.WriteLine(output);
-				return false;
 			}
-			return true;
 		}
 
 		#region GetFamilyFilesFromFolder
@@ -169,13 +174,15 @@ namespace RevitFamilyImagePrinter.Commands
 					{
 						string nameProject = $"{data.FamilyName}&{symbol.Name}";
 						_allSymbols.Add(nameProject);
+
 						string pathProject = Path.Combine(ProjectsFolder.FullName, $"{nameProject}.rvt");
 						//string pathImage = Path.Combine(ImagesFolder.FullName, $"{nameProject}{UserValues.UserExtension}");
 
 						RemoveExistingInstances(symbol.Id);
 						InsertInstanceIntoProject(symbol);
-						if (!File.Exists(pathProject))
-							_doc.SaveAs(pathProject);
+						if (File.Exists(pathProject))
+							File.Delete(pathProject);
+						_doc.SaveAs(pathProject);
 
 						RemoveTypeFromProject(symbol);
 					}

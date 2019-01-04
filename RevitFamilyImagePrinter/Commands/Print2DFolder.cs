@@ -60,21 +60,29 @@ namespace RevitFamilyImagePrinter.Commands
                 var fileList = Directory.GetFiles(UserFolderFrom.FullName);
                 foreach (var item in fileList)
                 {
-                    RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-                    FileInfo info = new FileInfo(item);
-                    if (!info.Extension.Equals(".rvt"))
-                        continue;
-                    _uiDoc = commandData.Application.OpenAndActivateDocument(item);
+	                try
+	                {
+		                RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
+		                FileInfo info = new FileInfo(item);
+		                if (!info.Extension.Equals(".rvt"))
+			                continue;
+		                _uiDoc = commandData.Application.OpenAndActivateDocument(item);
 
-                    if (info.Length > maxSizeLength)
-                    {
-                        RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-                    }
+		                if (info.Length > maxSizeLength)
+		                {
+			                RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
+		                }
 
-                    RevitPrintHelper.SetActive2DView(_uiDoc);
-                    ViewChangesCommit();
-                    RevitPrintHelper.R2019_HotFix();
-                    PrintCommit(_uiDoc.Document);
+		                RevitPrintHelper.SetActive2DView(_uiDoc);
+		                ViewChangesCommit();
+		                PrintCommit(_uiDoc.Document);
+					}
+	                catch (Exception exc)
+	                {
+		                string errorMessage = "### ERROR ### - Error occured in cycle during command execution";
+		                TaskDialog.Show("Error", errorMessage);
+		                _logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+					}
                 }
 
                 if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))

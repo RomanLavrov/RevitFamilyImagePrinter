@@ -47,7 +47,7 @@ namespace RevitFamilyImagePrinter.Commands
 			//uiapp.ViewActivated += SetViewParameters;
 			
 			RevitPrintHelper.SetActive3DView(UIDoc);
-			ViewChangesCommit();
+			ViewChangesCommit();	// check the redundancy of this function call
 
 			if (!message.Equals("FolderPrint"))
 			{
