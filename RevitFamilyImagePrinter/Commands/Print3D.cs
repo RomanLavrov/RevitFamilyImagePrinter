@@ -45,13 +45,13 @@ namespace RevitFamilyImagePrinter.Commands
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
 			//uiapp.ViewActivated += SetViewParameters;
-			
+
 			RevitPrintHelper.SetActive3DView(UIDoc);
-			ViewChangesCommit();
+			ViewChangesCommit();    // check the redundancy of this function call
 
 			if (!message.Equals("FolderPrint"))
 			{
-				UserImageValues userInputValues = 
+				UserImageValues userInputValues =
 					RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, true);
 				if (userInputValues == null)
 					return Result.Cancelled;

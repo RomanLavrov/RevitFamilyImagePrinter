@@ -93,7 +93,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-		private static double GetScaleFromElement(UIDocument uiDoc)
+		private static double? GetScaleFromElement(UIDocument uiDoc)
 		{
 			Document doc = uiDoc.Document;
 			var viewType = uiDoc.ActiveView.ViewType;
@@ -103,6 +103,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			foreach (var item in collector)
 			{
 				var box = item.get_BoundingBox(doc.ActiveView);
+				if (box == null)
+					return null;
 				if (viewType == ViewType.ThreeD)
 				{
 					Scale3DCalculation(box, ref scaleFactor);
@@ -160,6 +162,38 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					return true;
 			}
 			return false;
+		}
+
+		private static void R2019_HotFix()
+		{
+			if (App.Version != "2019") return;
+			//TODO - Rewrite with updated Revit 2019 Documentation!
+			var window = new Window();
+			window.Show();
+			window.Close();
+		}
+
+		private static void R2019_3DViewFix(UIDocument uiDoc)
+		{
+			if (App.Version != "2019") return;
+			FilteredElementCollector collector = new FilteredElementCollector(uiDoc.Document);
+			collector.OfClass(typeof(Level));
+			var levelsToHide = new List<ElementId>();
+			foreach (Element level in collector)
+			{
+				if (level.CanBeHidden(uiDoc.ActiveView))
+				{
+					levelsToHide.Add(level.Id);
+				}
+			}
+			if (levelsToHide.Count < 1) return;
+
+			using (Transaction transaction = new Transaction(uiDoc.Document, "Level Isolating"))
+			{
+				transaction.Start();
+				uiDoc.ActiveView.HideElements(levelsToHide);
+				transaction.Commit();
+			}
 		}
 
 		private static void CorrectFileName(ref string fileName)
@@ -224,7 +258,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#region Public
 
-		#region Dialogs
+		#region Windows
 
 		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40,
 			int windowWidthOffset = 20, bool is3D = false, bool isApplyButtonVisible = true, bool isUpdateView = true)
@@ -316,7 +350,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				if (!isAuto)
 					filePath = SelectFileNameDialog(initialName);
 				if (filePath == initialName) return;
-
 				IList<ElementId> views = new List<ElementId>();
 				views.Add(doc.ActiveView.Id);
 
@@ -335,11 +368,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					ImageResolution = userValues.UserImageResolution,
 					PixelSize = userValues.UserImageSize,
 				    ShouldCreateWebSite = false,
-					ShadowViewsFileType = ImageFileType.PNG,//GetImageFileType(userValues.UserExtension),
+					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
 				    ViewName = "temporary",
-				    Zoom = 1,
                     ZoomType = ZoomFitType.FitToPage
-                    
 				};
 
 				if (views.Count > 0)
@@ -347,11 +378,14 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					exportOptions.SetViewsAndSheets(views);
 				}
 
-				ZoomOpenUIViews(uiDoc, GetScaleFromElement(uiDoc));
+				var scale = GetScaleFromElement(uiDoc);
+				if (scale == null)
+					return;
+
+				ZoomOpenUIViews(uiDoc, (double)scale);
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
-				   // R2019_HotFix(uiDoc);
                     doc.ExportImage(exportOptions);
 				}
 				transaction.Commit();
@@ -414,6 +448,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
 				ActiveViewChangeTransaction(doc, userValues);
+				R2019_HotFix();
 			}
 		}
 
@@ -430,8 +465,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					if (view3D == null) continue;
 					ActiveViewChangeTransaction(doc, userValues, true);
 				}
-				doc.Dispose();
 			}
+			R2019_3DViewFix(uiDoc);
+			R2019_HotFix();
 		}
 
 		public static string GetFileName(Document doc)
@@ -535,17 +571,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 			return true;
 		}
-
-	    public static void R2019_HotFix()
-	    {
-	        if (App.Version == "2019" )
-	        {
-	            //TODO - Revrite with updated Revit 2019 Documentation!
-	            var window = new Window();
-	            window.Show();
-	            window.Close();
-	        }
-        }
 
 		#endregion
 	}
