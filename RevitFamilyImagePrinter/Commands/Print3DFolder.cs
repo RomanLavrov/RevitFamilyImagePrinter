@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -7,9 +8,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Forms;
+using System.Windows.Controls;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using RevitFamilyImagePrinter.Infrastructure;
@@ -30,6 +32,7 @@ namespace RevitFamilyImagePrinter.Commands
 
 		#region Variables
 
+		private UIApplication _uiApp;
 		private UIDocument _uiDoc;
 		private readonly Logger _logger = App.Logger;
 
@@ -44,14 +47,58 @@ namespace RevitFamilyImagePrinter.Commands
 
 		#endregion
 
+		#region TMP
+
+		PrintProgress progressWindow = new PrintProgress();
+
+		private int totalFiles;
+
+		private bool isCancelled;
+
+		private TextBlock ProcessTextBlock;
+
+		private ProgressBar PrintProgressBar;
+
+		private Button CancelButton;
+
+		private Label Counter;
+
+		private Window window;
+
+		private void CancelButton_Click(object sender, RoutedEventArgs e)
+		{
+			isCancelled = false;
+			CancelButton.IsEnabled = false;
+		}
+
+		private void ApplicationOnViewActivated(object sender, ViewActivatedEventArgs e)
+		{
+			UIApplication uiApp = sender as UIApplication;
+			string viewName = uiApp.ActiveUIDocument.ActiveView.Document.Title;
+			if (viewName.ToLower().Equals("empty") ||
+			    ProcessTextBlock.Text.Contains(viewName)) return;
+			ProcessTextBlock.Text = $"{viewName} view has been activated";
+			PrintProgressBar.Value++;
+		}
+
+		private void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
+		{
+			Document docSender = sender as Document;
+			PrintProgressBar.Value++;
+			ProcessTextBlock.Text = $"{docSender.Title} has been created";
+			Counter.Content = PrintProgressBar.Value;
+		}
+
+		#endregion
+
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
-			_uiDoc = commandData.Application.ActiveUIDocument;
+			_uiApp = commandData.Application;
+			_uiDoc = _uiApp.ActiveUIDocument;
 			var initProjectPath = _uiDoc.Document.PathName;
 			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
-			DirectoryInfo familiesFolder =
-				RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
+			DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
 			if (familiesFolder == null)
 				return Result.Cancelled;
 			UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
@@ -63,12 +110,48 @@ namespace RevitFamilyImagePrinter.Commands
 			if (UserValues == null)
 				return Result.Failed;
 
+			UserFolderFrom = new DirectoryInfo(Path.Combine(familiesFolder.FullName, "Projects"));
+
+			progressWindow.CancelButton.Click += CancelButton_Click;
+			ProcessTextBlock = progressWindow.ProcessTextBlock;
+			PrintProgressBar = progressWindow.PrintProgressBar;
+			CancelButton = progressWindow.CancelButton;
+			Counter = progressWindow.LabelCounter;
+			window = new Window
+			{
+				Height = 200,
+				Width = 400,
+				Title = "Printing",
+				WindowStyle = WindowStyle.ToolWindow,
+				Name = "Printing",
+				ResizeMode = ResizeMode.NoResize,
+				WindowStartupLocation = WindowStartupLocation.CenterScreen,
+				Content = progressWindow,
+				Topmost = true
+			};
+
+			//commandData.Application.Application.DocumentSavedAs += ApplicationOnDocumentSavedAs;
+			commandData.Application.ActiveUIDocument.Document.DocumentSavedAs += ApplicationOnDocumentSavedAs;
+
+			PrintProgressBar.Value = 0;
+			PrintProgressBar.Maximum = familiesFolder.GetFiles().Length;
+			//ProcessTextBlock.Text = "Projects are being created...";
+
+			window.Show();
+
 			if (!CreateProjects(commandData, elements, familiesFolder))
 				return Result.Failed;
 
 			var fileList = Directory.GetFiles(UserFolderFrom.FullName);
+
+			PrintProgressBar.Value = 0;
+			PrintProgressBar.Maximum = fileList.Length;
+
+			commandData.Application.ViewActivated += ApplicationOnViewActivated;
+
 			foreach (var item in fileList)
 			{
+				if (isCancelled) break;
 				RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 				FileInfo info = new FileInfo(item);
 				if (!info.Extension.Equals(".rvt"))
@@ -80,11 +163,14 @@ namespace RevitFamilyImagePrinter.Commands
 				ViewChangesCommit();
 				PrintCommit(_uiDoc.Document);
 			}
+
 			if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
 				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
 			else
 				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 
+			ProcessTextBlock.Text = "Done!";
+			window.Close();
 			return Result.Succeeded;
 		}
 

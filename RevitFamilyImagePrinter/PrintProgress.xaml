@@ -4,21 +4,22 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RevitFamilyImagePrinter"
-             mc:Ignorable="d" d:DesignWidth="400" Height="130">
+             mc:Ignorable="d" d:DesignWidth="400" Height="150">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition/>
-            <RowDefinition Height="0.7*"/>
+            <RowDefinition Height="0.6*"/>
         </Grid.RowDefinitions>
         <Grid Grid.Row="0">
             <Grid.RowDefinitions>
-                <RowDefinition Height="0.5*"/>
+                <RowDefinition/>
                 <RowDefinition Height="35"/>
             </Grid.RowDefinitions>
             <TextBlock 
-                x:Name="ProcessTextBox"
+                x:Name="ProcessTextBlock"
                 FontSize="14"
                 Grid.Row="0"
+                TextWrapping="Wrap"
                 Text="Something is happening..."
                 VerticalAlignment="Center"
                 Margin="20 0 0 0"/>
@@ -35,5 +36,6 @@
                 Content="Cancel"
                 HorizontalAlignment="Right"
                 Margin="0 0 20 0"/>
+        <Label x:Name="LabelCounter" Grid.Row="1">COUNTER</Label>
     </Grid>
 </UserControl>
