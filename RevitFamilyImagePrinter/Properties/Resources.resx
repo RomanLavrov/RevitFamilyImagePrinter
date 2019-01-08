@@ -127,4 +127,16 @@
   <data name="medium" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\medium.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="_2D_Folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\2D_Folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="_2D_Single" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\2D_Single.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="_3D_Folder" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\3D_Folder.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="_3D_Single" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\3D_Single.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>
