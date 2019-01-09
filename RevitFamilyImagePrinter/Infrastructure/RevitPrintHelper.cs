@@ -4,9 +4,13 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 using Ookii.Dialogs.Wpf;
+using Image = System.Drawing.Image;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
@@ -14,6 +18,38 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	public static class RevitPrintHelper
 	{
 		#region Private
+
+		#region Events
+
+		private static void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Window wnd = sender as Window;
+			SinglePrintOptions options = wnd.Content as SinglePrintOptions;
+			if (!options.IsPreview && !options.IsCancelled)
+				options.SaveConfig();
+		}
+
+		private static void ApplicationOnViewActivated(object sender, ViewActivatedEventArgs e)
+		{
+			string viewName = e.CurrentActiveView.Document.Title;
+			if (_processTextBlock.Text.Contains(viewName) || viewName.ToLower().Equals("empty")) return;
+			_processTextBlock.Text = $"{viewName} is printing...";
+			_printProgressBar.Value++;
+		}
+
+		private static void ApplicationOnFamilyLoadedIntoDocument(object sender, FamilyLoadedIntoDocumentEventArgs e)
+		{
+			_processTextBlock.Text = $"{e.FamilyName} view has been loaded";
+			_printProgressBar.Value++;
+		}
+
+		private static void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
+		{
+			_printProgressBar.Value++;
+			_processTextBlock.Text = $"{e.Document.Title} has been created";
+		}
+
+		#endregion
 
 		private static UserImageValues InitializeVariables(SinglePrintOptions options)
 		{
@@ -26,14 +62,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				UserExtension = options.UserExtension,
 				UserDetailLevel = options.UserDetailLevel
 			};
-		}
-
-		private static void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			Window wnd = sender as Window;
-			SinglePrintOptions options = wnd.Content as SinglePrintOptions;
-			if (!options.IsPreview && !options.IsCancelled)
-				options.SaveConfig();
 		}
 
 		private static void DeleteTransaction(Document doc, Element element)
@@ -296,6 +324,41 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			if (window.DialogResult != true)
 				return null;
 			return InitializeVariables(options);
+		}
+
+		#region Variables for ProgressWindow
+
+		private static TextBlock _processTextBlock;
+		private static ProgressBar _printProgressBar;
+
+		#endregion
+
+		public static Window ShowProgressWindow(UIApplication uiApp, DirectoryInfo familiesFolder,
+			bool is3D = false, int windowHeightOffset = 40, int windowWidthOffset = 20)
+		{
+			PrintProgress printProgressWnd = new PrintProgress();
+			_processTextBlock = printProgressWnd.ProcessTextBlock;
+			_printProgressBar = printProgressWnd.PrintProgressBar;
+			Window _progressWindow = new Window
+			{
+				Height = 100 + windowHeightOffset,
+				Width = 400 + windowWidthOffset,
+				Title = $"Folder \"{familiesFolder.Name}\" {(is3D ? "3D" : "2D")} printing",
+				WindowStyle = WindowStyle.ToolWindow,
+				Name = "Printing",
+				ResizeMode = ResizeMode.NoResize,
+				WindowStartupLocation = WindowStartupLocation.CenterScreen,
+				Content = printProgressWnd,
+				ShowActivated = true,
+				Topmost = true
+			};
+
+			_printProgressBar.Value = 0;
+			_printProgressBar.Maximum = familiesFolder.GetFiles().Length;
+			_processTextBlock.Text = "Creating .rvt projects from .rfa files, this may take a time...";
+			_progressWindow.Show();
+			uiApp.ViewActivated += ApplicationOnViewActivated;
+			return _progressWindow;
 		}
 
 		public static string SelectFileNameDialog(string name)

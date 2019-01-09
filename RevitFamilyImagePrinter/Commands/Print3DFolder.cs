@@ -47,130 +47,63 @@ namespace RevitFamilyImagePrinter.Commands
 
 		#endregion
 
-		#region TMP
-
-		PrintProgress progressWindow = new PrintProgress();
-
-		private int totalFiles;
-
-		private bool isCancelled;
-
-		private TextBlock ProcessTextBlock;
-
-		private ProgressBar PrintProgressBar;
-
-		private Button CancelButton;
-
-		private Label Counter;
-
-		private Window window;
-
-		private void CancelButton_Click(object sender, RoutedEventArgs e)
-		{
-			isCancelled = false;
-			CancelButton.IsEnabled = false;
-		}
-
-		private void ApplicationOnViewActivated(object sender, ViewActivatedEventArgs e)
-		{
-			UIApplication uiApp = sender as UIApplication;
-			string viewName = uiApp.ActiveUIDocument.ActiveView.Document.Title;
-			if (viewName.ToLower().Equals("empty") ||
-			    ProcessTextBlock.Text.Contains(viewName)) return;
-			ProcessTextBlock.Text = $"{viewName} view has been activated";
-			PrintProgressBar.Value++;
-		}
-
-		private void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
-		{
-			Document docSender = sender as Document;
-			PrintProgressBar.Value++;
-			ProcessTextBlock.Text = $"{docSender.Title} has been created";
-			Counter.Content = PrintProgressBar.Value;
-		}
-
-		#endregion
-
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
-			_uiApp = commandData.Application;
-			_uiDoc = _uiApp.ActiveUIDocument;
-			var initProjectPath = _uiDoc.Document.PathName;
-			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
-
-			DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
-			if (familiesFolder == null)
-				return Result.Cancelled;
-			UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
-			if (UserFolderTo == null)
-				return Result.Cancelled;
-
-			UserValues =
-				RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
-			if (UserValues == null)
-				return Result.Failed;
-
-			UserFolderFrom = new DirectoryInfo(Path.Combine(familiesFolder.FullName, "Projects"));
-
-			progressWindow.CancelButton.Click += CancelButton_Click;
-			ProcessTextBlock = progressWindow.ProcessTextBlock;
-			PrintProgressBar = progressWindow.PrintProgressBar;
-			CancelButton = progressWindow.CancelButton;
-			Counter = progressWindow.LabelCounter;
-			window = new Window
+			try
 			{
-				Height = 200,
-				Width = 400,
-				Title = "Printing",
-				WindowStyle = WindowStyle.ToolWindow,
-				Name = "Printing",
-				ResizeMode = ResizeMode.NoResize,
-				WindowStartupLocation = WindowStartupLocation.CenterScreen,
-				Content = progressWindow,
-				Topmost = true
-			};
+				_uiApp = commandData.Application;
+				_uiDoc = _uiApp.ActiveUIDocument;
+				var initProjectPath = _uiDoc.Document.PathName;
+				RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
 
-			//commandData.Application.Application.DocumentSavedAs += ApplicationOnDocumentSavedAs;
-			commandData.Application.ActiveUIDocument.Document.DocumentSavedAs += ApplicationOnDocumentSavedAs;
+				DirectoryInfo familiesFolder =
+					RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
+				if (familiesFolder == null)
+					return Result.Cancelled;
+				UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
+				if (UserFolderTo == null)
+					return Result.Cancelled;
 
-			PrintProgressBar.Value = 0;
-			PrintProgressBar.Maximum = familiesFolder.GetFiles().Length;
-			//ProcessTextBlock.Text = "Projects are being created...";
+				UserValues =
+					RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
+				if (UserValues == null)
+					return Result.Failed;
 
-			window.Show();
+				Window progressWindow = RevitPrintHelper.ShowProgressWindow(_uiApp, familiesFolder, true);
 
-			if (!CreateProjects(commandData, elements, familiesFolder))
-				return Result.Failed;
+				if (!CreateProjects(commandData, elements, familiesFolder))
+					return Result.Failed;
 
-			var fileList = Directory.GetFiles(UserFolderFrom.FullName);
+				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
 
-			PrintProgressBar.Value = 0;
-			PrintProgressBar.Maximum = fileList.Length;
+				foreach (var item in fileList)
+				{
+					RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
+					FileInfo info = new FileInfo(item);
+					if (!info.Extension.Equals(".rvt"))
+						continue;
+					_uiDoc = commandData.Application.OpenAndActivateDocument(item);
+					if (info.Length > maxSizeLength)
+						RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
+					RevitPrintHelper.SetActive3DView(_uiDoc);
+					ViewChangesCommit();
+					PrintCommit(_uiDoc.Document);
+				}
 
-			commandData.Application.ViewActivated += ApplicationOnViewActivated;
+				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
+					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+				else
+					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 
-			foreach (var item in fileList)
-			{
-				if (isCancelled) break;
-				RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-				FileInfo info = new FileInfo(item);
-				if (!info.Extension.Equals(".rvt"))
-					continue;
-				_uiDoc = commandData.Application.OpenAndActivateDocument(item);
-				if (info.Length > maxSizeLength)
-					RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-				RevitPrintHelper.SetActive3DView(_uiDoc);
-				ViewChangesCommit();
-				PrintCommit(_uiDoc.Document);
+				progressWindow.Close();
 			}
-
-			if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
-				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
-			else
-				_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-
-			ProcessTextBlock.Text = "Done!";
-			window.Close();
+			catch (Exception exc)
+			{
+				string errorMessage = "### ERROR ### - Error occured during Print3DFolder command execution";
+				TaskDialog.Show("Error", errorMessage);
+				_logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				return Result.Failed;
+			}
 			return Result.Succeeded;
 		}
 

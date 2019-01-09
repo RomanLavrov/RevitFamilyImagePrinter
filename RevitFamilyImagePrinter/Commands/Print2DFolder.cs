@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using RevitFamilyImagePrinter.Infrastructure;
 using View = Autodesk.Revit.DB.View;
@@ -38,9 +39,10 @@ namespace RevitFamilyImagePrinter.Commands
         {
             try
             {
-                _uiDoc = commandData.Application.ActiveUIDocument;
+	            UIApplication uiApp = commandData.Application;
+                _uiDoc = uiApp.ActiveUIDocument;
                 var initProjectPath = _uiDoc.Document.PathName;
-                RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
+                RevitPrintHelper.CreateEmptyProject(uiApp.Application);
 
                 DirectoryInfo familiesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
                 if (familiesFolder == null)
@@ -54,7 +56,9 @@ namespace RevitFamilyImagePrinter.Commands
                 if (UserValues == null)
                     return Result.Failed;
 
-                if (!CreateProjects(commandData, elements, familiesFolder))
+				Window progressWindow = RevitPrintHelper.ShowProgressWindow(uiApp, familiesFolder);
+
+				if (!CreateProjects(commandData, elements, familiesFolder))
                     return Result.Failed;
 
                 var fileList = Directory.GetFiles(UserFolderFrom.FullName);
@@ -66,7 +70,7 @@ namespace RevitFamilyImagePrinter.Commands
 		                FileInfo info = new FileInfo(item);
 		                if (!info.Extension.Equals(".rvt"))
 			                continue;
-		                _uiDoc = commandData.Application.OpenAndActivateDocument(item);
+		                _uiDoc = uiApp.OpenAndActivateDocument(item);
 
 		                if (info.Length > maxSizeLength)
 		                {
@@ -89,10 +93,12 @@ namespace RevitFamilyImagePrinter.Commands
                     _uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
                 else
                     _uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-            }
+
+	            progressWindow.Close();
+			}
             catch (Exception exc)
             {
-                string errorMessage = "### ERROR ### - Error occured during command execution";
+                string errorMessage = "### ERROR ### - Error occured during Print2DFolder command execution";
                 TaskDialog.Show("Error", errorMessage);
                 _logger.WriteLine($"{errorMessage}\n{exc.Message}\n{exc.StackTrace}");
                 return Result.Failed;
