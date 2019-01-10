@@ -4,9 +4,14 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows;
+using System.Windows.Controls;
 using Autodesk.Revit.DB;
+using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 using Ookii.Dialogs.Wpf;
+using RevitFamilyImagePrinter.Windows;
+using Image = System.Drawing.Image;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
@@ -15,7 +20,15 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	{
 		#region Private
 
-		private static UserImageValues InitializeVariables(SinglePrintOptions options)
+		private static void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+		{
+			Window wnd = sender as Window;
+			PrintOptions options = wnd.Content as PrintOptions;
+			if (!options.IsPreview && !options.IsCancelled)
+				options.SaveConfig();
+		}
+
+		private static UserImageValues InitializeVariables(PrintOptions options)
 		{
 			return new UserImageValues()
 			{
@@ -26,14 +39,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				UserExtension = options.UserExtension,
 				UserDetailLevel = options.UserDetailLevel
 			};
-		}
-
-		private static void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-		{
-			Window wnd = sender as Window;
-			SinglePrintOptions options = wnd.Content as SinglePrintOptions;
-			if (!options.IsPreview && !options.IsCancelled)
-				options.SaveConfig();
 		}
 
 		private static void DeleteTransaction(Document doc, Element element)
@@ -75,8 +80,10 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			foreach (var item in uiViews)
 			{
 				if (isToFit)
+				{
 					item.ZoomToFit();
-				uiDoc.RefreshActiveView();
+					uiDoc.RefreshActiveView();
+				}
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
 			}
@@ -168,7 +175,14 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		{
 			if (App.Version != "2019") return;
 			//TODO - Rewrite with updated Revit 2019 Documentation!
-			var window = new Window();
+			var window = new Window()
+			{
+				Width = 10,
+				Height = 10,
+				ShowInTaskbar = false,
+				ShowActivated = false,
+				WindowStyle = WindowStyle.None
+			};
 			window.Show();
 			window.Close();
 		}
@@ -258,16 +272,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#region Public
 
-		#region Windows
+		#region Dialogs
 
 		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40,
 			int windowWidthOffset = 20, bool is3D = false, bool isApplyButtonVisible = true, bool isUpdateView = true)
 		{
 			Window window = null;
-			SinglePrintOptions options = null;
+			PrintOptions options = null;
 			using (Document doc = uiDoc.Document)
 			{
-				options = new SinglePrintOptions()
+				options = new PrintOptions()
 				{
 					Doc = doc,
 					UIDoc = uiDoc,
@@ -373,6 +387,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
                     ZoomType = ZoomFitType.FitToPage
 				};
 
+				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+
 				if (views.Count > 0)
 				{
 					exportOptions.SetViewsAndSheets(views);
@@ -382,7 +398,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				if (scale == null)
 					return;
 
-				ZoomOpenUIViews(uiDoc, (double)scale);
+				ZoomOpenUIViews(uiDoc, (double)scale, false);
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
@@ -547,6 +563,24 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
+			//FileStream stream = null;
+			//try
+			//{
+			//	stream = File.Open(newDocPath, FileMode.Open);
+			//}
+			//catch (IOException)
+			//{
+			//	//the file is unavailable because it is:
+			//	//still being written to
+			//	//or being processed by another thread
+			//	//or does not exist (has already been processed)
+			//	return null;
+			//}
+			//finally
+			//{
+			//	stream?.Close();
+			//}
+			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if(!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);

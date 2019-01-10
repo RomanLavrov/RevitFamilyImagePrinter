@@ -16,6 +16,7 @@ using View = Autodesk.Revit.DB.View;
 using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Infrastructure;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+using TaskDialogIcon = Autodesk.Revit.UI.TaskDialogIcon;
 
 namespace RevitFamilyImagePrinter.Commands
 {
@@ -69,13 +70,14 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### - Error occured during current view correction";
+				string errorMessage = "Error occured during current view correction";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 
@@ -87,13 +89,14 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### - Error occured during printing of current view";
+				string errorMessage = "Error occured during printing of current view";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 	}

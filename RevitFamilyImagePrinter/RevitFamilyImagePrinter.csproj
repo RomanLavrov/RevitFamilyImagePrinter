@@ -39,6 +39,9 @@
     <StartAction>Program</StartAction>
     <StartProgram>$(ProgramW6432)\Autodesk\Revit 2018\Revit.exe</StartProgram>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>ImagePrinterLogo.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\MSTest.TestFramework.1.4.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
@@ -54,13 +57,11 @@
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
-    <Reference Include="RevitAPI, Version=19.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2019\RevitAPI.dll</HintPath>
+    <Reference Include="RevitAPI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2018\RevitAPI.dll</HintPath>
     </Reference>
-    <Reference Include="RevitAPIUI, Version=19.0.0.0, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\Program Files\Autodesk\Revit 2019\RevitAPIUI.dll</HintPath>
+    <Reference Include="RevitAPIUI">
+      <HintPath>C:\Program Files\Autodesk\Revit 2018\RevitAPIUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -81,7 +82,8 @@
     <Compile Include="Commands\RemoveEmptyFamilies.cs" />
     <Compile Include="Infrastructure\FamilyData.cs" />
     <Compile Include="Infrastructure\Logger.cs" />
-    <Compile Include="PrintProgress.xaml.cs">
+    <Compile Include="Infrastructure\PrintProgressHelper.cs" />
+    <Compile Include="Windows\PrintProgress.xaml.cs">
       <DependentUpon>PrintProgress.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -91,8 +93,8 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\RevitPrintHelper.cs" />
-    <Compile Include="SinglePrintOptions.xaml.cs">
-      <DependentUpon>SinglePrintOptions.xaml</DependentUpon>
+    <Compile Include="Windows\PrintOptions.xaml.cs">
+      <DependentUpon>PrintOptions.xaml</DependentUpon>
     </Compile>
     <Compile Include="Infrastructure\UserImageValues.cs" />
   </ItemGroup>
@@ -106,14 +108,17 @@
     <None Include="Resources\2D_Single.png" />
     <None Include="Resources\3D_Folder.png" />
     <None Include="Resources\3D_Single.png" />
+    <None Include="Resources\viewexport.png" />
+    <Content Include="ImagePrinterLogo.ico" />
+    <None Include="Resources\ImagePrinterLogo.ico" />
     <Content Include="RevitFamilyImagePrinter.addin" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="PrintProgress.xaml">
+    <Page Include="Windows\PrintProgress.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="SinglePrintOptions.xaml">
+    <Page Include="Windows\PrintOptions.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -122,6 +127,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

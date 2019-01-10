@@ -27,11 +27,12 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region Variables
-		//private IList<ElementId> views = new List<ElementId>();
+
 		private Document _doc => UIDoc?.Document;
 		private readonly Logger _logger = Logger.GetLogger();
 		public UIDocument UIDoc;
 		public bool IsAuto = false;
+
 		#endregion
 
 		#region Constants
@@ -72,13 +73,14 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### - Error occured during current view correction";
+				string errorMessage = "Error occured during current view correction";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 
@@ -90,13 +92,14 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "### ERROR ### - Error occured during printing of current view";
+				string errorMessage = "Error occured during printing of current view";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
-				_logger.WriteLine($"{errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
 			}
 		}
 	}

@@ -18,12 +18,12 @@ using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.IO;
 
-namespace RevitFamilyImagePrinter
+namespace RevitFamilyImagePrinter.Windows
 {
 	/// <summary>
-	/// Interaction logic for SinglePrintOptions.xaml
+	/// Interaction logic for PrintOptions.xaml
 	/// </summary>
-	public partial class SinglePrintOptions : UserControl
+	public partial class PrintOptions : UserControl
 	{
 		#region Properties
 		public int UserImageSize { get; set; }
@@ -51,7 +51,7 @@ namespace RevitFamilyImagePrinter
 		#endregion
 
 
-		public SinglePrintOptions()
+		public PrintOptions()
 		{
 			InitializeComponent();
 		}
@@ -141,6 +141,7 @@ namespace RevitFamilyImagePrinter
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 				return null;
@@ -212,6 +213,7 @@ namespace RevitFamilyImagePrinter
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 			}
@@ -243,6 +245,7 @@ namespace RevitFamilyImagePrinter
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 			}
@@ -267,6 +270,7 @@ namespace RevitFamilyImagePrinter
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 			}
@@ -300,6 +304,7 @@ namespace RevitFamilyImagePrinter
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 			}
