@@ -63,6 +63,7 @@ namespace RevitFamilyImagePrinter
 
 			PushButtonData buttonPrintView = new PushButtonData("Print current view", "Print view", assembly, "RevitFamilyImagePrinter.Commands.PrintView");
 			buttonPrintView.ToolTip = "Create a screenshot of current view and save it as a picture";
+			buttonPrintView.LargeImage = GetImage(Resources.viewexport.GetHbitmap());
 
 			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
 			printPanel.AddItem(buttonPrint2DSingle);
@@ -82,7 +83,6 @@ namespace RevitFamilyImagePrinter
 			if(File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
 				File.Delete(DefaultProject);
 			Logger.EndLogSession();
-			//to clean folder, from which files were printed
             return Result.Succeeded;
         }
 

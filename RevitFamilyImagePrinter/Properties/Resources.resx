@@ -139,4 +139,10 @@
   <data name="_3D_Single" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\3D_Single.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="viewexport" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\viewexport.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="ImagePrinterLogo" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\ImagePrinterLogo.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

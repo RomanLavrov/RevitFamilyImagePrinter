@@ -10,6 +10,7 @@ using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Ookii.Dialogs.Wpf;
+using RevitFamilyImagePrinter.Windows;
 using Image = System.Drawing.Image;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
@@ -19,39 +20,15 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	{
 		#region Private
 
-		#region Events
-
 		private static void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
 		{
 			Window wnd = sender as Window;
-			SinglePrintOptions options = wnd.Content as SinglePrintOptions;
+			PrintOptions options = wnd.Content as PrintOptions;
 			if (!options.IsPreview && !options.IsCancelled)
 				options.SaveConfig();
 		}
 
-		private static void ApplicationOnViewActivated(object sender, ViewActivatedEventArgs e)
-		{
-			string viewName = e.CurrentActiveView.Document.Title;
-			if (_processTextBlock.Text.Contains(viewName) || viewName.ToLower().Equals("empty")) return;
-			_processTextBlock.Text = $"{viewName} is printing...";
-			_printProgressBar.Value++;
-		}
-
-		private static void ApplicationOnFamilyLoadedIntoDocument(object sender, FamilyLoadedIntoDocumentEventArgs e)
-		{
-			_processTextBlock.Text = $"{e.FamilyName} view has been loaded";
-			_printProgressBar.Value++;
-		}
-
-		private static void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
-		{
-			_printProgressBar.Value++;
-			_processTextBlock.Text = $"{e.Document.Title} has been created";
-		}
-
-		#endregion
-
-		private static UserImageValues InitializeVariables(SinglePrintOptions options)
+		private static UserImageValues InitializeVariables(PrintOptions options)
 		{
 			return new UserImageValues()
 			{
@@ -103,8 +80,10 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			foreach (var item in uiViews)
 			{
 				if (isToFit)
+				{
 					item.ZoomToFit();
-				uiDoc.RefreshActiveView();
+					uiDoc.RefreshActiveView();
+				}
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
 			}
@@ -196,7 +175,14 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		{
 			if (App.Version != "2019") return;
 			//TODO - Rewrite with updated Revit 2019 Documentation!
-			var window = new Window();
+			var window = new Window()
+			{
+				Width = 10,
+				Height = 10,
+				ShowInTaskbar = false,
+				ShowActivated = false,
+				WindowStyle = WindowStyle.None
+			};
 			window.Show();
 			window.Close();
 		}
@@ -286,16 +272,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#region Public
 
-		#region Windows
+		#region Dialogs
 
 		public static UserImageValues ShowOptionsDialog(UIDocument uiDoc, int windowHeightOffset = 40,
 			int windowWidthOffset = 20, bool is3D = false, bool isApplyButtonVisible = true, bool isUpdateView = true)
 		{
 			Window window = null;
-			SinglePrintOptions options = null;
+			PrintOptions options = null;
 			using (Document doc = uiDoc.Document)
 			{
-				options = new SinglePrintOptions()
+				options = new PrintOptions()
 				{
 					Doc = doc,
 					UIDoc = uiDoc,
@@ -324,41 +310,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			if (window.DialogResult != true)
 				return null;
 			return InitializeVariables(options);
-		}
-
-		#region Variables for ProgressWindow
-
-		private static TextBlock _processTextBlock;
-		private static ProgressBar _printProgressBar;
-
-		#endregion
-
-		public static Window ShowProgressWindow(UIApplication uiApp, DirectoryInfo familiesFolder,
-			bool is3D = false, int windowHeightOffset = 40, int windowWidthOffset = 20)
-		{
-			PrintProgress printProgressWnd = new PrintProgress();
-			_processTextBlock = printProgressWnd.ProcessTextBlock;
-			_printProgressBar = printProgressWnd.PrintProgressBar;
-			Window _progressWindow = new Window
-			{
-				Height = 100 + windowHeightOffset,
-				Width = 400 + windowWidthOffset,
-				Title = $"Folder \"{familiesFolder.Name}\" {(is3D ? "3D" : "2D")} printing",
-				WindowStyle = WindowStyle.ToolWindow,
-				Name = "Printing",
-				ResizeMode = ResizeMode.NoResize,
-				WindowStartupLocation = WindowStartupLocation.CenterScreen,
-				Content = printProgressWnd,
-				ShowActivated = true,
-				Topmost = true
-			};
-
-			_printProgressBar.Value = 0;
-			_printProgressBar.Maximum = familiesFolder.GetFiles().Length;
-			_processTextBlock.Text = "Creating .rvt projects from .rfa files, this may take a time...";
-			_progressWindow.Show();
-			uiApp.ViewActivated += ApplicationOnViewActivated;
-			return _progressWindow;
 		}
 
 		public static string SelectFileNameDialog(string name)
@@ -436,6 +387,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
                     ZoomType = ZoomFitType.FitToPage
 				};
 
+				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+
 				if (views.Count > 0)
 				{
 					exportOptions.SetViewsAndSheets(views);
@@ -445,7 +398,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				if (scale == null)
 					return;
 
-				ZoomOpenUIViews(uiDoc, (double)scale);
+				ZoomOpenUIViews(uiDoc, (double)scale, false);
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
@@ -610,6 +563,24 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
+			//FileStream stream = null;
+			//try
+			//{
+			//	stream = File.Open(newDocPath, FileMode.Open);
+			//}
+			//catch (IOException)
+			//{
+			//	//the file is unavailable because it is:
+			//	//still being written to
+			//	//or being processed by another thread
+			//	//or does not exist (has already been processed)
+			//	return null;
+			//}
+			//finally
+			//{
+			//	stream?.Close();
+			//}
+			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if(!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);

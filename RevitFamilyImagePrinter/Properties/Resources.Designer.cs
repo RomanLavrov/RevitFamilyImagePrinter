@@ -121,11 +121,31 @@ namespace RevitFamilyImagePrinter.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
+        /// </summary>
+        internal static System.Drawing.Icon ImagePrinterLogo {
+            get {
+                object obj = ResourceManager.GetObject("ImagePrinterLogo", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap medium {
             get {
                 object obj = ResourceManager.GetObject("medium", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap viewexport {
+            get {
+                object obj = ResourceManager.GetObject("viewexport", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

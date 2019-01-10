@@ -14,6 +14,8 @@ using System.Reflection;
 using System.Xml;
 using System.Xml.Serialization;
 using Application = Autodesk.Revit.ApplicationServices.Application;
+using InvalidOperationException = Autodesk.Revit.Exceptions.InvalidOperationException;
+using IOException = Autodesk.Revit.Exceptions.IOException;
 
 namespace RevitFamilyImagePrinter.Commands
 {
@@ -73,10 +75,7 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			if (!ProjectsFolder.Exists)
 				throw new Exception("Projects folder does not exist");
-			var projectsCreated = Directory.GetFiles(ProjectsFolder.FullName)
-				.Select(x => new FileInfo(x))
-				.Select(x => x.Name.Replace(x.Extension, ""))
-				.ToList();
+			var projectsCreated = ProjectsFolder.GetFiles().Where(x => x.Extension.Equals(".rvt")).ToList();
 			try
 			{
 				Assert.AreEqual(_allSymbols.Count, projectsCreated.Count);
@@ -86,32 +85,32 @@ namespace RevitFamilyImagePrinter.Commands
 				new TaskDialog("Warning!")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconWarning,
 					MainContent =
 						"Attention! The amount of projects created is not equal to amount of types in families. Check log file."
 				}.Show();
-				_logger.WriteLine(
-					$"### ERROR ### - The amount of projects created is not equal to amount of types in families.\n{exc.Message}\nMissed projects:");
-				var differences = _allSymbols.Except(projectsCreated);
+				var differences = _allSymbols.Except(projectsCreated.Select(x => x.Name.ToString()));
 				string output = string.Empty;
 				foreach (var i in differences)
 				{
 					output += $"{i}\n";
 				}
-
-				_logger.WriteLine(output);
+				_logger.WriteLine(
+					$"### ERROR ### - The amount of projects created is not equal to amount of types in families." +
+					$"\n{exc.Message}\nMismatch projects:\n{output}");
 			}
 		}
 
 		#region GetFamilyFilesFromFolder
-		private List<string> GetFamilyFilesFromFolder()
+		private List<FileInfo> GetFamilyFilesFromFolder()
 		{
 			try
 			{
 				//FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
 				if (FamiliesFolder == null) return null;
 
-				var allFilesList = Directory.GetFiles(FamiliesFolder.FullName);
-				var familyFilesList = allFilesList.Where(x => x.EndsWith(".rfa")).ToList();
+				
+				var familyFilesList = FamiliesFolder.GetFiles().Where(x => x.Extension.Equals(".rfa")).ToList();
 				if (!familyFilesList.Any())
 				{
 					new TaskDialog("Fail")
@@ -133,7 +132,7 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch(Exception exc)
 			{
-				string errorMessage = "Error during getting families from folder.";
+				string errorMessage = "Error during retrieving families from folder.";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
@@ -147,14 +146,13 @@ namespace RevitFamilyImagePrinter.Commands
 		#endregion
 
 		#region ProcessProjects
-		private bool ProcessProjects(IEnumerable<string> fileList)
+		private bool ProcessProjects(IEnumerable<FileInfo> fileList)
 		{
 			try
 			{
 				RemoveExcessFamilies();
-				foreach (var i in fileList)
+				foreach (var info in fileList)
 				{
-					FileInfo info = new FileInfo(i);
 					FamilyData data = new FamilyData()
 					{
 						FamilyName = info.Name.Remove(info.Name.LastIndexOf('.'), 4), // removing extension
@@ -180,10 +178,17 @@ namespace RevitFamilyImagePrinter.Commands
 
 						RemoveExistingInstances(symbol.Id);
 						InsertInstanceIntoProject(symbol);
-						if (File.Exists(pathProject))
+						if (File.Exists(pathProject) && RevitPrintHelper.IsFileAccessible(pathProject))
 							File.Delete(pathProject);
-						_doc.SaveAs(pathProject);
-
+						try
+						{
+							_doc.SaveAs(pathProject);
+						}
+						catch (InvalidOperationException exc)
+						{
+							string errorMessage = $"File {pathProject} already exists!";
+							_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+						}
 						RemoveTypeFromProject(symbol);
 					}
 					RemoveFamily(family);
@@ -195,6 +200,7 @@ namespace RevitFamilyImagePrinter.Commands
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
 				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
