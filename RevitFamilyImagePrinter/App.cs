@@ -6,6 +6,7 @@ using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Autodesk.Revit.ApplicationServices;
 using Autodesk.Revit.Attributes;
@@ -20,64 +21,87 @@ namespace RevitFamilyImagePrinter
 {
     class App : IExternalApplication
     {
-		public static string Version { get; private set; }
-		public static string DefaultFolder => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-		public static string DefaultProject => Path.Combine(DefaultFolder, "Empty.rvt");
-	    public static Logger Logger = Logger.GetLogger();
+        public static string Version { get; private set; }
+        public string Language { get; set; }
+        public static string DefaultFolder => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        public static string DefaultProject => Path.Combine(DefaultFolder, "Empty.rvt");
+        public static Logger Logger = Logger.GetLogger();
 
-	    public Result OnStartup(UIControlledApplication a)
-		{
-			Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-			Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+        public Result OnStartup(UIControlledApplication a)
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
 
-			ControlledApplication c = a.ControlledApplication;
-			Version = c.VersionNumber;
-			Logger.WriteLine($"Revit Version -> {Version}");
+            ControlledApplication c = a.ControlledApplication;
+            Version = c.VersionNumber;
+            Language = c.Language.ToString();
+            Logger.WriteLine($"Revit Version -> {Version}");
+            Logger.WriteLine($"Revit Language -> {Language}");
+            Translator translator = new Translator(Language);
 
-			string tabName = "Image Printer";
+            string tabName = translator.GetValue(Translator.Keys.tabName);
             a.CreateRibbonTab(tabName);
 
-			var assembly = Assembly.GetExecutingAssembly().Location;
+            var assembly = Assembly.GetExecutingAssembly().Location;
 
-			PushButtonData buttonPrint2DSingle = new PushButtonData("Print 2D", " 2D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print2D");
-			buttonPrint2DSingle.ToolTip = "Create 2D family image from current view";
-		    buttonPrint2DSingle.LargeImage = GetImage(Resources._2D_Single.GetHbitmap());
+            PushButtonData buttonPrint2DSingle = new PushButtonData("Print 2D",
+                translator.GetValue(Translator.Keys.buttonPrint2DSingle_Name), assembly,
+                "RevitFamilyImagePrinter.Commands.Print2D")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonPrint2DSingle_ToolTip),
+                LargeImage = GetImage(Resources._2D_Single.GetHbitmap())
+            };
 
-			PushButtonData buttonPrint2DMulti = new PushButtonData("Print 2D Folder", " 2D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print2DFolder");
-			buttonPrint2DMulti.ToolTip = "Create 2D family images from selected folder";
-		    buttonPrint2DMulti.LargeImage = GetImage(Resources._2D_Folder.GetHbitmap());
-            
-			PushButtonData buttonPrint3DSingle = new PushButtonData("Print 3D", " 3D Single ", assembly, "RevitFamilyImagePrinter.Commands.Print3D");
-			buttonPrint3DSingle.ToolTip = "Create 3D family image from current view";
-		    buttonPrint3DSingle.LargeImage = GetImage(Resources._3D_Single.GetHbitmap());
+            PushButtonData buttonPrint2DMulti = new PushButtonData("Print 2D Folder", translator.GetValue(Translator.Keys.buttonPrint2DMulti_Name), assembly,
+                "RevitFamilyImagePrinter.Commands.Print2DFolder")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonPrint2DMulti_ToolTip),
+                LargeImage = GetImage(Resources._2D_Folder.GetHbitmap())
+            };
 
-			PushButtonData buttonPrint3DMulti = new PushButtonData("Print 3D Folder", " 3D Folder ", assembly, "RevitFamilyImagePrinter.Commands.Print3DFolder");
-			buttonPrint3DMulti.ToolTip = "Create 3D family image from selected folder";
-		    buttonPrint3DMulti.LargeImage = GetImage(Resources._3D_Folder.GetHbitmap());
+            PushButtonData buttonPrint3DSingle = new PushButtonData("Print 3D", translator.GetValue(Translator.Keys.buttonPrint3DSingle_Name), assembly,
+                "RevitFamilyImagePrinter.Commands.Print3D")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonPrint3DSingle_ToolTip),
+                LargeImage = GetImage(Resources._3D_Single.GetHbitmap())
+            };
 
-			PushButtonData buttonRemoveEmptyFamilies = new PushButtonData("Remove empty families", "Remove Families", assembly, "RevitFamilyImagePrinter.Commands.RemoveEmptyFamilies");
-			buttonRemoveEmptyFamilies.ToolTip = "Remove all families without instances.";
+            PushButtonData buttonPrint3DMulti = new PushButtonData("Print 3D Folder", translator.GetValue(Translator.Keys.buttonPrint3DMulti_Name), assembly,
+                "RevitFamilyImagePrinter.Commands.Print3DFolder")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonPrint3DMulti_ToolTip),
+                LargeImage = GetImage(Resources._3D_Folder.GetHbitmap())
+            };
 
-			PushButtonData buttonProjectCreator = new PushButtonData("Project creator", "Project creator", assembly, "RevitFamilyImagePrinter.Commands.ProjectCreator");
-			buttonProjectCreator.ToolTip = "Create .rvt files from .rfa files";
+            PushButtonData buttonPrintView = new PushButtonData("Print current view", translator.GetValue(Translator.Keys.buttonPrintView_Name), assembly,
+                "RevitFamilyImagePrinter.Commands.PrintView")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonPrintView_ToolTip),
+                LargeImage = GetImage(Resources.viewexport.GetHbitmap())
+            };
 
-			PushButtonData buttonPrintView = new PushButtonData("Print current view", "Print view", assembly, "RevitFamilyImagePrinter.Commands.PrintView");
-			buttonPrintView.ToolTip = "Create a screenshot of current view and save it as a picture";
-			buttonPrintView.LargeImage = GetImage(Resources.viewexport.GetHbitmap());
+            PushButtonData buttonLink = new PushButtonData("building360.ch", "building360.ch", assembly,
+                "RevitFamilyImagePrinter.Commands.Link")
+            {
+                ToolTip = translator.GetValue(Translator.Keys.buttonLink_ToolTip),
+                LargeImage = GetImage(Resources.logo_small.GetHbitmap())
+            };
 
-		    PushButtonData buttonLink = new PushButtonData("building360.ch", "building360.ch", assembly, "RevitFamilyImagePrinter.Commands.Link");
-		    buttonLink.ToolTip = "Visit building360.ch website";
-		    buttonLink.LargeImage = GetImage(Resources.logo_small.GetHbitmap());
+            PushButtonData buttonRemoveEmptyFamilies = new PushButtonData("Remove empty families", "Remove Families", assembly, "RevitFamilyImagePrinter.Commands.RemoveEmptyFamilies");
+            buttonRemoveEmptyFamilies.ToolTip = "Remove all families without instances.";
 
-            RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
-			printPanel.AddItem(buttonPrint2DSingle);
-			printPanel.AddItem(buttonPrint2DMulti);
-			printPanel.AddItem(buttonPrint3DSingle);
-			printPanel.AddItem(buttonPrint3DMulti);
-			printPanel.AddSeparator();
-			printPanel.AddItem(buttonPrintView);
-		    printPanel.AddSeparator();
-		    printPanel.AddItem(buttonLink);
+            PushButtonData buttonProjectCreator = new PushButtonData("Project creator", "Project creator", assembly, "RevitFamilyImagePrinter.Commands.ProjectCreator");
+            buttonProjectCreator.ToolTip = "Create .rvt files from .rfa files";
+
+            RibbonPanel printPanel = a.CreateRibbonPanel(tabName, translator.GetValue(Translator.Keys.tabTitle));
+            printPanel.AddItem(buttonPrint2DSingle);
+            printPanel.AddItem(buttonPrint2DMulti);
+            printPanel.AddItem(buttonPrint3DSingle);
+            printPanel.AddItem(buttonPrint3DMulti);
+            printPanel.AddSeparator();
+            printPanel.AddItem(buttonPrintView);
+            printPanel.AddSeparator();
+            printPanel.AddItem(buttonLink);
             //printPanel.AddItem(buttonRemoveEmptyFamilies);
             //printPanel.AddItem(buttonProjectCreator);
 
@@ -86,9 +110,9 @@ namespace RevitFamilyImagePrinter
 
         public Result OnShutdown(UIControlledApplication a)
         {
-			if(File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
-				File.Delete(DefaultProject);
-			Logger.EndLogSession();
+            if (File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
+                File.Delete(DefaultProject);
+            Logger.EndLogSession();
             return Result.Succeeded;
         }
 
