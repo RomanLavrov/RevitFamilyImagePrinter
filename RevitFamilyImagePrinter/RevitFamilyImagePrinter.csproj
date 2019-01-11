@@ -73,6 +73,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
+    <Compile Include="Commands\Link.cs" />
     <Compile Include="Commands\Print2D.cs" />
     <Compile Include="Commands\Print2DFolder.cs" />
     <Compile Include="Commands\Print3D.cs" />
@@ -111,6 +112,7 @@
     <None Include="Resources\viewexport.png" />
     <Content Include="ImagePrinterLogo.ico" />
     <None Include="Resources\ImagePrinterLogo.ico" />
+    <None Include="Resources\logo_small.png" />
     <Content Include="RevitFamilyImagePrinter.addin" />
   </ItemGroup>
   <ItemGroup>
