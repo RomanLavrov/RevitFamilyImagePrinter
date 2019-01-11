@@ -110,7 +110,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		    string viewName = RevitPrintHelper.GetFileName(e.CurrentActiveView.Document);
 		    if (PreviousViewName.Equals(viewName) || viewName.ToLower().Equals("empty")) return;
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"Printed: {_printProgressBar.Value} / {_printProgressBar.Maximum}";
+		    _processTextBlock.Text = $"Printing: {_printProgressBar.Value} / {_printProgressBar.Maximum}";
 		    PreviousViewName = viewName;
 	    }
 
@@ -123,7 +123,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private void ApplicationOnFamilyLoadedIntoDocument(object sender, FamilyLoadedIntoDocumentEventArgs e) 
 	    {
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"Loaded families: {_printProgressBar.Value} / {_familiesAmount}";
+		    _processTextBlock.Text = $"Loading families: {_printProgressBar.Value} / {_familiesAmount}";
 		    R2018_HotFix();
 	    }
 
