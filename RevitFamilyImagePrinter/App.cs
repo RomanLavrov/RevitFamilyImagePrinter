@@ -65,17 +65,23 @@ namespace RevitFamilyImagePrinter
 			buttonPrintView.ToolTip = "Create a screenshot of current view and save it as a picture";
 			buttonPrintView.LargeImage = GetImage(Resources.viewexport.GetHbitmap());
 
-			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
+		    PushButtonData buttonLink = new PushButtonData("building360.ch", "building360.ch", assembly, "RevitFamilyImagePrinter.Commands.Link");
+		    buttonLink.ToolTip = "Visit building360.ch website";
+		    buttonLink.LargeImage = GetImage(Resources.logo_small.GetHbitmap());
+
+            RibbonPanel printPanel = a.CreateRibbonPanel(tabName, "Family Image Printer");
 			printPanel.AddItem(buttonPrint2DSingle);
 			printPanel.AddItem(buttonPrint2DMulti);
 			printPanel.AddItem(buttonPrint3DSingle);
 			printPanel.AddItem(buttonPrint3DMulti);
 			printPanel.AddSeparator();
 			printPanel.AddItem(buttonPrintView);
-			//printPanel.AddItem(buttonRemoveEmptyFamilies);
-			//printPanel.AddItem(buttonProjectCreator);
+		    printPanel.AddSeparator();
+		    printPanel.AddItem(buttonLink);
+            //printPanel.AddItem(buttonRemoveEmptyFamilies);
+            //printPanel.AddItem(buttonProjectCreator);
 
-			return Result.Succeeded;
+            return Result.Succeeded;
         }
 
         public Result OnShutdown(UIControlledApplication a)
