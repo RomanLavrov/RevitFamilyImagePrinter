@@ -29,7 +29,7 @@ namespace RevitFamilyImagePrinter.Commands
 		#region Variables
 
 		private Document _doc => UIDoc?.Document;
-		private readonly Logger _logger = Logger.GetLogger();
+		private readonly Logger _logger = App.Logger;
 		public UIDocument UIDoc;
 		public bool IsAuto = false;
 
@@ -48,7 +48,7 @@ namespace RevitFamilyImagePrinter.Commands
 			//uiapp.ViewActivated += SetViewParameters;
 
 			RevitPrintHelper.SetActive3DView(UIDoc);
-			ViewChangesCommit();    // check the redundancy of this function call
+			ViewChangesCommit();    
 
 			if (!message.Equals("FolderPrint"))
 			{
@@ -73,14 +73,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during current view correction";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
 			}
 		}
 
@@ -92,14 +86,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during printing of current view";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
 			}
 		}
 	}

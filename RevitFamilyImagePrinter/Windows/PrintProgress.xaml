@@ -4,39 +4,40 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:RevitFamilyImagePrinter"
-             mc:Ignorable="d" d:DesignWidth="400" Height="77.839">
+             mc:Ignorable="d" d:DesignWidth="400" Height="80"
+             DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid Margin="10">
         <!--<Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="0.6*"/>
         </Grid.RowDefinitions>-->
-        <Grid Grid.Row="0" Margin="5 0 5 5">
+        <Grid Grid.Row="0">
             <Grid.RowDefinitions>
                 <RowDefinition/>
                 <RowDefinition Height="23"/>
             </Grid.RowDefinitions>
             <TextBlock 
-                x:Name="ProcessTextBlock"
+                x:Name="textBlockProcess"
                 FontSize="12"
                 Grid.Row="0"
                 TextWrapping="Wrap"
-                Text="Something is happening..."
+                Text="{Binding Path=textBlockProcess_Text}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Margin="0 0 0 0"/>
             <ProgressBar
-                x:Name="PrintProgressBar"
+                x:Name="progressBarPrint"
                 Grid.Row="1"
                 Margin="0 5 0 0"/>
         </Grid>
         <Button 
                 Visibility="Collapsed"
-                x:Name="CancelButton"
+                x:Name="buttonCancel"
                 IsEnabled="False"
                 Grid.Row="0"
                 Width="100"
                 Height="25"
-                Content="Cancel"
+                Content="{Binding Path=buttonCancel_Text}"
                 HorizontalAlignment="Right"
                 Margin="0 0 20 0"/>
     </Grid>

@@ -51,7 +51,7 @@ namespace RevitFamilyImagePrinter.Commands
 			IList<ElementId> views = new List<ElementId>();
 			views.Add(doc.ActiveView.Id);
 
-			FileInfo imageFile = new FileInfo($"{filePath}{UserValues.UserExtension}");
+			//FileInfo imageFile = new FileInfo($"{filePath}{UserValues.UserExtension}");
 
 			using (Transaction transaction = new Transaction(doc, "PrintView"))
 			{

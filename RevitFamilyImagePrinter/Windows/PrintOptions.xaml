@@ -8,7 +8,8 @@
     Width="300"
     Height="300"
     mc:Ignorable="d"
-    Loaded="UserControl_Loaded">
+    Loaded="UserControl_Loaded"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}">
     <Grid
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
@@ -58,9 +59,10 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <Label
+                        x:Name="labelSize"
                         Grid.Column="0"
                         Grid.Row="0"
-                        Content="Image size:" />
+                        Content="{Binding Path=labelSize_Text}"/>
                         <TextBox
                     Grid.Column="1"
                     Grid.Row="0"
@@ -68,48 +70,52 @@
                     Text="64"
                     MinHeight="20"/>
                         <Label
+                    x:Name="labelScale"
                     Grid.Column="0"
                     Grid.Row="1"
-                    Content="Scale:" />
+                    Content="{Binding Path=labelScale_Text}" />
                         <TextBox
                     Grid.Column="1"
                     Grid.Row="1"
                     x:Name="ScaleValue"
                     Text="64"/>
                         <Label
+                    x:Name="labelZoom"
                     Grid.Column="0"
                     Grid.Row="2"
-                    Content="Zoom (%):" />
+                            Content="{Binding Path=labelZoom_Text}" />
                         <TextBox
                     Grid.Column="1"
                     Grid.Row="2"
                     x:Name="ZoomValue"
                     Text="90"/>
                         <Label
+                    x:Name="labelResolution"
                     Grid.Column="0"
                     Grid.Row="3"
-                    Content="Image resolution:" />
+                            Content="{Binding Path=labelResolution_Text}" />
                         <ComboBox 
                     Grid.Row="3"
                     Grid.Column="1"
-                    Name="ResolutionValue"
+                    x:Name="comboBoxResolutionValue"
                     Height="23" 
                     SelectedIndex="0"
                     VerticalAlignment="Center"
                     SelectionChanged="ComboBox_SelectionChanged">
-                            <TextBlock Tag="72">Web Low</TextBlock>
-                            <TextBlock Tag="150">Web High</TextBlock>
-                            <TextBlock Tag="300">Print Low</TextBlock>
-                            <TextBlock Tag="600" Visibility="Collapsed">Print High</TextBlock>
+                            <TextBlock Tag="72" x:Name="textBlockResolutionWebLow" Text="{Binding Path=textBlockResolutionWebLow_Text}"/>
+                            <TextBlock Tag="150" x:Name="textBlockResolutionWebHigh" Text="{Binding Path=textBlockResolutionWebHigh_Text}"/>
+                            <TextBlock Tag="300" x:Name="textBlockResolutionPrintLow" Text="{Binding Path=textBlockResolutionPrintLow_Text}"/>
+                            <TextBlock Tag="600" x:Name="textBlockResolutionPrintHigh" Visibility="Collapsed" Text="{Binding Path=textBlockResolutionPrintLow_Text}"/>
                         </ComboBox>
                         <Label
-                    Grid.Column="0"
-                    Grid.Row="4"
-                    Content="Detail level:" />
+                            x:Name="labelDetailLevel"
+                            Grid.Column="0"
+                            Grid.Row="4"
+                            Content="{Binding Path=labelDetailLevel_Text}" />
                         <ComboBox 
                     Grid.Row="4"
                     Grid.Column="1"
-                    Name="DetailLevelValue"
+                    Name="comboBoxDetailLevelValue"
                     Height="23" 
                     SelectedIndex="1"
                     VerticalAlignment="Center"
@@ -128,19 +134,19 @@
                             <ComboBoxItem Tag="Coarse">
                                 <StackPanel>
                                     <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/coarse.png"/>
-                                    <TextBlock>Coarse</TextBlock>
+                                    <TextBlock x:Name="textBlockDetailLevelCoarse" Text="{Binding Path=textBlockDetailLevelCoarse_Text}"/>
                                 </StackPanel>
                             </ComboBoxItem>
                             <ComboBoxItem  Tag="Medium">
                                 <StackPanel>
                                     <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/medium.png"/>
-                                    <TextBlock>Medium</TextBlock>
+                                    <TextBlock x:Name="textBlockDetailLevelMedium" Text="{Binding Path=textBlockDetailLevelMedium_Text}"/>
                                 </StackPanel>
                             </ComboBoxItem>
                             <ComboBoxItem  Tag="Fine">
                                 <StackPanel>
                                     <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/fine.png"/>
-                                    <TextBlock>Fine</TextBlock>
+                                    <TextBlock x:Name="textBlockDetailLevelFine" Text="{Binding Path=textBlockDetailLevelFine_Text}"/>
                                 </StackPanel>
                             </ComboBoxItem>
                         </ComboBox>
@@ -153,9 +159,10 @@
                             <ColumnDefinition Width="120"/>
                         </Grid.ColumnDefinitions>
                         <Label
+                            x:Name="labelFormat"
                         Grid.Column="0"
                         VerticalAlignment="Top"
-                        Content="Image format:" />
+                            Content="{Binding Path=labelFormat_Text}" />
                         <StackPanel
                         Grid.Column="1"
                         Orientation="Vertical"
@@ -207,7 +214,7 @@
                 </Grid.ColumnDefinitions>
                 <Button
                     Grid.Column="0"
-                    x:Name="btnApply"
+                    x:Name="buttonApply"
                     Click="Button_Click_Apply">
                     <StackPanel Orientation="Horizontal">
                         <Viewbox Width="12" Height="12" Margin="0 0 5 0">
@@ -215,12 +222,12 @@
                                   0.7,0l13.4-13.9h0.1v-8.88178e-16c0.4-0.4 1-0.4 1.4,0l1.4,1.4c0.4,0.4 0.4,1 
                                   0,1.4l0,0-16,16.6c-0.2,0.2-0.4,0.3-0.7,0.3-0.3,0-0.5-0.1-0.7-0.3l-7.8-8.4-.2-.3z"/>
                         </Viewbox>
-                        <TextBlock>Apply</TextBlock>
+                        <TextBlock Text="{Binding Path=buttonApply_Text}"/>
                     </StackPanel>
                 </Button>
                 <Button
                     Grid.Column="1"
-                    x:Name="btnPrint"
+                    x:Name="buttonPrint"
                     Click="Button_Click_Print">
                     <StackPanel Orientation="Horizontal">
                         <Viewbox Width="12" Height="12" Margin="0 0 5 0">
@@ -234,7 +241,7 @@
 			                            z M327.15,392.6h-172c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h171.9c7.5,0,13.5-6,13.5-13.5S334.55,392.6,327.15,392.6z 
                                         M398.95,151.9h-27.4c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h27.4c7.5,0,13.5-6,13.5-13.5S406.45,151.9,398.95,151.9z"/>
                         </Viewbox>
-                        <TextBlock>Print</TextBlock>
+                        <TextBlock Text="{Binding Path=buttonPrint_Text}"/>
                     </StackPanel>
                 </Button>
             </Grid>
