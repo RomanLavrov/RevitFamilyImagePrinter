@@ -69,6 +69,7 @@
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
@@ -84,6 +85,7 @@
     <Compile Include="Infrastructure\FamilyData.cs" />
     <Compile Include="Infrastructure\Logger.cs" />
     <Compile Include="Infrastructure\PrintProgressHelper.cs" />
+    <Compile Include="Infrastructure\Translator.cs" />
     <Compile Include="Windows\PrintProgress.xaml.cs">
       <DependentUpon>PrintProgress.xaml</DependentUpon>
     </Compile>
@@ -113,6 +115,9 @@
     <Content Include="ImagePrinterLogo.ico" />
     <None Include="Resources\ImagePrinterLogo.ico" />
     <None Include="Resources\logo_small.png" />
+    <EmbeddedResource Include="Languages\English_USA.xml" />
+    <EmbeddedResource Include="Languages\German.xml" />
+    <Content Include="Languages\English_GB.xml" />
     <Content Include="RevitFamilyImagePrinter.addin" />
   </ItemGroup>
   <ItemGroup>
