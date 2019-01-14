@@ -5,8 +5,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:RevitFamilyImagePrinter"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    Width="300"
-    Height="300"
+    Width="330"
+    Height="400"
     mc:Ignorable="d"
     Loaded="UserControl_Loaded"
     DataContext="{Binding RelativeSource={RelativeSource Self}}">
@@ -25,11 +25,101 @@
                 Margin="3 3 3 0">
                 <Grid>
                     <Grid.RowDefinitions>
-                        <RowDefinition/>
                         <RowDefinition Height="0.45*"/>
+                        <RowDefinition Height="0.45*"/>
+                        <RowDefinition/>
                     </Grid.RowDefinitions>
-                    <Grid
+                    <Grid 
                     Grid.Row="0"
+                    VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            x:Name="labelAspectRatio"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                            Content="{Binding Path=labelAspectRatio_Text}" />
+                        <StackPanel
+                        Grid.Column="1"
+                        Orientation="Vertical"
+                        VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                            <StackPanel.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="-5 0 0 0"/>
+                                </Style>
+                                <Style TargetType="RadioButton">
+                                    <Setter Property="Margin" Value="0 0 0 7"/>
+                                    <Setter Property="Height" Value="17"/>
+                                    <EventSetter Event="Checked" Handler="RadioButtonRatio_Checked"/>
+                                </Style>
+                            </StackPanel.Resources>
+                            <RadioButton IsChecked="True" Tag="4:3" Name="RadioButton4to3">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">4:3</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton  Tag="16:9"  Name="RadioButton16to9">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">16:9</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton Tag="1:1" Name="RadioButton1to1" Margin="0">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">1:1</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+                    </Grid>
+                    <Grid 
+                    Grid.Row="1"
+                    VerticalAlignment="Center">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="120"/>
+                        </Grid.ColumnDefinitions>
+                        <Label
+                            x:Name="labelFormat"
+                        Grid.Column="0"
+                        VerticalAlignment="Top"
+                            Content="{Binding Path=labelFormat_Text}" />
+                        <StackPanel
+                        Grid.Column="1"
+                        Orientation="Vertical"
+                        VerticalAlignment="Center"
+                            HorizontalAlignment="Left">
+                            <StackPanel.Resources>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Margin" Value="-5 0 0 0"/>
+                                </Style>
+                                <Style TargetType="RadioButton">
+                                    <Setter Property="Margin" Value="0 0 0 7"/>
+                                    <Setter Property="Height" Value="17"/>
+                                    <EventSetter Event="Checked" Handler="RadioButtonExtension_Checked"/>
+                                </Style>
+                            </StackPanel.Resources>
+                            <RadioButton IsChecked="True" Tag=".png" Name="RadioButtonPng">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">PNG</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton  Tag=".jpg"  Name="RadioButtonJpg">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">JPG</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                            <RadioButton Tag=".bmp" Name="RadioButtonBmp"
+                                         Margin="0">
+                                <RadioButton.Content>
+                                    <TextBlock Margin="3 0 0 0 ">BMP</TextBlock>
+                                </RadioButton.Content>
+                            </RadioButton>
+                        </StackPanel>
+                    </Grid>
+                    <Grid
+                    Grid.Row="2"
                     HorizontalAlignment="Stretch"
                     MinWidth="200">
                         <Grid.Resources>
@@ -150,51 +240,6 @@
                                 </StackPanel>
                             </ComboBoxItem>
                         </ComboBox>
-                    </Grid>
-                    <Grid 
-                    Grid.Row="1"
-                    VerticalAlignment="Center">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition Width="120"/>
-                        </Grid.ColumnDefinitions>
-                        <Label
-                            x:Name="labelFormat"
-                        Grid.Column="0"
-                        VerticalAlignment="Top"
-                            Content="{Binding Path=labelFormat_Text}" />
-                        <StackPanel
-                        Grid.Column="1"
-                        Orientation="Vertical"
-                        VerticalAlignment="Center"
-                            HorizontalAlignment="Left">
-                            <StackPanel.Resources>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="Margin" Value="-5 0 0 0"/>
-                                </Style>
-                                <Style TargetType="RadioButton">
-                                    <Setter Property="Margin" Value="0 0 0 7"/>
-                                    <Setter Property="Height" Value="17"/>
-                                    <EventSetter Event="Checked" Handler="RadioButton_Checked"/>
-                                </Style>
-                            </StackPanel.Resources>
-                            <RadioButton IsChecked="True" Tag=".png" Name="RadioButtonPng">
-                                <RadioButton.Content>
-                                    <TextBlock Margin="3 0 0 0 ">PNG</TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <RadioButton  Tag=".jpg"  Name="RadioButtonJpg">
-                                <RadioButton.Content>
-                                    <TextBlock Margin="3 0 0 0 ">JPG</TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                            <RadioButton Tag=".bmp" Name="RadioButtonBmp"
-                                         Margin="0">
-                                <RadioButton.Content>
-                                    <TextBlock Margin="3 0 0 0 ">BMP</TextBlock>
-                                </RadioButton.Content>
-                            </RadioButton>
-                        </StackPanel>
                     </Grid>
                 </Grid>
             </GroupBox>

@@ -29,12 +29,13 @@ namespace RevitFamilyImagePrinter.Windows
 	public partial class PrintOptions : UserControl, INotifyPropertyChanged
 	{
 		#region Properties
-		public int UserImageSize { get; set; }
+		public int UserImageHeight { get; set; }
 		public int UserScale { get; set; }
 		public ImageResolution UserImageResolution { get; set; }
 		public double UserZoomValue { get; set; }
 		public string UserExtension { get; set; }
 		public ViewDetailLevel UserDetailLevel { get; set; }
+		public ImageAspectRatio UserAspectRatio { get; set; }
 
 		public Document Doc { get; set; }
 		public UIDocument UIDoc { get; set; }
@@ -62,12 +63,12 @@ namespace RevitFamilyImagePrinter.Windows
 		public string labelResolution_Text => App.Translator.GetValue(Translator.Keys.labelResolution_Text);
 		public string labelDetailLevel_Text => App.Translator.GetValue(Translator.Keys.labelDetailLevel_Text);
 		public string labelFormat_Text => App.Translator.GetValue(Translator.Keys.labelFormat_Text);
+		public string labelAspectRatio_Text => App.Translator.GetValue(Translator.Keys.labelAspectRatio_Text);
 
 		public string textBlockResolutionWebLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebLow_Text);
 		public string textBlockResolutionWebHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebHigh_Text);
 		public string textBlockResolutionPrintLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionPrintLow_Text);
 		public string textBlockResolutionPrintHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionPrintHigh_Text);
-
 
 		public string textBlockDetailLevelCoarse_Text => App.Translator.GetValue(Translator.Keys.textBlockDetailLevelCoarse_Text);
 		public string textBlockDetailLevelMedium_Text => App.Translator.GetValue(Translator.Keys.textBlockDetailLevelMedium_Text);
@@ -76,18 +77,11 @@ namespace RevitFamilyImagePrinter.Windows
 		public string buttonApply_Text => App.Translator.GetValue(Translator.Keys.buttonApply_Text);
 		public string buttonPrint_Text => App.Translator.GetValue(Translator.Keys.buttonPrint_Text);
 
-
 		#endregion
 
 		public PrintOptions()
 		{
 			InitializeComponent();
-			//InitializeVariables();
-		}
-
-		private void InitializeVariables()
-		{
-			throw new NotImplementedException();
 		}
 
 		#region Events
@@ -108,9 +102,14 @@ namespace RevitFamilyImagePrinter.Windows
 				Print();
 		}
 
-		private void RadioButton_Checked(object sender, RoutedEventArgs e)
+		private void RadioButtonExtension_Checked(object sender, RoutedEventArgs e)
 		{
 			UserExtension = (sender as RadioButton)?.Tag.ToString();
+		}
+
+		private void RadioButtonRatio_Checked(object sender, RoutedEventArgs e)
+		{
+			UserAspectRatio = GetAspectRatio((sender as RadioButton)?.Tag.ToString());
 		}
 
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
@@ -161,7 +160,7 @@ namespace RevitFamilyImagePrinter.Windows
 				string strDetailLevel = (this.comboBoxDetailLevelValue.SelectedItem as FrameworkElement)?.Tag.ToString();
 				return new UserImageValues()
 				{
-					UserImageSize = int.Parse(this.SizeValue.Text),
+					UserImageHeight = int.Parse(this.SizeValue.Text),
 					UserScale = int.Parse(this.ScaleValue.Text),
 					UserZoomValue = double.Parse(this.ZoomValue.Text),
 					UserImageResolution = GetImageResolution(strResolution),
@@ -171,14 +170,8 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesRetrieving)}";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesRetrieving)}", _logger);
 				return null;
 			}
 		}
@@ -190,18 +183,20 @@ namespace RevitFamilyImagePrinter.Windows
 				UserScale = 1;
 				return;
 			}
-			else if (UserScale > 256)
+
+			if (UserScale > 256)
 			{
 				UserScale = 10;
 				return;
 			}
-			else if (UserScale > 32)
+
+			if (UserScale > 32)
 			{
 				UserScale = 25;
 				return;
 			}
-			else
-				UserScale = 50;
+
+			UserScale = 50;
 		}
 
 		private ViewDetailLevel GetUserDetailLevel(string strDetailLevel)
@@ -215,15 +210,24 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 		}
 
+		private ImageAspectRatio GetAspectRatio(string stringRatio)
+		{
+			switch (stringRatio)
+			{
+				case "16tp9": return ImageAspectRatio.Ratio_16to9;
+				case "4to3": return ImageAspectRatio.Ratio_4to3;
+				default: case "1to1": return ImageAspectRatio.Ratio_1to1;
+			}
+		}
+
 		private ImageResolution GetImageResolution(string resolution)
 		{
 			switch (resolution)
 			{
-				case "72": return ImageResolution.DPI_72;
+				default: case "72": return ImageResolution.DPI_72;
 				case "150": return ImageResolution.DPI_150;
 				case "300": return ImageResolution.DPI_300;
 				case "600": return ImageResolution.DPI_600;
-				default: throw new Exception("Unknown Resolution Type");
 			}
 		}
 
@@ -231,27 +235,21 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			try
 			{
-				if (UserImageSize > 2048)
-					UserImageSize = 2048;
-				if (UserImageSize < 32)
-					UserImageSize = 32;
+				if (UserImageHeight > 2048)
+					UserImageHeight = 2048;
+				if (UserImageHeight < 32)
+					UserImageHeight = 32;
 				if (UserZoomValue > 100)
 					UserZoomValue = 100;
-				if (UserScale < 1 || UserImageSize < 1 || UserZoomValue <= 0)
+				if (UserScale < 1 || UserImageHeight < 1 || UserZoomValue <= 0)
 					throw new InvalidCastException("The value cannot be zero or less than zero.");
 				UserZoomValue = Math.Round(UserZoomValue) / 100;
 				FitUserScale();
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesCorrection)}";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesCorrection)}", _logger);
 			}
 		}
 
@@ -259,6 +257,7 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			try
 			{
+				//RevitPrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
 				IList<UIView> uiviews = UIDoc.GetOpenUIViews();
 				foreach (var item in uiviews)
 				{
@@ -277,14 +276,8 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc, 
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}", _logger);
 			}
 		}
 
@@ -303,14 +296,8 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesSaving)}";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesSaving)}", _logger);
 			}
 		}
 
@@ -323,11 +310,12 @@ namespace RevitFamilyImagePrinter.Windows
 					InitializeUserFields(new UserImageValues()
 					{
 						UserDetailLevel = ViewDetailLevel.Medium,
-						UserImageSize = 64,
+						UserImageHeight = 64,
 						UserExtension = ".png",
 						UserScale = 50,
 						UserImageResolution = ImageResolution.DPI_150,
-						UserZoomValue = 90
+						UserZoomValue = 90,
+						UserAspectRatio = ImageAspectRatio.Ratio_1to1
 					});
 					return;
 				}
@@ -338,46 +326,53 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}", _logger);
 			}
 		}
 
 		private void InitializeUserFields(UserImageValues userValues)
 		{
 			this.UserImageResolution = userValues.UserImageResolution;
-			this.UserImageSize = userValues.UserImageSize;
+			this.UserImageHeight = userValues.UserImageHeight;
 			this.UserScale = userValues.UserScale;
 			this.UserDetailLevel = userValues.UserDetailLevel;
 			this.UserExtension = userValues.UserExtension;
 			this.UserZoomValue = userValues.UserZoomValue;
+			this.UserAspectRatio = userValues.UserAspectRatio;
 		}
 
 		private void SetInitialFieldValues()
 		{
-			SizeValue.Text = UserImageSize.ToString();
+			SizeValue.Text = UserImageHeight.ToString();
 			ScaleValue.Text = UserScale.ToString();
 			ZoomValue.Text = UserZoomValue.ToString(CultureInfo.InvariantCulture);
 			comboBoxResolutionValue.SelectedIndex = GetResolutionItemIndex();
 			comboBoxDetailLevelValue.SelectedIndex = GetDetailingItemIndex();
-			SetRadioButtonChecked();
+			SetRadioButtonExtensionChecked();
+			SetRadioButtonRatioChecked();
 		}
 
-		private void SetRadioButtonChecked()
+		private void SetRadioButtonExtensionChecked()
 		{
 			RadioButton btn = null;
 			switch (UserExtension)
 			{
-				case ".png": btn = RadioButtonPng; break;
+				default: case ".png": btn = RadioButtonPng; break;
 				case ".jpg": btn = RadioButtonJpg; break;
 				case ".bmp": btn = RadioButtonBmp; break;
-				default: throw new Exception("Unknown extension");
+			}
+			btn.IsChecked = true;
+		}
+
+		private void SetRadioButtonRatioChecked()
+		{
+			RadioButton btn = null;
+			switch (UserAspectRatio)
+			{
+				default: case ImageAspectRatio.Ratio_1to1: btn = RadioButton1to1; break;
+				case ImageAspectRatio.Ratio_16to9: btn = RadioButton16to9; break;
+				case ImageAspectRatio.Ratio_4to3: btn = RadioButton4to3; break;
 			}
 			btn.IsChecked = true;
 		}
@@ -386,11 +381,10 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			switch (UserImageResolution)
 			{
-				case ImageResolution.DPI_72: return 0;
+				default: case ImageResolution.DPI_72: return 0;
 				case ImageResolution.DPI_150: return 1;
 				case ImageResolution.DPI_300: return 2;
 				case ImageResolution.DPI_600: return 3;
-				default: throw new Exception("Unknown resolution type");
 			}
 		}
 
@@ -399,9 +393,8 @@ namespace RevitFamilyImagePrinter.Windows
 			switch (UserDetailLevel)
 			{
 				case ViewDetailLevel.Coarse: return 0;
-				case ViewDetailLevel.Medium: return 1;
+				default: case ViewDetailLevel.Medium: return 1;
 				case ViewDetailLevel.Fine: return 2;
-				default: throw new Exception("Unknown detailing type");
 			}
 		}
 		#endregion

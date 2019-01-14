@@ -33,11 +33,12 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			return new UserImageValues()
 			{
 				UserScale = options.UserScale,
-				UserImageSize = options.UserImageSize,
+				UserImageHeight = options.UserImageHeight,
 				UserImageResolution = options.UserImageResolution,
 				UserZoomValue = options.UserZoomValue,
 				UserExtension = options.UserExtension,
-				UserDetailLevel = options.UserDetailLevel
+				UserDetailLevel = options.UserDetailLevel,
+				UserAspectRatio = options.UserAspectRatio
 			};
 		}
 
@@ -53,7 +54,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void CropImageRectangle(UserImageValues userValues, FileInfo imageFile, FileInfo tmpFile)
 		{
-			int imgSize = userValues.UserImageSize;
+			int imgSize = userValues.UserImageHeight;
 			using (Bitmap image = Image.FromFile(tmpFile.FullName) as Bitmap)
 			{
 
@@ -380,7 +381,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					FitDirection = FitDirectionType.Vertical,
 					HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
 					ImageResolution = userValues.UserImageResolution,
-					PixelSize = userValues.UserImageSize,
+					PixelSize = userValues.UserImageHeight,
 					ShouldCreateWebSite = false,
 					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
 					ViewName = "temporary",

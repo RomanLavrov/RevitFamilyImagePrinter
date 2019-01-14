@@ -64,7 +64,7 @@ namespace RevitFamilyImagePrinter.Commands
 					HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(UserValues.UserExtension),
 					ImageResolution = UserValues.UserImageResolution,
 					ShouldCreateWebSite = false,
-					PixelSize = UserValues.UserImageSize
+					PixelSize = UserValues.UserImageHeight
 				};
 
 				if (views.Count > 0)
