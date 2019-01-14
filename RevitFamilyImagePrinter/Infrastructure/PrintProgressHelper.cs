@@ -18,31 +18,28 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	    public PrintProgressHelper(DirectoryInfo familiesFolder, string processText)
 	    {
 		    _printProgress = new PrintProgress();
-		    _processTextBlock = _printProgress.ProcessTextBlock;
-		    _printProgressBar = _printProgress.PrintProgressBar;
+		    _processTextBlock = _printProgress.textBlockProcess;
+		    _printProgressBar = _printProgress.progressBarPrint;
 		    _processTextBlock.Text = processText;
 		    _familiesFolder = familiesFolder;
 		    _familiesAmount = familiesFolder.GetFiles().Count(x => x.Extension.Equals(".rfa"));
 		    PreviousViewName = string.Empty;
 	    }
 
-		//  ~PrintProgressHelper()
-	  //  {
-			//this.Close();
-	  //  }
-
 		public string PreviousViewName { get; set; }
 
 		#region Methods
 
 		public Window Show(bool is3D = false, int windowHeightOffset = 40, int windowWidthOffset = 20)
-	    {
+		{
+			string wndTitle = $"{(is3D ? "3D" : "2D")}{App.Translator.GetValue(Translator.Keys.windowProgressTitle)}"
+				.Replace("%folderName%", $"\"{_familiesFolder.Name}\"");
 		    _progressWindow = new Window
 		    {
 			    Height = 100 + windowHeightOffset,
 			    Width = 400 + windowWidthOffset,
-			    Title = $"{(is3D ? "3D" : "2D")} printing of \"{_familiesFolder.Name}\" folder",
-			    WindowStyle = WindowStyle.ToolWindow,
+			    Title = wndTitle,
+				WindowStyle = WindowStyle.ToolWindow,
 			    Name = "Printing",
 			    ResizeMode = ResizeMode.NoResize,
 			    WindowStartupLocation = WindowStartupLocation.CenterScreen,
@@ -110,7 +107,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		    string viewName = RevitPrintHelper.GetFileName(e.CurrentActiveView.Document);
 		    if (PreviousViewName.Equals(viewName) || viewName.ToLower().Equals("empty")) return;
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"Printing: {_printProgressBar.Value} / {_printProgressBar.Maximum}";
+		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessPrinting)}" +
+		                             $" {_printProgressBar.Value} / {_printProgressBar.Maximum}";
 		    PreviousViewName = viewName;
 	    }
 
@@ -123,14 +121,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private void ApplicationOnFamilyLoadedIntoDocument(object sender, FamilyLoadedIntoDocumentEventArgs e) 
 	    {
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"Loading families: {_printProgressBar.Value} / {_familiesAmount}";
+		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessLoadingFamilies)}" +
+		                             $" {_printProgressBar.Value} / {_familiesAmount}";
 		    R2018_HotFix();
 	    }
 
 	    private void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
 	    {
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"{e.Document.Title} has been created";
+		    _processTextBlock.Text = $"{e.Document.Title} " +
+		                             $"{App.Translator.GetValue(Translator.Keys.textBlockProcessProjectCreated)}";
 	    }
 
 		#endregion

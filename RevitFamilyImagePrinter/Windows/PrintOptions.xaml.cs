@@ -2,6 +2,7 @@
 using Autodesk.Revit.UI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -17,13 +18,15 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.IO;
+using System.Runtime.CompilerServices;
+using RevitFamilyImagePrinter.Infrastructure;
 
 namespace RevitFamilyImagePrinter.Windows
 {
 	/// <summary>
 	/// Interaction logic for PrintOptions.xaml
 	/// </summary>
-	public partial class PrintOptions : UserControl
+	public partial class PrintOptions : UserControl, INotifyPropertyChanged
 	{
 		#region Properties
 		public int UserImageSize { get; set; }
@@ -48,12 +51,43 @@ namespace RevitFamilyImagePrinter.Windows
 
 		#region Variables
 		private Window _parentWindow;
+		private Logger _logger = App.Logger;
 		#endregion
 
+		#region Labels
+
+		public string labelSize_Text => App.Translator.GetValue(Translator.Keys.labelSize_Text);
+		public string labelScale_Text => App.Translator.GetValue(Translator.Keys.labelScale_Text);
+		public string labelZoom_Text => App.Translator.GetValue(Translator.Keys.labelZoom_Text);
+		public string labelResolution_Text => App.Translator.GetValue(Translator.Keys.labelResolution_Text);
+		public string labelDetailLevel_Text => App.Translator.GetValue(Translator.Keys.labelDetailLevel_Text);
+		public string labelFormat_Text => App.Translator.GetValue(Translator.Keys.labelFormat_Text);
+
+		public string textBlockResolutionWebLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebLow_Text);
+		public string textBlockResolutionWebHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebHigh_Text);
+		public string textBlockResolutionPrintLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionPrintLow_Text);
+		public string textBlockResolutionPrintHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionPrintHigh_Text);
+
+
+		public string textBlockDetailLevelCoarse_Text => App.Translator.GetValue(Translator.Keys.textBlockDetailLevelCoarse_Text);
+		public string textBlockDetailLevelMedium_Text => App.Translator.GetValue(Translator.Keys.textBlockDetailLevelMedium_Text);
+		public string textBlockDetailLevelFine_Text => App.Translator.GetValue(Translator.Keys.textBlockDetailLevelFine_Text);
+
+		public string buttonApply_Text => App.Translator.GetValue(Translator.Keys.buttonApply_Text);
+		public string buttonPrint_Text => App.Translator.GetValue(Translator.Keys.buttonPrint_Text);
+
+
+		#endregion
 
 		public PrintOptions()
 		{
 			InitializeComponent();
+			//InitializeVariables();
+		}
+
+		private void InitializeVariables()
+		{
+			throw new NotImplementedException();
 		}
 
 		#region Events
@@ -69,7 +103,7 @@ namespace RevitFamilyImagePrinter.Windows
 
 		private void TextBox_KeyDown(object sender, KeyEventArgs e)
 		{
-			btnApply.IsEnabled = true;
+			buttonApply.IsEnabled = true;
 			if (e.Key == Key.Enter)
 				Print();
 		}
@@ -82,7 +116,7 @@ namespace RevitFamilyImagePrinter.Windows
 		private void UserControl_Loaded(object sender, RoutedEventArgs e)
 		{
 			_parentWindow = Window.GetWindow(this);
-			btnApply.Visibility = IsPreview ? System.Windows.Visibility.Visible
+			buttonApply.Visibility = IsPreview ? System.Windows.Visibility.Visible
 											: System.Windows.Visibility.Hidden;
 			LoadConfig();
 			CorrectValues();
@@ -92,10 +126,10 @@ namespace RevitFamilyImagePrinter.Windows
 
 		private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
-			if ((sender as System.Windows.Controls.ComboBox) != ResolutionValue
-					&& btnApply != null)
+			if ((sender as System.Windows.Controls.ComboBox) != comboBoxResolutionValue
+					&& buttonApply != null)
 			{
-				btnApply.IsEnabled = true;
+				buttonApply.IsEnabled = true;
 			}
 		}
 		#endregion
@@ -113,7 +147,7 @@ namespace RevitFamilyImagePrinter.Windows
 			SaveConfig();
 			InitializeUserFields(userValues);
 			CorrectValues();
-			btnApply.IsEnabled = false;
+			buttonApply.IsEnabled = false;
 			if (IsUpdateView)
 				UpdateView();
 			return true;
@@ -123,8 +157,8 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			try
 			{
-				string strResolution = (this.ResolutionValue.SelectedItem as FrameworkElement)?.Tag.ToString();
-				string strDetailLevel = (this.DetailLevelValue.SelectedItem as FrameworkElement)?.Tag.ToString();
+				string strResolution = (this.comboBoxResolutionValue.SelectedItem as FrameworkElement)?.Tag.ToString();
+				string strDetailLevel = (this.comboBoxDetailLevelValue.SelectedItem as FrameworkElement)?.Tag.ToString();
 				return new UserImageValues()
 				{
 					UserImageSize = int.Parse(this.SizeValue.Text),
@@ -137,13 +171,14 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error occured during values correction.\n{exc.Message}";
+				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesRetrieving)}";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 				return null;
 			}
 		}
@@ -209,13 +244,14 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error occured during values correction.\n{exc.Message}";
+				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesCorrection)}";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -241,13 +277,14 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"### ERROR ### - Error occured during view update.\n{exc.Message}";
+				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -266,13 +303,14 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error during saving user input values: {exc.Message}";
+				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesSaving)}";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -300,13 +338,14 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = $"Error during loading user input values: {exc.Message}";
+				string errorMessage = $"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}";
 				new TaskDialog("Error")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconError,
 					MainContent = errorMessage
 				}.Show();
+				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 			}
 		}
 
@@ -325,8 +364,8 @@ namespace RevitFamilyImagePrinter.Windows
 			SizeValue.Text = UserImageSize.ToString();
 			ScaleValue.Text = UserScale.ToString();
 			ZoomValue.Text = UserZoomValue.ToString(CultureInfo.InvariantCulture);
-			ResolutionValue.SelectedIndex = GetResolutionItemIndex();
-			DetailLevelValue.SelectedIndex = GetDetailingItemIndex();
+			comboBoxResolutionValue.SelectedIndex = GetResolutionItemIndex();
+			comboBoxDetailLevelValue.SelectedIndex = GetDetailingItemIndex();
 			SetRadioButtonChecked();
 		}
 
@@ -366,5 +405,12 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 		}
 		#endregion
+
+		public event PropertyChangedEventHandler PropertyChanged;
+
+		protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+		{
+			PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+		}
 	}
 }

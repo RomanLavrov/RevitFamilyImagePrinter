@@ -254,15 +254,15 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 
 			if (item.Contains("von oben nach unten") ||
-			    item.Contains("von unten nach oben") ||
-			    item.Contains("von oben") ||
-			    item.Contains("nach oben") ||
-			    item.Contains("von unten") ||
-			    item.Contains("nach unten") ||
-			    item.Contains("von ob nach un") ||
-			    item.Contains("von un nach ob") ||
-			    item.Contains("nach unten von oben") ||
-			    item.Contains("SCHWENKBAR MIT MOTORZOOM"))
+				item.Contains("von unten nach oben") ||
+				item.Contains("von oben") ||
+				item.Contains("nach oben") ||
+				item.Contains("von unten") ||
+				item.Contains("nach unten") ||
+				item.Contains("von ob nach un") ||
+				item.Contains("von un nach ob") ||
+				item.Contains("nach unten von oben") ||
+				item.Contains("SCHWENKBAR MIT MOTORZOOM"))
 			{
 				fileName = fileName.Replace(' ', '_');
 			}
@@ -293,7 +293,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				{
 					Height = options.Height + windowHeightOffset,
 					Width = options.Width + windowWidthOffset,
-					Title = "Image Print Settings",
+					Title = $"{App.Translator.GetValue(Translator.Keys.windowPrintSettingsTitle)}",
 					Content = options,
 					Background = System.Windows.Media.Brushes.WhiteSmoke,
 					WindowStyle = WindowStyle.ToolWindow,
@@ -375,16 +375,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				var exportOptions = new ImageExportOptions
 				{
-				    ExportRange = ExportRange.VisibleRegionOfCurrentView,
+					ExportRange = ExportRange.VisibleRegionOfCurrentView,
 					FilePath = tmpFilePath,
 					FitDirection = FitDirectionType.Vertical,
 					HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
 					ImageResolution = userValues.UserImageResolution,
 					PixelSize = userValues.UserImageSize,
-				    ShouldCreateWebSite = false,
+					ShouldCreateWebSite = false,
 					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
-				    ViewName = "temporary",
-                    ZoomType = ZoomFitType.FitToPage
+					ViewName = "temporary",
+					ZoomType = ZoomFitType.FitToPage
 				};
 
 				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
@@ -402,7 +402,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
-                    doc.ExportImage(exportOptions);
+					doc.ExportImage(exportOptions);
 				}
 				transaction.Commit();
 
@@ -552,7 +552,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		{
 			if (File.Exists(App.DefaultProject))
 			{
-				if(IsFileAccessible(App.DefaultProject))
+				if (IsFileAccessible(App.DefaultProject))
 					File.Delete(App.DefaultProject);
 				else
 					return;
@@ -582,7 +582,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			//}
 			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
-			if(!IsDocumentActive(uiDoc))
+			if (!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);
 			return result;
 		}
@@ -604,6 +604,17 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				stream?.Close();
 			}
 			return true;
+		}
+
+		public static void ProcessError(Exception exc, string errorMessage, Logger logger)
+		{
+			new TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
+			{
+				TitleAutoPrefix = false,
+				MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,
+				MainContent = errorMessage
+			}.Show();
+			logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 		}
 
 		#endregion

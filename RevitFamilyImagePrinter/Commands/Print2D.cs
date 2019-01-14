@@ -70,14 +70,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during current view correction";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
 			}
 		}
 
@@ -89,14 +83,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during printing of current view";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}{endl}{exc.Message}{endl}{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
 			}
 		}
 	}

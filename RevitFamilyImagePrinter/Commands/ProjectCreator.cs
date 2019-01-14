@@ -36,7 +36,7 @@ namespace RevitFamilyImagePrinter.Commands
 		private UIDocument _uiDoc;
 		private Document _doc;
 		private readonly List<string> _allSymbols = new List<string>();
-		private readonly Logger _logger;
+		private readonly Logger _logger = App.Logger;
 		#endregion
 
 		#region Constants 
@@ -45,11 +45,6 @@ namespace RevitFamilyImagePrinter.Commands
 		private const int windowHeightOffset = 40;
 
 		#endregion
-
-		public ProjectCreator()
-		{
-			_logger = Logger.GetLogger();
-		}
 
 		public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
 		{
@@ -74,7 +69,7 @@ namespace RevitFamilyImagePrinter.Commands
 		private void CheckProjectsAmount()
 		{
 			if (!ProjectsFolder.Exists)
-				throw new Exception("Projects folder does not exist");
+				throw new Exception($"{App.Translator.GetValue(Translator.Keys.errorMessageNoProjectsFolder)}");
 			var projectsCreated = ProjectsFolder.GetFiles().Where(x => x.Extension.Equals(".rvt")).ToList();
 			try
 			{
@@ -82,12 +77,12 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (AssertFailedException exc)
 			{
-				new TaskDialog("Warning!")
+				new TaskDialog($"{App.Translator.GetValue(Translator.Keys.warningMessageTitle)}")
 				{
 					TitleAutoPrefix = false,
 					MainIcon = TaskDialogIcon.TaskDialogIconWarning,
 					MainContent =
-						"Attention! The amount of projects created is not equal to amount of types in families. Check log file."
+						$"{App.Translator.GetValue(Translator.Keys.warningMessageProjectsAmount)}"
 				}.Show();
 				var differences = _allSymbols.Except(projectsCreated.Select(x => x.Name.ToString()));
 				string output = string.Empty;
@@ -96,7 +91,7 @@ namespace RevitFamilyImagePrinter.Commands
 					output += $"{i}\n";
 				}
 				_logger.WriteLine(
-					$"### ERROR ### - The amount of projects created is not equal to amount of types in families." +
+					$"### ERROR ### - The amount of projects created is not equal to the amount of types in families." +
 					$"\n{exc.Message}\nMismatch projects:\n{output}");
 			}
 		}
@@ -106,7 +101,6 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			try
 			{
-				//FamiliesFolder = RevitPrintHelper.SelectFolderDialog("Select folder with families to be printed");
 				if (FamiliesFolder == null) return null;
 
 				
@@ -122,7 +116,6 @@ namespace RevitFamilyImagePrinter.Commands
 					return null;
 				}
 
-				//UserValues = RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
 				if (UserValues == null)
 					return null;
 
@@ -132,13 +125,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch(Exception exc)
 			{
-				string errorMessage = "Error during retrieving families from folder.";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamiliesRetrieving)}", _logger);
 				return null;
 			}
 		}
@@ -196,14 +184,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during processing of project";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageProjectProcessing)}", _logger);
 				return false;
 			}
 			return true;
@@ -226,13 +208,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during deleting element from project.";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamilyRemoving)}", _logger);
 			}
 		}
 
@@ -262,14 +239,9 @@ namespace RevitFamilyImagePrinter.Commands
 					FindExistingFamily(ref family, file);
 			}
 			catch (Exception exc)
-			{
-				string errorMessage = "Error during loading of family from file.";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+			{	
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamilyLoading)}", _logger);
 			}
 			return family;
 		}
@@ -309,13 +281,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during removing of instances.";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageInstanceRemoving)}", _logger);
 			}
 		}
 
@@ -339,13 +306,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during inserting of instances";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageInstanceInserting)}", _logger);
 			}
 		}
 
@@ -361,13 +323,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during removing of type from project";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageTypeRemoving)}", _logger);
 			}
 		}
 
@@ -379,13 +336,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error during removing of family from project";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamilyRemoving)}", _logger);
 			}
 		}
 		#endregion

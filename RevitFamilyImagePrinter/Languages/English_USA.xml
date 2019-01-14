@@ -20,4 +20,60 @@
   <buttonPrintView_ToolTip>Export Current View to image file</buttonPrintView_ToolTip>
 
   <buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
+
+	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
+	<labelSize_Text>Image size:</labelSize_Text>
+	<labelScale_Text>Scale:</labelScale_Text>
+	<labelZoom_Text>Zoom (%):</labelZoom_Text>
+	<labelResolution_Text>Image resolution:</labelResolution_Text>
+	<labelDetailLevel_Text>Detail level:</labelDetailLevel_Text>
+	<labelFormat_Text>Image format:</labelFormat_Text>
+	<buttonApply_Text>Apply</buttonApply_Text>
+	<buttonPrint_Text>Print</buttonPrint_Text>
+	<textBlockResolutionWebLow_Text>Web Low</textBlockResolutionWebLow_Text>
+	<textBlockResolutionWebHigh_Text>Web High</textBlockResolutionWebHigh_Text>
+	<textBlockResolutionPrintLow_Text>Print Low</textBlockResolutionPrintLow_Text>
+	<textBlockResolutionPrintHigh_Text>Print High</textBlockResolutionPrintHigh_Text>
+	<textBlockDetailLevelCoarse_Text>Coarse</textBlockDetailLevelCoarse_Text>
+	<textBlockDetailLevelMedium_Text>Medium</textBlockDetailLevelMedium_Text>
+	<textBlockDetailLevelFine_Text>Fine</textBlockDetailLevelFine_Text>
+
+	<errorMessageTitle>Error</errorMessageTitle>
+	<errorMessageValuesCorrection>Error occurred during values correction</errorMessageValuesCorrection>
+	<errorMessageValuesRetrieving>Error occurred during retrieving values</errorMessageValuesRetrieving>
+	<errorMessageViewUpdating>Error occurred during view updating</errorMessageViewUpdating>
+	<errorMessageValuesSaving>Error occurred during saving user input values</errorMessageValuesSaving>
+	<errorMessageValuesLoading>Error occurred during loading user input values</errorMessageValuesLoading>
+
+	<textBlockProcess_Text>Something is happening...</textBlockProcess_Text>
+	<buttonCancel_Text>Cancel</buttonCancel_Text>
+
+	<errorMessageViewCorrecting>Error occurred during current view correction</errorMessageViewCorrecting>
+	<errorMessageViewPrinting>Error occurred during printing of current view</errorMessageViewPrinting>
+	<errorMessage2dFolderPrintingCycle>Error occurred in cycle during 2D folder printing</errorMessage2dFolderPrintingCycle>
+	<errorMessage2dFolderPrinting>Error occurred during 2D folder printing</errorMessage2dFolderPrinting>
+	<errorMessage3dFolderPrintingCycle>Error occurred in cycle during 3D folder printing</errorMessage3dFolderPrintingCycle>
+	<errorMessage3dFolderPrinting>Error occurred during 3D folder printing</errorMessage3dFolderPrinting>
+	
+	<errorMessageNoProjectsFolder>'Projects' folder does not exist</errorMessageNoProjectsFolder>
+	<errorMessageFamiliesRetrieving>Error occurred during retrieving families from folder</errorMessageFamiliesRetrieving>
+	<errorMessageProjectProcessing>Error occurred during processing of project</errorMessageProjectProcessing>
+	<errorMessageFamilyRemoving>Error occurred during removing family from project</errorMessageFamilyRemoving>
+	<errorMessageFamilyLoading>Error occurred during loading family from file</errorMessageFamilyLoading>
+	<errorMessageInstanceRemoving>Error occurred during removing instance from project</errorMessageInstanceRemoving>
+	<errorMessageInstanceInserting>Error occurred during inserting of instance</errorMessageInstanceInserting>
+	<errorMessageTypeRemoving>Error occurred during removing type from project</errorMessageTypeRemoving>
+
+	<warningMessageTitle>Warning</warningMessageTitle>
+	<warningMessageProjectsAmount>Attention! The amount of projects created is not equal to the amount of types in families. Check the log file.</warningMessageProjectsAmount>
+
+	<folderDialogFromTitle>Select folder with needed families to be printed</folderDialogFromTitle>
+	<folderDialogToTitle>Select folder where to save printed files</folderDialogToTitle>
+
+	<windowProgressTitle> printing of %folderName% folder</windowProgressTitle>
+	<textBlockProcessCreatingProjects>Creating .rvt projects from .rfa files, this may take some time...</textBlockProcessCreatingProjects>
+	<textBlockProcessPreparingPrinting>Preparation for printing...</textBlockProcessPreparingPrinting>
+	<textBlockProcessPrinting>Printing: </textBlockProcessPrinting>
+	<textBlockProcessLoadingFamilies>Loading families: </textBlockProcessLoadingFamilies>
+	<textBlockProcessProjectCreated> has been created</textBlockProcessProjectCreated>
 </Data>

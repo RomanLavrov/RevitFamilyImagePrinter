@@ -11,7 +11,10 @@ using System.Xml.Serialization;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
-    class Translator
+	/// <summary>
+	/// Class to provide multilingualism in entire add in
+	/// </summary>
+	public class Translator
     {
         private IDictionary<string, string> Dictionary { get; set; }
 
@@ -29,8 +32,56 @@ namespace RevitFamilyImagePrinter.Infrastructure
             buttonPrint3DMulti_Name,
             buttonPrintView_Name,
             buttonPrintView_ToolTip,
-            buttonLink_ToolTip
-        }
+            buttonLink_ToolTip,
+	        windowPrintSettingsTitle,
+			labelSize_Text,
+	        labelScale_Text,
+	        labelZoom_Text,
+	        labelResolution_Text,
+	        labelDetailLevel_Text,
+	        labelFormat_Text,
+	        buttonApply_Text,
+	        buttonPrint_Text,
+			textBlockResolutionWebLow_Text,
+			textBlockResolutionWebHigh_Text,
+			textBlockResolutionPrintLow_Text,
+			textBlockResolutionPrintHigh_Text,
+			textBlockDetailLevelCoarse_Text,
+			textBlockDetailLevelMedium_Text,
+			textBlockDetailLevelFine_Text,
+	        errorMessageTitle,
+	        errorMessageValuesCorrection,
+	        errorMessageValuesRetrieving,
+	        errorMessageViewUpdating,
+	        errorMessageValuesSaving,
+	        errorMessageValuesLoading,
+			textBlockProcess_Text,
+	        buttonCancel_Text,
+	        errorMessageViewCorrecting,
+	        errorMessageViewPrinting,
+	        errorMessage2dFolderPrinting,
+	        errorMessage2dFolderPrintingCycle,
+	        errorMessage3dFolderPrintingCycle,
+	        errorMessage3dFolderPrinting,
+	        errorMessageNoProjectsFolder,
+	        errorMessageFamiliesRetrieving,
+	        errorMessageProjectProcessing,
+	        errorMessageFamilyRemoving,
+	        errorMessageFamilyLoading,
+	        errorMessageInstanceRemoving,
+	        errorMessageInstanceInserting,
+	        errorMessageTypeRemoving,
+			warningMessageTitle,
+	        warningMessageProjectsAmount,
+			folderDialogFromTitle,
+	        folderDialogToTitle,
+	        windowProgressTitle,
+	        textBlockProcessPrinting,
+	        textBlockProcessLoadingFamilies,
+	        textBlockProcessProjectCreated,
+			textBlockProcessCreatingProjects,
+	        textBlockProcessPreparingPrinting,
+		}
 
         public Translator(string language)
         {
@@ -41,7 +92,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
         {
             var value = string.Empty;
             string _key = Enum.GetName(typeof(Keys), key);
-            if (!String.IsNullOrEmpty(_key))
+            if (!string.IsNullOrEmpty(_key))
             {
                 Dictionary.TryGetValue(_key, out value);
             }
@@ -74,7 +125,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
             return result;
         }
 
-        IDictionary<string, string> XmlToDictionary(string data)
+	    private IDictionary<string, string> XmlToDictionary(string data)
         {
             XElement rootElement = XElement.Parse(data);
             Dictionary<string, string> dict = new Dictionary<string, string>();

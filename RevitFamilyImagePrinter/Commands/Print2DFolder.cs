@@ -48,11 +48,12 @@ namespace RevitFamilyImagePrinter.Commands
 				RevitPrintHelper.CreateEmptyProject(uiApp.Application);
 
 				DirectoryInfo familiesFolder =
-					RevitPrintHelper.SelectFolderDialog("Select folder with needed families to be printed");
+					RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogFromTitle)}");
 				if (familiesFolder == null)
 					return Result.Cancelled;
 
-				UserFolderTo = RevitPrintHelper.SelectFolderDialog("Select folder where to save printed files");
+				UserFolderTo = 
+					RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogToTitle)}");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
 
@@ -62,7 +63,7 @@ namespace RevitFamilyImagePrinter.Commands
 					return Result.Failed;
 
 				progressHelper = new PrintProgressHelper(familiesFolder,
-					"Creating .rvt projects from .rfa files, this may take a time...");
+					$"{App.Translator.GetValue(Translator.Keys.textBlockProcessCreatingProjects)}");
 				progressHelper.Show();
 				progressHelper.SubscribeOnLoadedFamily(uiApp);
 				progressHelper.SetProgressBarMaximum(familiesFolder.GetFiles().Count(x => x.Extension.Equals(".rfa")));
@@ -71,7 +72,7 @@ namespace RevitFamilyImagePrinter.Commands
 					return Result.Failed;
 
 				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
-				progressHelper.SetProgressText("Preparation for printing...");
+				progressHelper.SetProgressText($"{App.Translator.GetValue(Translator.Keys.textBlockProcessPreparingPrinting)}");
 				progressHelper.SetProgressBarMaximum(UserFolderFrom.GetFiles().Count(x => x.Extension.Equals(".rvt")));
 				progressHelper.SubscribeOnViewActivated(uiApp);
 
@@ -96,27 +97,13 @@ namespace RevitFamilyImagePrinter.Commands
 					}
 					catch (CorruptModelException exc)
 					{
-						if (!exc.Message.Equals("The model was saved by a later version of Revit.")) throw;
-						string errorMessage = $"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}";
-						new TaskDialog("Error")
-						{
-							TitleAutoPrefix = false,
-							MainIcon = TaskDialogIcon.TaskDialogIconError,
-							MainContent = errorMessage
-						}.Show();
-						_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+						RevitPrintHelper.ProcessError(exc,
+							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger);
 					}
 					catch (Exception exc)
 					{
-						string errorMessage =
-							"Error occured in cycle during Print2DFolder command execution";
-						new TaskDialog("Error")
-						{
-							TitleAutoPrefix = false,
-							MainIcon = TaskDialogIcon.TaskDialogIconError,
-							MainContent = errorMessage
-						}.Show();
-						_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+						RevitPrintHelper.ProcessError(exc,
+							$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrintingCycle)}", _logger);
 					}
 				}
 
@@ -127,15 +114,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during Print2DFolder command execution";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
-
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrinting)}", _logger);
 				return Result.Failed;
 			}
 			finally
@@ -168,14 +148,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during current view correction";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
 			}
 		}
 
@@ -189,14 +163,8 @@ namespace RevitFamilyImagePrinter.Commands
 			}
 			catch (Exception exc)
 			{
-				string errorMessage = "Error occured during printing current view";
-				new TaskDialog("Error")
-				{
-					TitleAutoPrefix = false,
-					MainIcon = TaskDialogIcon.TaskDialogIconError,
-					MainContent = errorMessage
-				}.Show();
-				_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
+				RevitPrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
 			}
 		}
 	}
