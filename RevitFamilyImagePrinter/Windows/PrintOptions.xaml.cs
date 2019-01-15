@@ -55,6 +55,7 @@ namespace RevitFamilyImagePrinter.Windows
 		public string labelDetailLevel_Text => App.Translator.GetValue(Translator.Keys.labelDetailLevel_Text);
 		public string labelFormat_Text => App.Translator.GetValue(Translator.Keys.labelFormat_Text);
 		public string labelAspectRatio_Text => App.Translator.GetValue(Translator.Keys.labelAspectRatio_Text);
+		public string labelParameters_Text => App.Translator.GetValue(Translator.Keys.labelParameters_Text);
 
 		public string textBlockResolutionWebLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebLow_Text);
 		public string textBlockResolutionWebHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebHigh_Text);

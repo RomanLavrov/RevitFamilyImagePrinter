@@ -1,21 +1,14 @@
-#region Namespaces
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using RevitFamilyImagePrinter.Infrastructure;
 using RevitFamilyImagePrinter.Properties;
-
-#endregion
 
 namespace RevitFamilyImagePrinter
 {

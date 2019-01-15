@@ -6,16 +6,11 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using System.Windows.Controls;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Events;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
 using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Windows;
-using Color = System.Windows.Media.Color;
 using Image = System.Drawing.Image;
-using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
@@ -684,7 +679,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static void ProcessError(Exception exc, string errorMessage, Logger logger)
 		{
-			new TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
+			new Autodesk.Revit.UI.TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
 			{
 				TitleAutoPrefix = false,
 				MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,

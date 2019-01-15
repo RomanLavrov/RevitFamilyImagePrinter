@@ -1,22 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Forms;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using Application = Autodesk.Revit.ApplicationServices.Application;
-using View = Autodesk.Revit.DB.View;
-using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Infrastructure;
-using TaskDialog = Autodesk.Revit.UI.TaskDialog;
-using TaskDialogIcon = Autodesk.Revit.UI.TaskDialogIcon;
 
 namespace RevitFamilyImagePrinter.Commands
 {

@@ -41,6 +41,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	        labelDetailLevel_Text,
 	        labelFormat_Text,
 			labelAspectRatio_Text,
+	        labelParameters_Text,
 			buttonApply_Text,
 	        buttonPrint_Text,
 			textBlockResolutionWebLow_Text,

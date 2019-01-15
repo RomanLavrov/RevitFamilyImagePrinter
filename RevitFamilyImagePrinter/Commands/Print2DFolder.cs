@@ -2,15 +2,8 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
 using RevitFamilyImagePrinter.Infrastructure;
-using View = Autodesk.Revit.DB.View;
 using System.Linq;
 using Autodesk.Revit.Exceptions;
 
