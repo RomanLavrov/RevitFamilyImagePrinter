@@ -56,9 +56,9 @@
                                     <EventSetter Event="Checked" Handler="RadioButtonRatio_Checked"/>
                                 </Style>
                             </StackPanel.Resources>
-                            <RadioButton IsChecked="True" Tag="4:3" Name="RadioButton4to3">
+                            <RadioButton Tag="1:1" IsChecked="True" Name="RadioButton1to1">
                                 <RadioButton.Content>
-                                    <TextBlock Margin="3 0 0 0 ">4:3</TextBlock>
+                                    <TextBlock Margin="3 0 0 0 ">1:1</TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
                             <RadioButton  Tag="16:9"  Name="RadioButton16to9">
@@ -66,9 +66,9 @@
                                     <TextBlock Margin="3 0 0 0 ">16:9</TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
-                            <RadioButton Tag="1:1" Name="RadioButton1to1" Margin="0">
+                            <RadioButton Tag="4:3" Name="RadioButton4to3" Margin="0">
                                 <RadioButton.Content>
-                                    <TextBlock Margin="3 0 0 0 ">1:1</TextBlock>
+                                    <TextBlock Margin="3 0 0 0 ">4:3</TextBlock>
                                 </RadioButton.Content>
                             </RadioButton>
                         </StackPanel>

@@ -4,18 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.IO;
 using System.Runtime.CompilerServices;
@@ -165,7 +156,8 @@ namespace RevitFamilyImagePrinter.Windows
 					UserZoomValue = double.Parse(this.ZoomValue.Text),
 					UserImageResolution = GetImageResolution(strResolution),
 					UserDetailLevel = GetUserDetailLevel(strDetailLevel),
-					UserExtension = this.UserExtension
+					UserExtension = this.UserExtension,
+					UserAspectRatio = this.UserAspectRatio
 				};
 			}
 			catch (Exception exc)
@@ -214,9 +206,9 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			switch (stringRatio)
 			{
-				case "16tp9": return ImageAspectRatio.Ratio_16to9;
-				case "4to3": return ImageAspectRatio.Ratio_4to3;
-				default: case "1to1": return ImageAspectRatio.Ratio_1to1;
+				case "16:9": return ImageAspectRatio.Ratio_16to9;
+				case "4:3": return ImageAspectRatio.Ratio_4to3;
+				default: case "1:1": return ImageAspectRatio.Ratio_1to1;
 			}
 		}
 

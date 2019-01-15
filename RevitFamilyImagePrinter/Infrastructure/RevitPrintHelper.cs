@@ -54,18 +54,40 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void CropImageRectangle(UserImageValues userValues, FileInfo imageFile, FileInfo tmpFile)
 		{
-			int imgSize = userValues.UserImageHeight;
+
+			int imgHeight = userValues.UserImageHeight;
+			int imgWidth = 0;
+			switch (userValues.UserAspectRatio)
+			{
+				case ImageAspectRatio.Ratio_16to9:
+					imgWidth = imgHeight * 16 / 9;
+					break;
+				case ImageAspectRatio.Ratio_1to1: imgWidth = imgHeight;
+					break;
+				case ImageAspectRatio.Ratio_4to3:
+					imgWidth = imgHeight * 4 / 3;
+					break;
+			}
+
 			using (Bitmap image = Image.FromFile(tmpFile.FullName) as Bitmap)
 			{
 
 				if (image == null) return;
 
+				//System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
+				//{
+				//	X = (int)(Math.Floor((image.Width - imgSize) / 2d)),
+				//	Y = (image.Height - imgSize) / 2,
+				//	Height = imgSize,
+				//	Width = imgSize
+				//};
+
 				System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
 				{
-					X = (int)(Math.Floor((image.Width - imgSize) / 2d)),
-					Y = (image.Height - imgSize) / 2,
-					Height = imgSize,
-					Width = imgSize
+					Height = imgHeight,
+					Width = imgWidth,
+					X = (image.Width - imgWidth) / 2,
+					Y = (image.Height - imgHeight) / 2
 				};
 
 				var result = image.Clone(cropRectangle, image.PixelFormat);
