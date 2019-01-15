@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows;
@@ -11,6 +13,7 @@ using Autodesk.Revit.UI;
 using Autodesk.Revit.UI.Events;
 using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Windows;
+using Color = System.Windows.Media.Color;
 using Image = System.Drawing.Image;
 using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
@@ -55,46 +58,96 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private static void CropImageRectangle(UserImageValues userValues, FileInfo imageFile, FileInfo tmpFile)
 		{
 
-			int imgHeight = userValues.UserImageHeight;
-			int imgWidth = 0;
+			int resultHeight = userValues.UserImageHeight;
+			int resultWidth = 0;
 			switch (userValues.UserAspectRatio)
 			{
 				case ImageAspectRatio.Ratio_16to9:
-					imgWidth = imgHeight * 16 / 9;
+					resultWidth = resultHeight * 16 / 9;
 					break;
-				case ImageAspectRatio.Ratio_1to1: imgWidth = imgHeight;
+				case ImageAspectRatio.Ratio_1to1: resultWidth = resultHeight;
 					break;
 				case ImageAspectRatio.Ratio_4to3:
-					imgWidth = imgHeight * 4 / 3;
+					resultWidth = resultHeight * 4 / 3;
 					break;
 			}
 
-			using (Bitmap image = Image.FromFile(tmpFile.FullName) as Bitmap)
+			Bitmap image = Image.FromFile(tmpFile.FullName) as Bitmap;
+			if (image == null) return;
+
+			System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
 			{
+				Width = resultWidth,
+				Height = resultHeight,
+				X = (image.Width - resultWidth) / 2,
+				Y = (image.Height - resultHeight) / 2
+			};
 
-				if (image == null) return;
-
-				//System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
-				//{
-				//	X = (int)(Math.Floor((image.Width - imgSize) / 2d)),
-				//	Y = (image.Height - imgSize) / 2,
-				//	Height = imgSize,
-				//	Width = imgSize
-				//};
-
-				System.Drawing.Rectangle cropRectangle = new System.Drawing.Rectangle
+			if (image.Width - resultWidth < 0)
+			{
+				cropRectangle.Width = image.Width;
+				cropRectangle.X = 0;
+				using (var resultBitmap = image.Clone(cropRectangle, image.PixelFormat))
 				{
-					Height = imgHeight,
-					Width = imgWidth,
-					X = (image.Width - imgWidth) / 2,
-					Y = (image.Height - imgHeight) / 2
-				};
-
-				var result = image.Clone(cropRectangle, image.PixelFormat);
-				result.Save($"{imageFile.FullName}");
-				result.Dispose();
+					Image resultImage = ResizeImage(resultBitmap, resultWidth, resultHeight);
+					resultImage.Save($"{imageFile.FullName}");
+					resultImage.Dispose();
+				}
 			}
+			else
+			{
+				using (var resultBitmap = image.Clone(cropRectangle, image.PixelFormat))
+				{
+					resultBitmap.Save($"{imageFile.FullName}");
+				}
+			}
+			image.Dispose();
 			File.Delete(tmpFile.FullName);
+		}
+
+		private static Image ResizeImage(Image sourceImage, int width, int height)
+		{
+			int sourceWidth = sourceImage.Width;
+			int sourceHeight = sourceImage.Height;
+			int sourceX = 0, sourceY = 0;
+			int destX = 0, destY = 0;
+
+			float coeff = 0;
+			float coeffWidth = 0;
+			float coeffHeight = 0;
+
+			coeffWidth = ((float)width / (float)sourceWidth);
+			coeffHeight = ((float)height / (float)sourceHeight);
+
+			if (coeffHeight < coeffWidth)
+			{
+				coeff = coeffHeight;
+				destX = System.Convert.ToInt32((width - (sourceWidth * coeff)) / 2);
+			}
+			else
+			{
+				coeff = coeffWidth;
+				destY = System.Convert.ToInt32((height - (sourceHeight * coeff)) / 2);
+			}
+
+			int destWidth = (int)(sourceWidth * coeff);
+			int destHeight = (int)(sourceHeight * coeff);
+
+			Bitmap bitmap = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+			bitmap.SetResolution(sourceImage.HorizontalResolution, sourceImage.VerticalResolution);
+
+			using (Graphics graphics = Graphics.FromImage(bitmap))
+			{
+				graphics.Clear(System.Drawing.Color.White);
+				graphics.InterpolationMode =
+					InterpolationMode.HighQualityBicubic;
+
+				graphics.DrawImage(sourceImage,
+					new System.Drawing.Rectangle(destX, destY, destWidth, destHeight),
+					new System.Drawing.Rectangle(sourceX, sourceY, sourceWidth, sourceHeight),
+					GraphicsUnit.Pixel);
+			}
+			return bitmap;
 		}
 
 		private static void ZoomOpenUIViews(UIDocument uiDoc, double zoomValue, bool isToFit = true)
@@ -344,11 +397,11 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				RestoreDirectory = true,
 				Title = "Choose a directory",
 				FilterIndex = 0,
-				Filter = "Image Files (*.PNG, *.jpg, *.BMP) | *.png;*.jpg;*.bmp",
+				Filter = "Image Files (*.PNG, *.JPG, *.BMP) | *.png;*.jpg;*.bmp",
 				FileName = name
 			};
 
-			if ((bool)dialog.ShowDialog())
+			if (dialog.ShowDialog() == true)
 			{
 				path = dialog.FileName;
 				return path;

@@ -195,7 +195,7 @@
                             <TextBlock Tag="72" x:Name="textBlockResolutionWebLow" Text="{Binding Path=textBlockResolutionWebLow_Text}"/>
                             <TextBlock Tag="150" x:Name="textBlockResolutionWebHigh" Text="{Binding Path=textBlockResolutionWebHigh_Text}"/>
                             <TextBlock Tag="300" x:Name="textBlockResolutionPrintLow" Text="{Binding Path=textBlockResolutionPrintLow_Text}"/>
-                            <TextBlock Tag="600" x:Name="textBlockResolutionPrintHigh" Visibility="Collapsed" Text="{Binding Path=textBlockResolutionPrintLow_Text}"/>
+                            <TextBlock Tag="600" x:Name="textBlockResolutionPrintHigh" Text="{Binding Path=textBlockResolutionPrintHigh_Text}"/>
                         </ComboBox>
                         <Label
                             x:Name="labelDetailLevel"
