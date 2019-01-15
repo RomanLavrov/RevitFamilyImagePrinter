@@ -3,19 +3,11 @@ using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using RevitFamilyImagePrinter;
 using RevitFamilyImagePrinter.Infrastructure;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Xml;
-using System.Xml.Serialization;
-using Application = Autodesk.Revit.ApplicationServices.Application;
-using InvalidOperationException = Autodesk.Revit.Exceptions.InvalidOperationException;
-using IOException = Autodesk.Revit.Exceptions.IOException;
 
 namespace RevitFamilyImagePrinter.Commands
 {
@@ -172,7 +164,7 @@ namespace RevitFamilyImagePrinter.Commands
 						{
 							_doc.SaveAs(pathProject);
 						}
-						catch (InvalidOperationException exc)
+						catch (Autodesk.Revit.Exceptions.InvalidOperationException exc)
 						{
 							string errorMessage = $"File {pathProject} already exists!";
 							_logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");

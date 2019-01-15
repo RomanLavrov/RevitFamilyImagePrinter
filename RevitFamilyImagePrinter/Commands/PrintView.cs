@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
@@ -64,7 +59,7 @@ namespace RevitFamilyImagePrinter.Commands
 					HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(UserValues.UserExtension),
 					ImageResolution = UserValues.UserImageResolution,
 					ShouldCreateWebSite = false,
-					PixelSize = UserValues.UserImageSize
+					PixelSize = UserValues.UserImageHeight
 				};
 
 				if (views.Count > 0)

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:RevitFamilyImagePrinter"
              mc:Ignorable="d" d:DesignWidth="400" Height="80"
              DataContext="{Binding RelativeSource={RelativeSource Self}}">
-    <Grid Margin="10">
+    <Grid Margin="10 0 10 10">
         <!--<Grid.RowDefinitions>
             <RowDefinition/>
             <RowDefinition Height="0.6*"/>
@@ -24,7 +24,7 @@
                 Text="{Binding Path=textBlockProcess_Text}"
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
-                Margin="0 0 0 0"/>
+                Margin="0"/>
             <ProgressBar
                 x:Name="progressBarPrint"
                 Grid.Row="1"

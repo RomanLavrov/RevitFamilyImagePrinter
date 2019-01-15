@@ -22,12 +22,14 @@
   <buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
 
 	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
-	<labelSize_Text>Image size:</labelSize_Text>
+	<labelParameters_Text>Parameters</labelParameters_Text>
+	<labelSize_Text>Image height:</labelSize_Text>
 	<labelScale_Text>Scale:</labelScale_Text>
 	<labelZoom_Text>Zoom (%):</labelZoom_Text>
 	<labelResolution_Text>Image resolution:</labelResolution_Text>
 	<labelDetailLevel_Text>Detail level:</labelDetailLevel_Text>
 	<labelFormat_Text>Image format:</labelFormat_Text>
+	<labelAspectRatio_Text>Aspect ratio:</labelAspectRatio_Text>
 	<buttonApply_Text>Apply</buttonApply_Text>
 	<buttonPrint_Text>Print</buttonPrint_Text>
 	<textBlockResolutionWebLow_Text>Web Low</textBlockResolutionWebLow_Text>
