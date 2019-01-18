@@ -15,23 +15,15 @@ namespace RevitFamilyImagePrinter
     public class App : IExternalApplication
     {
         public static string Version { get; private set; }
-        public string Language { get; set; }
-        public static string DefaultFolder => Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        public static string DefaultProject => Path.Combine(DefaultFolder, "Empty.rvt");
-        public static Logger Logger = Logger.GetLogger();
+        public static string Language { get; set; }
+        public static string DefaultFolder { get; private set; }
+        public static string DefaultProject { get; private set; }
+	    public static Logger Logger { get; private set; }
 	    public static Translator Translator { get; private set; }
 
 		public Result OnStartup(UIControlledApplication a)
         {
-            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
-            Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
-
-            ControlledApplication c = a.ControlledApplication;
-            Version = c.VersionNumber;
-            Language = c.Language.ToString();
-            Logger.WriteLine($"Revit Version -> {Version}");
-            Logger.WriteLine($"Revit Language -> {Language}");
-            Translator = new Translator(Language);
+			Initialize(a.ControlledApplication);
 
             string tabName = Translator.GetValue(Translator.Keys.tabName);
             a.CreateRibbonTab(tabName);
@@ -119,5 +111,23 @@ namespace RevitFamilyImagePrinter
                 BitmapSizeOptions.FromEmptyOptions());
             return bmSource;
         }
+
+	    private static void Initialize(ControlledApplication cApp)
+	    {
+		    Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+		    Thread.CurrentThread.CurrentUICulture = CultureInfo.InvariantCulture;
+
+		    string myDocuments = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+		    DefaultFolder = Path.Combine(myDocuments, "Building360");
+		    if (!Directory.Exists(DefaultFolder))
+			    Directory.CreateDirectory(DefaultFolder);
+			DefaultProject = Path.Combine(DefaultFolder, "Empty.rvt");
+			Logger = Logger.GetLogger();
+
+			Version = cApp.VersionNumber;
+		    Language = cApp.Language.ToString();
+		    Logger.WriteLine($"Revit Version -> {Version}\nRevit Language -> {Language}");
+		    Translator = new Translator(Language);
+		}
     }
 }

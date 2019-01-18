@@ -20,16 +20,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		    _familiesFolder = familiesFolder;
 		    _familiesAmount = familiesFolder.GetFiles().Count(x => x.Extension.Equals(".rfa"));
 		    PreviousViewName = string.Empty;
-			//_printProgressBar.ValueChanged += PrintProgressBarOnValueChanged;
 	    }
-
-	    //private void PrintProgressBarOnValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
-	    //{
-		   // var s = sender;
-		   // var es = e;
-		   // var oldval = e.OldValue;
-		   // var newval = e.NewValue;
-	    //}
 
 	    public string PreviousViewName { get; set; }
 
@@ -72,7 +63,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	    public void SetProgressText(string text)
 	    {
 		    _processTextBlock.Text = text;
-			R2018_HotFix();
+			Threading_HotFix();
 		}
 
 	    public void SubscribeOnLoadedFamily(UIApplication uiApp)
@@ -88,9 +79,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				uiApp.ViewActivated += ApplicationOnViewActivated;
 	    }
 
-	    private void R2018_HotFix()
+	    private void Threading_HotFix()
 	    {
-		    //if (App.Version != "2018") return;
 		    var tmpWindow = new Window()
 		    {
 			    Width = 10,
@@ -115,7 +105,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessPrinting)}" +
 		                             $" {_printProgressBar.Value} / {_printProgressBar.Maximum}";
 		    PreviousViewName = viewName;
-		    R2018_HotFix();
+		    Threading_HotFix();
 		}
 
 	    private void ApplicationOn3DViewActivated(object sender, ViewActivatedEventArgs e)
@@ -129,7 +119,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		    _printProgressBar.Value++;
 		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessLoadingFamilies)}" +
 		                             $" {_printProgressBar.Value} / {_familiesAmount}";
-		    R2018_HotFix();
+		    Threading_HotFix();
 	    }
 
 	    private void ApplicationOnDocumentSavedAs(object sender, DocumentSavedAsEventArgs e)
