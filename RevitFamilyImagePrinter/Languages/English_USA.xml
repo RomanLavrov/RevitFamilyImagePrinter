@@ -5,13 +5,13 @@
   <tabTitle>Family Image Printer</tabTitle>
 
   <buttonPrint2DSingle_Name> Export# 2D View</buttonPrint2DSingle_Name>
-  <buttonPrint2DSingle_ToolTip>Export Family 2D view to image file</buttonPrint2DSingle_ToolTip>
+  <buttonPrint2DSingle_ToolTip>Export Type 2D view to image file</buttonPrint2DSingle_ToolTip>
 
   <buttonPrint2DMulti_Name> Export 2D# From Folder </buttonPrint2DMulti_Name>
   <buttonPrint2DMulti_ToolTip>Export List of Families 2D view from Folder to image files</buttonPrint2DMulti_ToolTip>
 
   <buttonPrint3DSingle_Name>Export# Isometric View </buttonPrint3DSingle_Name>
-  <buttonPrint3DSingle_ToolTip>Export Family Isometric view to image file</buttonPrint3DSingle_ToolTip>
+  <buttonPrint3DSingle_ToolTip>Export Type Isometric view to image file</buttonPrint3DSingle_ToolTip>
 
   <buttonPrint3DMulti_Name> Export Isometric#From Folder </buttonPrint3DMulti_Name>
   <buttonPrint3DMulti_ToolTip>Create 3D family image from selected folder</buttonPrint3DMulti_ToolTip>
