@@ -1,2 +1,81 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<TabName>Test</TabName>
+<!--Use #-symbol where NewLine required-->
+<Data>
+  <tabName>Bilddrucker</tabName>
+  <tabTitle>Familienbilddrucker</tabTitle>
+
+  <buttonPrint2DSingle_Name> 2D-Ansicht#exportieren</buttonPrint2DSingle_Name>
+  <buttonPrint2DSingle_ToolTip>Exportieren Sie die 2D-Ansicht der Familie in eine Bilddatei</buttonPrint2DSingle_ToolTip>
+
+  <buttonPrint2DMulti_Name> 2D Aus Ordner# exportieren </buttonPrint2DMulti_Name>
+  <buttonPrint2DMulti_ToolTip>Exportieren Sie die 2D-Ansicht der Familienliste aus dem Ordner in Bilder</buttonPrint2DMulti_ToolTip>
+
+  <buttonPrint3DSingle_Name>Isometrische Ansicht#exportieren</buttonPrint3DSingle_Name>
+  <buttonPrint3DSingle_ToolTip>Familien-Isometrieansicht in Bilddatei exportieren</buttonPrint3DSingle_ToolTip>
+
+  <buttonPrint3DMulti_Name> Isometrische Ansicht#aus Ordner exportieren </buttonPrint3DMulti_Name>
+  <buttonPrint3DMulti_ToolTip>Erstellen Sie ein 3D-Familienbild aus dem ausgewählten Ordner</buttonPrint3DMulti_ToolTip>
+
+  <buttonPrintView_Name> Aktuelle Ansicht# exportieren </buttonPrintView_Name>
+  <buttonPrintView_ToolTip>Aktuelle Ansicht in Bilddatei exportieren</buttonPrintView_ToolTip>
+
+  <buttonLink_ToolTip>Besuchen Sie die Website building360.ch</buttonLink_ToolTip>
+
+  <windowPrintSettingsTitle>Bilddruckeinstellungen</windowPrintSettingsTitle>
+  <labelParameters_Text>Parameter</labelParameters_Text>
+  <labelSize_Text>Bildhöhe:</labelSize_Text>
+  <labelScale_Text>Massstab</labelScale_Text>
+  <labelZoom_Text>Zoom (%):</labelZoom_Text>
+  <labelResolution_Text>Bildauflösung:</labelResolution_Text>
+  <labelDetailLevel_Text>Detail-Ebene:</labelDetailLevel_Text>
+  <labelFormat_Text>Bildformat:</labelFormat_Text>
+  <labelAspectRatio_Text>Seitenverhältnis:</labelAspectRatio_Text>
+  <buttonApply_Text>Anwenden</buttonApply_Text>
+  <buttonPrint_Text>Drucken</buttonPrint_Text>
+  <textBlockResolutionWebLow_Text>Web Nieder</textBlockResolutionWebLow_Text>
+  <textBlockResolutionWebHigh_Text>Web Hoch</textBlockResolutionWebHigh_Text>
+  <textBlockResolutionPrintLow_Text>Drucken Nieder</textBlockResolutionPrintLow_Text>
+  <textBlockResolutionPrintHigh_Text>Drucken Hoch</textBlockResolutionPrintHigh_Text>
+  <textBlockDetailLevelCoarse_Text>Grob</textBlockDetailLevelCoarse_Text>
+  <textBlockDetailLevelMedium_Text>Mittel</textBlockDetailLevelMedium_Text>
+  <textBlockDetailLevelFine_Text>Fein</textBlockDetailLevelFine_Text>
+
+  <errorMessageTitle>Fehler</errorMessageTitle>
+  <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten</errorMessageValuesCorrection>
+  <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten</errorMessageValuesRetrieving>
+  <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten</errorMessageViewUpdating>
+  <errorMessageValuesSaving>Beim Speichern der Benutzereingabewerte ist ein Fehler aufgetreten</errorMessageValuesSaving>
+  <errorMessageValuesLoading>Fehler beim Laden der Benutzereingabewerte</errorMessageValuesLoading>
+
+  <textBlockProcess_Text>Wird bearbeitet...</textBlockProcess_Text>
+  <buttonCancel_Text>Beenden</buttonCancel_Text>
+
+  <errorMessageViewCorrecting>Bei der Korrektur der aktuellen Ansicht ist ein Fehler aufgetreten</errorMessageViewCorrecting>
+  <errorMessageViewPrinting>Beim Drucken der aktuellen Ansicht ist ein Fehler aufgetreten</errorMessageViewPrinting>
+  <errorMessage2dFolderPrintingCycle>Während des 2D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten</errorMessage2dFolderPrintingCycle>
+  <errorMessage2dFolderPrinting>Beim Drucken von 2D-Ordnern ist ein Fehler aufgetreten</errorMessage2dFolderPrinting>
+  <errorMessage3dFolderPrintingCycle>Während des 3D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten</errorMessage3dFolderPrintingCycle>
+  <errorMessage3dFolderPrinting>Beim Drucken von 3D-Ordnern ist ein Fehler aufgetreten</errorMessage3dFolderPrinting>
+
+  <errorMessageNoProjectsFolder>Der Ordner "Projekte" ist nicht vorhanden</errorMessageNoProjectsFolder>
+  <errorMessageFamiliesRetrieving>Fehler beim Abrufen von Familien aus dem Ordner</errorMessageFamiliesRetrieving>
+  <errorMessageProjectProcessing>Fehler beim Verarbeiten des Projekts</errorMessageProjectProcessing>
+  <errorMessageFamilyRemoving>Beim Entfernen der Familie aus dem Projekt ist ein Fehler aufgetreten</errorMessageFamilyRemoving>
+  <errorMessageFamilyLoading>Beim Laden der Familie aus der Datei ist ein Fehler aufgetreten</errorMessageFamilyLoading>
+  <errorMessageInstanceRemoving>Beim Entfernen der Instanz aus dem Projekt ist ein Fehler aufgetreten</errorMessageInstanceRemoving>
+  <errorMessageInstanceInserting>Beim Einfügen der Instanz ist ein Fehler aufgetreten</errorMessageInstanceInserting>
+  <errorMessageTypeRemoving>Beim Entfernen des Typs aus dem Projekt ist ein Fehler aufgetreten</errorMessageTypeRemoving>
+
+  <warningMessageTitle>Warnung</warningMessageTitle>
+  <warningMessageProjectsAmount>Beachtung! Die Anzahl der erstellten Projekte entspricht nicht der Anzahl der Typen in Familien. Überprüfen Sie die Protokolldatei.</warningMessageProjectsAmount>
+
+  <folderDialogFromTitle>Wählen Sie den Ordner mit den benötigten Familien zum Drucken aus</folderDialogFromTitle>
+  <folderDialogToTitle>Wählen Sie den Ordner, in dem die gedruckten Dateien gespeichert werden sollen</folderDialogToTitle>
+
+  <windowProgressTitle> Drucken der %folderName% Ordner</windowProgressTitle>
+  <textBlockProcessCreatingProjects>Beim Erstellen von .rvt-Projekten aus .rfa-Dateien kann dies einige Zeit dauern ...</textBlockProcessCreatingProjects>
+  <textBlockProcessPreparingPrinting>Vorbereitung zum Drucken ...</textBlockProcessPreparingPrinting>
+  <textBlockProcessPrinting>Drucken: </textBlockProcessPrinting>
+  <textBlockProcessLoadingFamilies>Familien laden: </textBlockProcessLoadingFamilies>
+  <textBlockProcessProjectCreated> wurde erschaffen</textBlockProcessProjectCreated>
+</Data>
