@@ -3,11 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Xml.Linq;
-using System.Xml.Serialization;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
@@ -111,19 +107,21 @@ namespace RevitFamilyImagePrinter.Infrastructure
             return dictionary;
         }
 
-        private string ReadXML(string filename)
+        private string ReadXML(string fileName)
         {
             string result = string.Empty;
             Assembly assembly = Assembly.GetExecutingAssembly();
-            var languageFile = assembly.GetName().Name + ".Languages." + filename + ".xml";
-
-            using (Stream stream = assembly.GetManifestResourceStream(languageFile))
-            {
-                using (StreamReader sr = new StreamReader(stream))
-                {
-                    result = sr.ReadToEnd();
-                }
-            }
+	        var defaultLanguageFile = assembly.GetName().Name + ".Languages.English_USA.xml";
+			var languageFile = assembly.GetName().Name + ".Languages." + fileName + ".xml";
+	        if (!assembly.GetManifestResourceNames().Contains(languageFile))
+		        languageFile = defaultLanguageFile;
+			using (Stream stream = assembly.GetManifestResourceStream(languageFile))
+			{
+				using (StreamReader sr = new StreamReader(stream))
+				{
+					result = sr.ReadToEnd();
+				}
+			}
             return result;
         }
 
