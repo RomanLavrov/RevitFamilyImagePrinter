@@ -231,7 +231,8 @@
         <Grid Grid.Row="1" Margin="3 3 3 0">
             <Grid.Resources>
                 <Style TargetType="Button">
-                    <Setter Property="Width" Value="75"/>
+                    <Setter Property="Padding" Value="5 0 5 0"></Setter>
+                    <Setter Property="Width" Value="85"/>
                     <Setter Property="Height" Value="23"/>
                     <Setter Property="HorizontalAlignment" Value="Center"/>
                     <Setter Property="VerticalAlignment" Value="Center"/>
@@ -244,6 +245,7 @@
             </Grid.ColumnDefinitions>
             <Button
                     Grid.Column="0"
+                    HorizontalContentAlignment="Center"
                     x:Name="buttonApply"
                     Click="Button_Click_Apply">
                 <StackPanel Orientation="Horizontal">
@@ -258,6 +260,7 @@
             <Button
                     Grid.Column="1"
                     x:Name="buttonPrint"
+                    HorizontalContentAlignment="Center"
                     Click="Button_Click_Print">
                 <StackPanel Orientation="Horizontal">
                     <Viewbox Width="12" Height="12" Margin="0 0 5 0">
