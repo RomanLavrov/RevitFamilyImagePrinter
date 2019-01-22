@@ -48,6 +48,13 @@ namespace RevitFamilyImagePrinter.Windows
 
 		#region Labels
 
+		public class ExtendedToolTip
+		{
+			public string Text { get; set; }
+			public string Note { get; set; }
+			public string Example { get; set; }
+		}
+
 		public string labelSize_Text => App.Translator.GetValue(Translator.Keys.labelSize_Text);
 		public string labelScale_Text => App.Translator.GetValue(Translator.Keys.labelScale_Text);
 		public string labelZoom_Text => App.Translator.GetValue(Translator.Keys.labelZoom_Text);
@@ -56,6 +63,52 @@ namespace RevitFamilyImagePrinter.Windows
 		public string labelFormat_Text => App.Translator.GetValue(Translator.Keys.labelFormat_Text);
 		public string labelAspectRatio_Text => App.Translator.GetValue(Translator.Keys.labelAspectRatio_Text);
 		public string labelParameters_Text => App.Translator.GetValue(Translator.Keys.labelParameters_Text);
+
+		public ExtendedToolTip labelSizeToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelSize_ToolTip),
+			Example = App.Translator.GetValue(Translator.Keys.labelSize_ToolTip_Example)
+		};
+		public ExtendedToolTip labelScale_ToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelScale_ToolTip)
+
+		};
+		public ExtendedToolTip labelZoomToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelZoom_ToolTip),
+			Example = App.Translator.GetValue(Translator.Keys.labelZoom_ToolTip_Example),
+			Note = App.Translator.GetValue(Translator.Keys.labelZoom_ToolTip_Note)
+		};		
+		public ExtendedToolTip labelResolutionToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelResolution_ToolTip),
+			Note = App.Translator.GetValue(Translator.Keys.labelResolution_ToolTip_Note)
+		};
+		public ExtendedToolTip labelDetailLevelToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelDetailLevel_ToolTip),
+			Note = App.Translator.GetValue(Translator.Keys.labelDetailLevel_ToolTip_Note)
+		};
+		public ExtendedToolTip labelAspectRatioToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelAspectRatio_ToolTip),
+			Example = App.Translator.GetValue(Translator.Keys.labelAspectRatio_ToolTip_Example),
+			Note = App.Translator.GetValue(Translator.Keys.labelAspectRatio_ToolTip_Note)
+		};
+		public ExtendedToolTip labelFormat_ToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.labelFormat_ToolTip)
+		};
+		public ExtendedToolTip buttonApplyToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.buttonApply_ToolTip),
+			Note = App.Translator.GetValue(Translator.Keys.buttonApply_ToolTip_Note)
+		};
+		public ExtendedToolTip buttonPrint_ToolTip => new ExtendedToolTip
+		{
+			Text = App.Translator.GetValue(Translator.Keys.buttonPrint_ToolTip)
+		};
 
 		public string textBlockResolutionWebLow_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebLow_Text);
 		public string textBlockResolutionWebHigh_Text => App.Translator.GetValue(Translator.Keys.textBlockResolutionWebHigh_Text);
@@ -173,23 +226,23 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			if (UserScale > 512)
 			{
-				UserScale = 1;
+				UserScale = 50;
 				return;
 			}
 
 			if (UserScale > 256)
 			{
-				UserScale = 10;
+				UserScale = 25;
 				return;
 			}
 
 			if (UserScale > 32)
 			{
-				UserScale = 25;
+				UserScale = 10;
 				return;
 			}
 
-			UserScale = 50;
+			UserScale = 1;
 		}
 
 		private ViewDetailLevel GetUserDetailLevel(string strDetailLevel)
