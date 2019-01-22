@@ -4,7 +4,7 @@
   <tabName>Bilddrucker</tabName>
   <tabTitle>Familienbilddrucker</tabTitle>
 
-  <buttonPrint2DSingle_Name> 2D-Ansicht#exportieren</buttonPrint2DSingle_Name>
+  <buttonPrint2DSingle_Name>2D-Ansicht#exportieren</buttonPrint2DSingle_Name>
   <buttonPrint2DSingle_ToolTip>Exportieren Sie die 2D-Ansicht der Familie in eine Bilddatei</buttonPrint2DSingle_ToolTip>
 
   <buttonPrint2DMulti_Name> 2D Aus Ordner# exportieren </buttonPrint2DMulti_Name>
@@ -39,8 +39,25 @@
   <textBlockDetailLevelCoarse_Text>Grob</textBlockDetailLevelCoarse_Text>
   <textBlockDetailLevelMedium_Text>Mittel</textBlockDetailLevelMedium_Text>
   <textBlockDetailLevelFine_Text>Fein</textBlockDetailLevelFine_Text>
+	<labelSize_ToolTip></labelSize_ToolTip>
+	<labelScale_ToolTip></labelScale_ToolTip>
+	<labelZoom_ToolTip></labelZoom_ToolTip>
+	<labelResolution_ToolTip></labelResolution_ToolTip>
+	<labelDetailLevel_ToolTip></labelDetailLevel_ToolTip>
+	<labelFormat_ToolTip></labelFormat_ToolTip>
+	<labelAspectRatio_ToolTip></labelAspectRatio_ToolTip>
+	<buttonApply_ToolTip></buttonApply_ToolTip>
+	<buttonPrint_ToolTip></buttonPrint_ToolTip>
+	<labelSize_ToolTip_Example></labelSize_ToolTip_Example>
+	<labelZoom_ToolTip_Note></labelZoom_ToolTip_Note>
+	<labelZoom_ToolTip_Example></labelZoom_ToolTip_Example>
+	<labelDetailLevel_ToolTip_Note></labelDetailLevel_ToolTip_Note>
+	<labelAspectRatio_ToolTip_Note></labelAspectRatio_ToolTip_Note>
+	<labelAspectRatio_ToolTip_Example></labelAspectRatio_ToolTip_Example>
+	<buttonApply_ToolTip_Note></buttonApply_ToolTip_Note>
 
-  <errorMessageTitle>Fehler</errorMessageTitle>
+
+	<errorMessageTitle>Fehler</errorMessageTitle>
   <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten</errorMessageValuesCorrection>
   <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten</errorMessageValuesRetrieving>
   <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten</errorMessageViewUpdating>
@@ -69,6 +86,8 @@
   <warningMessageTitle>Warnung</warningMessageTitle>
   <warningMessageProjectsAmount>Beachtung! Die Anzahl der erstellten Projekte entspricht nicht der Anzahl der Typen in Familien. Überprüfen Sie die Protokolldatei.</warningMessageProjectsAmount>
 
+	<fileDialogFilter>Bilder Datei</fileDialogFilter>
+	<fileDialogTitle>Wählen Sie den Ordner zum Speichern des Bildes</fileDialogTitle>
   <folderDialogFromTitle>Wählen Sie den Ordner mit den benötigten Familien zum Drucken aus</folderDialogFromTitle>
   <folderDialogToTitle>Wählen Sie den Ordner, in dem die gedruckten Dateien gespeichert werden sollen</folderDialogToTitle>
 

@@ -1,25 +1,25 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--Use #-symbol where NewLine required-->
 <Data>
-  <tabName>Image Printer</tabName>
-  <tabTitle>Family Image Printer</tabTitle>
+	<tabName>Image Printer</tabName>
+	<tabTitle>Family Image Printer</tabTitle>
 
-  <buttonPrint2DSingle_Name> Export# 2D View</buttonPrint2DSingle_Name>
-  <buttonPrint2DSingle_ToolTip>Export Family 2D view to image file</buttonPrint2DSingle_ToolTip>
+	<buttonPrint2DSingle_Name>Export# 2D View</buttonPrint2DSingle_Name>
+	<buttonPrint2DSingle_ToolTip>Export Family 2D view to image file</buttonPrint2DSingle_ToolTip>
 
-  <buttonPrint2DMulti_Name> Export 2D# From Folder </buttonPrint2DMulti_Name>
-  <buttonPrint2DMulti_ToolTip>Export List of Families 2D view from Folder to image files</buttonPrint2DMulti_ToolTip>
+	<buttonPrint2DMulti_Name> Export 2D# From Folder </buttonPrint2DMulti_Name>
+	<buttonPrint2DMulti_ToolTip>Export List of Families 2D view from Folder to image files</buttonPrint2DMulti_ToolTip>
 
-  <buttonPrint3DSingle_Name>Export# Isometric View </buttonPrint3DSingle_Name>
-  <buttonPrint3DSingle_ToolTip>Export Family Isometric view to image file</buttonPrint3DSingle_ToolTip>
+	<buttonPrint3DSingle_Name>Export# Isometric View </buttonPrint3DSingle_Name>
+	<buttonPrint3DSingle_ToolTip>Export Family Isometric view to image file</buttonPrint3DSingle_ToolTip>
 
-  <buttonPrint3DMulti_Name> Export Isometric#From Folder </buttonPrint3DMulti_Name>
-  <buttonPrint3DMulti_ToolTip>Create 3D family image from selected folder</buttonPrint3DMulti_ToolTip>
+	<buttonPrint3DMulti_Name> Export Isometric#From Folder </buttonPrint3DMulti_Name>
+	<buttonPrint3DMulti_ToolTip>Create 3D family image from selected folder</buttonPrint3DMulti_ToolTip>
 
-  <buttonPrintView_Name> Export# Current View </buttonPrintView_Name>
-  <buttonPrintView_ToolTip>Export Current View to image file</buttonPrintView_ToolTip>
+	<buttonPrintView_Name> Export# Current View </buttonPrintView_Name>
+	<buttonPrintView_ToolTip>Export Current View to image file</buttonPrintView_ToolTip>
 
-  <buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
+	<buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
 
 	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
 	<labelParameters_Text>Parameters</labelParameters_Text>
@@ -39,6 +39,23 @@
 	<textBlockDetailLevelCoarse_Text>Coarse</textBlockDetailLevelCoarse_Text>
 	<textBlockDetailLevelMedium_Text>Medium</textBlockDetailLevelMedium_Text>
 	<textBlockDetailLevelFine_Text>Fine</textBlockDetailLevelFine_Text>
+	<labelSize_ToolTip>Defines “height” proportion of the exported image in pixels</labelSize_ToolTip>
+	<labelSize_ToolTip_Example>Example: Image height = 1080 with Aspect ratio 16:9 produces image with 1920:1080 resolution</labelSize_ToolTip_Example>
+	<labelScale_ToolTip>Defines the scale of the exported view in the following manner: larger scale value produces more accurate exported view scale (thinner lines)</labelScale_ToolTip>
+	<labelZoom_ToolTip>Defines the indents of the exported view in percentages</labelZoom_ToolTip>
+	<labelZoom_ToolTip_Note>Note: this option is ignored in command “Export Current View” and the resulted image will not be zoomed. Picture has 5% indent by default and this cannot be changed</labelZoom_ToolTip_Note>
+	<labelZoom_ToolTip_Example>Example: Zoom = 100 produces an image with common indent 5%, Zoom = 50 results an image with indent 55%</labelZoom_ToolTip_Example>
+	<labelResolution_ToolTip>Defines the resolution of the exported image in dots per inch</labelResolution_ToolTip>
+	<labelResolution_ToolTip_Note>“Web Low” = 72 DPI,#“Web High” = 150 DPI,#“Print Low” = 300 DPI,#“Print High” = 600 DPI</labelResolution_ToolTip_Note>
+	<labelDetailLevel_ToolTip>Corresponds to the detail level in Revit</labelDetailLevel_ToolTip>
+	<labelDetailLevel_ToolTip_Note>Note: while exporting isometric view detail level is always set as “Fine” and this cannot be changed</labelDetailLevel_ToolTip_Note>
+	<labelFormat_ToolTip>Defines the image format of the exported image</labelFormat_ToolTip>
+	<labelAspectRatio_ToolTip>Defines the aspect ratio of the exported image depending on image height value</labelAspectRatio_ToolTip>
+	<labelAspectRatio_ToolTip_Note>Note: this option is ignored in command “Export Current View” and the resulted resolution will be equal to the active view resolution</labelAspectRatio_ToolTip_Note>
+	<labelAspectRatio_ToolTip_Example>Example: Aspect ratio 4:3 with Image height = 768 produces image with 1024:768 resolution</labelAspectRatio_ToolTip_Example>
+	<buttonApply_ToolTip>Apply button let preview changes, that is to transform current view applying entered values.#This button is available only during the export of single image.</buttonApply_ToolTip>
+	<buttonApply_ToolTip_Note>This button is available only during the export of single image</buttonApply_ToolTip_Note>
+	<buttonPrint_ToolTip>Print button changes current view applying entered values and saves these values to display them the next time the “Image Print Settings” window will be opened. (Enter)</buttonPrint_ToolTip>
 
 	<errorMessageTitle>Error</errorMessageTitle>
 	<errorMessageValuesCorrection>Error occurred during values correction</errorMessageValuesCorrection>
@@ -47,7 +64,7 @@
 	<errorMessageValuesSaving>Error occurred during saving user input values</errorMessageValuesSaving>
 	<errorMessageValuesLoading>Error occurred during loading user input values</errorMessageValuesLoading>
 
-	<textBlockProcess_Text>Something is happening...</textBlockProcess_Text>
+	<textBlockProcess_Text>Processing...</textBlockProcess_Text>
 	<buttonCancel_Text>Cancel</buttonCancel_Text>
 
 	<errorMessageViewCorrecting>Error occurred during current view correction</errorMessageViewCorrecting>
@@ -69,8 +86,10 @@
 	<warningMessageTitle>Warning</warningMessageTitle>
 	<warningMessageProjectsAmount>Attention! The amount of projects created is not equal to the amount of types in families. Check the log file.</warningMessageProjectsAmount>
 
-	<folderDialogFromTitle>Select folder with needed families to be printed</folderDialogFromTitle>
-	<folderDialogToTitle>Select folder where to save printed files</folderDialogToTitle>
+	<fileDialogFilter>Image Files</fileDialogFilter>
+	<fileDialogTitle>Select the directory to save the image</fileDialogTitle>
+	<folderDialogFromTitle>Select the directory with families to be printed</folderDialogFromTitle>
+	<folderDialogToTitle>Select the directory to save printed files</folderDialogToTitle>
 
 	<windowProgressTitle> printing of %folderName% folder</windowProgressTitle>
 	<textBlockProcessCreatingProjects>Creating .rvt projects from .rfa files, this may take some time...</textBlockProcessCreatingProjects>
