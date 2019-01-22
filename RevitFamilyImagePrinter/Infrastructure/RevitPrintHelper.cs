@@ -390,9 +390,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				InitialDirectory = path,
 				RestoreDirectory = true,
-				Title = "Choose a directory",
+				Title = App.Translator.GetValue(Translator.Keys.fileDialogTitle),
 				FilterIndex = 0,
-				Filter = "Image Files (*.PNG, *.JPG, *.BMP) | *.png;*.jpg;*.bmp",
+				Filter = $"{App.Translator.GetValue(Translator.Keys.fileDialogFilter)} (*.PNG, *.JPG, *.BMP) | *.png;*.jpg;*.bmp",
 				FileName = name
 			};
 

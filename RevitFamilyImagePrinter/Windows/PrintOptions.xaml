@@ -14,7 +14,55 @@
         HorizontalAlignment="Stretch"
         VerticalAlignment="Stretch"
         Margin="3">
-        <Grid.RowDefinitions>
+		<Grid.Resources>
+			<Style TargetType="ToolTip">
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="ToolTip">
+							<Border Name="Border" BorderThickness="1"
+                                                    Width="{TemplateBinding Width}"
+                                                    Height="{TemplateBinding Height}">
+								<Grid DataContext="{TemplateBinding Content}">
+									<Border BorderThickness="3"
+                                                                Background="#f1f2f7"
+                                                                Padding="5"
+                                                                MaxWidth="230">
+										<Border.Effect>
+											<DropShadowEffect Color="#a2a2a2" 
+                                                                                  Opacity="0.5" 
+                                                                                  ShadowDepth="1"
+                                                                                  BlurRadius="5"/>
+										</Border.Effect>
+										<StackPanel Orientation="Vertical">
+											<StackPanel.Resources>
+												<Style TargetType="TextBlock">
+													<Setter Property="TextWrapping" Value="Wrap"/>
+													<Style.Triggers>
+														<Trigger Property="Text" Value="">
+															<Setter Property="Visibility" Value="Collapsed" />
+														</Trigger>
+														<Trigger Property="Text" Value="{x:Null}">
+															<Setter Property="Visibility" Value="Collapsed" />
+														</Trigger>
+													</Style.Triggers>
+												</Style>
+											</StackPanel.Resources>
+											<TextBlock FontWeight="DemiBold" Text="{Binding Text}"/>
+											<TextBlock Text="{Binding Note}"/>
+											<TextBlock FontStyle="Italic" Text="{Binding Example}"/>
+										</StackPanel>
+									</Border>
+								</Grid>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
+			<Style TargetType="HeaderedContentControl">
+				<Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+			</Style>
+		</Grid.Resources>
+	    <Grid.RowDefinitions>
             <RowDefinition Height="6*"/>
             <RowDefinition/>
         </Grid.RowDefinitions>
@@ -37,17 +85,18 @@
                     Margin="3"
                     HorizontalAlignment="Stretch">
                     <Grid.Resources>
-                        <Style TargetType="Label">
-                            <Setter Property="Margin" Value="0 0 5 0"/>
-                            <Setter Property="HorizontalAlignment" Value="Left"/>
-                            <Setter Property="VerticalAlignment" Value="Center"/>
-                        </Style>
-                        <Style TargetType="TextBox">
+						<Style TargetType="Label">
+							<Setter Property="Margin" Value="0 0 5 0"/>
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Center"/>
+							<Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+						</Style>
+						<Style TargetType="TextBox">
                             <Setter Property="MinHeight" Value="20"/>
                             <Setter Property="HorizontalAlignment" Value="Stretch"/>
                             <Setter Property="VerticalAlignment" Value="Center"/>
                             <Setter Property="TextWrapping" Value="Wrap"/>
-                            <Setter Property="MaxLength" Value="7"/>
+                            <Setter Property="MaxLength" Value="5"/>
                             <EventSetter Event="KeyDown" Handler="TextBox_KeyDown"/>
                         </Style>
                     </Grid.Resources>
@@ -66,8 +115,9 @@
                         x:Name="labelSize"
                         Grid.Column="0"
                         Grid.Row="0"
-                        Content="{Binding Path=labelSize_Text}"/>
-                    <TextBox
+                        Content="{Binding Path=labelSize_Text}"
+                        ToolTip="{Binding Path=labelSizeToolTip}"/>
+                        <TextBox
                     Grid.Column="1"
                     Grid.Row="0"
                     x:Name="SizeValue"
@@ -77,27 +127,32 @@
                     x:Name="labelScale"
                     Grid.Column="0"
                     Grid.Row="1"
-                    Content="{Binding Path=labelScale_Text}" />
+                    Content="{Binding Path=labelScale_Text}" 
+                    ToolTip="{Binding Path=labelScale_ToolTip}"/>
                     <TextBox
                     Grid.Column="1"
                     Grid.Row="1"
                     x:Name="ScaleValue"
-                    Text="64"/>
+                    Text="64"
+                    MaxLength="3"/>
                     <Label
                     x:Name="labelZoom"
                     Grid.Column="0"
                     Grid.Row="2"
-                            Content="{Binding Path=labelZoom_Text}" />
+                    Content="{Binding Path=labelZoom_Text}"
+                    ToolTip="{Binding Path=labelZoomToolTip}"/>
                     <TextBox
                     Grid.Column="1"
                     Grid.Row="2"
                     x:Name="ZoomValue"
-                    Text="90"/>
+                    Text="90"
+                    MaxLength="3"/>
                     <Label
                     x:Name="labelResolution"
                     Grid.Column="0"
                     Grid.Row="3"
-                            Content="{Binding Path=labelResolution_Text}" />
+                    Content="{Binding Path=labelResolution_Text}"
+                    ToolTip="{Binding Path=labelResolutionToolTip}"/>
                     <ComboBox 
                     Grid.Row="3"
                     Grid.Column="1"
@@ -115,7 +170,8 @@
                             x:Name="labelDetailLevel"
                             Grid.Column="0"
                             Grid.Row="4"
-                            Content="{Binding Path=labelDetailLevel_Text}" />
+                            Content="{Binding Path=labelDetailLevel_Text}"
+                            ToolTip="{Binding Path=labelDetailLevelToolTip}"/>
                     <ComboBox 
                     Grid.Row="4"
                     Grid.Column="1"
@@ -157,9 +213,12 @@
                 </Grid>
             </GroupBox>
             <GroupBox Grid.Row="1" 
-                          VerticalContentAlignment="Center"
-                          Header="{Binding Path=labelAspectRatio_Text}">
-                <Grid 
+                          VerticalContentAlignment="Center">
+	            <GroupBox.Header>
+		            <HeaderedContentControl ToolTip="{Binding Path=labelAspectRatioToolTip}" 
+		                                    Content="{Binding Path=labelAspectRatio_Text}"/>
+	            </GroupBox.Header>
+				<Grid 
                     VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -191,10 +250,13 @@
                     </RadioButton>
                 </Grid>
             </GroupBox>
-            <GroupBox Grid.Row="2"
-                          VerticalContentAlignment="Center"
-                          Header="{Binding Path=labelFormat_Text}">
-                <Grid 
+			<GroupBox Grid.Row="2"
+                      VerticalContentAlignment="Center">
+				<GroupBox.Header>
+					<HeaderedContentControl ToolTip="{Binding Path=labelFormat_ToolTip}" 
+					                        Content="{Binding Path=labelFormat_Text}"/>
+				</GroupBox.Header>
+				<Grid 
                     VerticalAlignment="Center">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
@@ -237,18 +299,20 @@
                     <Setter Property="HorizontalAlignment" Value="Center"/>
                     <Setter Property="VerticalAlignment" Value="Center"/>
                     <Setter Property="VerticalContentAlignment" Value="Center"/>
+	                <Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
                 </Style>
             </Grid.Resources>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
-            <Button
+			<Button
                     Grid.Column="0"
                     HorizontalContentAlignment="Center"
                     x:Name="buttonApply"
-                    Click="Button_Click_Apply">
-                <StackPanel Orientation="Horizontal">
+                    Click="Button_Click_Apply"
+					ToolTip="{Binding buttonApplyToolTip}">
+				<StackPanel Orientation="Horizontal">
                     <Viewbox Width="12" Height="12" Margin="0 0 5 0">
                         <Path Fill="Black" Data="m.3,14c-0.2-0.2-0.3-0.5-0.3-0.7s0.1-0.5 0.3-0.7l1.4-1.4c0.4-0.4 1-0.4 1.4,0l.1,.1 5.5,5.9c0.2,0.2 0.5,0.2
                                   0.7,0l13.4-13.9h0.1v-8.88178e-16c0.4-0.4 1-0.4 1.4,0l1.4,1.4c0.4,0.4 0.4,1 
@@ -262,7 +326,8 @@
                     x:Name="buttonPrint"
                     HorizontalContentAlignment="Center"
                     Click="Button_Click_Print">
-                <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Horizontal"
+                            ToolTip="{Binding buttonPrint_ToolTip}">
                     <Viewbox Width="12" Height="12" Margin="0 0 5 0">
                         <Path Fill="Black" Data="M399.25,98.9h-12.4V71.3c0-39.3-32-71.3-71.3-71.3h-149.7c-39.3,0-71.3,32-71.3,71.3v27.6h-11.3
 			                            c-39.3,0-71.3,32-71.3,71.3v115c0,39.3,32,71.3,71.3,71.3h11.2v90.4c0,19.6,16,35.6,35.6,35.6h221.1c19.6,0,35.6-16,35.6-35.6
