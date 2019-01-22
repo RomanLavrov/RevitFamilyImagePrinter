@@ -23,10 +23,10 @@
 
 	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
 	<labelParameters_Text>Parameters</labelParameters_Text>
-	<labelSize_Text>Image height:</labelSize_Text>
+	<labelSize_Text>Image height (px):</labelSize_Text>
 	<labelScale_Text>Scale:</labelScale_Text>
 	<labelZoom_Text>Zoom (%):</labelZoom_Text>
-	<labelResolution_Text>Image resolution:</labelResolution_Text>
+	<labelResolution_Text>Image resolution (DPI):</labelResolution_Text>
 	<labelDetailLevel_Text>Detail level:</labelDetailLevel_Text>
 	<labelFormat_Text>Image format:</labelFormat_Text>
 	<labelAspectRatio_Text>Aspect ratio:</labelAspectRatio_Text>
