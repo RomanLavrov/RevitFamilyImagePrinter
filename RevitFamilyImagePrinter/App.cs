@@ -35,8 +35,13 @@ namespace RevitFamilyImagePrinter
                 "RevitFamilyImagePrinter.Commands.Print2D")
             {
                 ToolTip = Translator.GetValue(Translator.Keys.buttonPrint2DSingle_ToolTip),
-                LargeImage = GetImage(Resources._2D_Single.GetHbitmap())
+                
+                LargeImage = GetImage(Resources._2D_Single.GetHbitmap()),
+                
             };
+            ContextualHelp buttonPrint2DSingleHelp =  new ContextualHelp(ContextualHelpType.Url, "https://www.building360.ch/ImagePrinter/index.html");
+            buttonPrint2DSingle.SetContextualHelp(buttonPrint2DSingleHelp);
+            
 
             PushButtonData buttonPrint2DMulti = new PushButtonData("Print 2D Folder", Translator.GetValue(Translator.Keys.buttonPrint2DMulti_Name), assembly,
                 "RevitFamilyImagePrinter.Commands.Print2DFolder")
