@@ -105,7 +105,7 @@ namespace RevitFamilyImagePrinter
 
         public Result OnShutdown(UIControlledApplication a)
         {
-            if (File.Exists(DefaultProject) && RevitPrintHelper.IsFileAccessible(DefaultProject))
+            if (File.Exists(DefaultProject) && PrintHelper.IsFileAccessible(DefaultProject))
                 File.Delete(DefaultProject);
             Logger.EndLogSession();
             return Result.Succeeded;

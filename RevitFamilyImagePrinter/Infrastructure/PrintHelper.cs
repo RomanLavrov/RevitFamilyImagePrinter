@@ -16,7 +16,7 @@ using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
-	public static class RevitPrintHelper
+	public static class PrintHelper
 	{
 		#region Private
 
@@ -417,62 +417,70 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false)
 		{
-			Document doc = uiDoc.Document;
-			using (Transaction transaction = new Transaction(doc, "Print"))
+			try
 			{
-				transaction.Start();
-
-				string initialName = GetFileName(doc);
-				if (!isAuto)
-					filePath = SelectFileNameDialog(initialName);
-				if (filePath == initialName) return;
-				IList<ElementId> views = new List<ElementId>();
-
-				views.Add(doc.ActiveView.Id);
-
-				//CorrectFileName(ref filePath);
-				FileInfo imageFile = new FileInfo($"{filePath}{userValues.UserExtension}");
-				var tmpFilePath = Path.Combine(imageFile.DirectoryName,
-					$"{Guid.NewGuid().ToString()}{imageFile.Extension}");
-				FileInfo tmpFile = new FileInfo(tmpFilePath);
-
-				var exportOptions = new ImageExportOptions
+				Document doc = uiDoc.Document;
+				using (Transaction transaction = new Transaction(doc, "Print"))
 				{
-					ExportRange = ExportRange.VisibleRegionOfCurrentView,
-					FilePath = tmpFilePath,
-					FitDirection = FitDirectionType.Vertical,
-					HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
-					ImageResolution = userValues.UserImageResolution,
-					PixelSize = userValues.UserImageHeight,
-					ShouldCreateWebSite = false,
-					ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
-					ViewName = "temporary",
-					ZoomType = ZoomFitType.FitToPage
-				};
+					transaction.Start();
 
-				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+					string initialName = GetFileName(doc);
+					if (!isAuto)
+						filePath = SelectFileNameDialog(initialName);
+					if (filePath == initialName) return;
+					IList<ElementId> views = new List<ElementId>();
+					views.Add(doc.ActiveView.Id);
 
-				if (views.Count > 0)
-				{
-					exportOptions.SetViewsAndSheets(views);
+					//CorrectFileName(ref filePath);
+					FileInfo imageFile = new FileInfo($"{filePath}{userValues.UserExtension}");
+					var tmpFilePath = Path.Combine(imageFile.DirectoryName,
+						$"{Guid.NewGuid().ToString()}{imageFile.Extension}");
+					FileInfo tmpFile = new FileInfo(tmpFilePath);
+
+					var exportOptions = new ImageExportOptions
+					{
+						ExportRange = ExportRange.VisibleRegionOfCurrentView,
+						FilePath = tmpFilePath,
+						FitDirection = FitDirectionType.Vertical,
+						HLRandWFViewsFileType = GetImageFileType(userValues.UserExtension),
+						ImageResolution = userValues.UserImageResolution,
+						PixelSize = userValues.UserImageHeight,
+						ShouldCreateWebSite = false,
+						ShadowViewsFileType = GetImageFileType(userValues.UserExtension),
+						ViewName = "temporary",
+						ZoomType = ZoomFitType.FitToPage
+					};
+
+					ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+
+					if (views.Count > 0)
+					{
+						exportOptions.SetViewsAndSheets(views);
+					}
+
+					var scale = GetScaleFromElement(uiDoc);
+					if (scale == null)
+						return;
+
+					ZoomOpenUIViews(uiDoc, (double) scale, false);
+
+					R2019_HotFix();
+					if (ImageExportOptions.IsValidFileName(filePath))
+					{
+						doc.ExportImage(exportOptions);
+					}
+
+					transaction.Commit();
+
+					CropImageRectangle(userValues, imageFile, tmpFile);
 				}
-
-				var scale = GetScaleFromElement(uiDoc);
-				if (scale == null)
-					return;
-
-				ZoomOpenUIViews(uiDoc, (double)scale, false);
-
-				R2019_HotFix();
-				if (ImageExportOptions.IsValidFileName(filePath))
-				{
-					doc.ExportImage(exportOptions);
-				}
-				transaction.Commit();
-
-				CropImageRectangle(userValues, imageFile, tmpFile);
+				doc.Dispose();
 			}
-			doc.Dispose();
+			catch (Exception exc)
+			{
+				ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", App.Logger, false);
+			}
 		}
 
 	    private static void ActiveViewChangeTransaction(Document doc, UserImageValues userValues, bool is3D = false)
@@ -535,11 +543,19 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static void View2DChangesCommit(UIDocument uiDoc, UserImageValues userValues)
 		{
-			using (Document doc = uiDoc.Document)
+			try
 			{
-				ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
-				ActiveViewChangeTransaction(doc, userValues);
-				R2019_HotFix();
+				using (Document doc = uiDoc.Document)
+				{
+					ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
+					ActiveViewChangeTransaction(doc, userValues);
+					R2019_HotFix();
+				}
+			}
+			catch (Exception exc)
+			{
+				ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", App.Logger, false);
 			}
 		}
 

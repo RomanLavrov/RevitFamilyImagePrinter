@@ -13,18 +13,17 @@ namespace RevitFamilyImagePrinter.Commands
 
 		public UserImageValues UserValues { get; set; } = new UserImageValues()
 		{
-			UserScale = 100, UserZoomValue = 0.9
+			UserScale = 100,
+			UserZoomValue = 0.9
 		};
-		public string UserImagePath { get; set; } 
+		public string UserImagePath { get; set; }
 
 		#endregion
 
 		#region Variables
 
-		private Document _doc => UIDoc?.Document;
 		private readonly Logger _logger = App.Logger;
 		public UIDocument UIDoc;
-		public bool IsAuto = false;
 
 		#endregion
 
@@ -38,50 +37,20 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
-			//uiapp.ViewActivated += SetViewParameters;
 
-			RevitPrintHelper.SetActive3DView(UIDoc);
-			ViewChangesCommit();    
+			PrintHelper.SetActive3DView(UIDoc);
+			PrintHelper.View3DChangesCommit(UIDoc, UserValues);
 
-			if (!message.Equals("FolderPrint"))
-			{
-				UserImageValues userInputValues =
-					RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, true);
-				if (userInputValues == null)
-					return Result.Cancelled;
-				this.UserValues = userInputValues;
-				ViewChangesCommit();
-			}
+			UserImageValues userInputValues =
+				PrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, true);
+			if (userInputValues == null)
+				return Result.Cancelled;
+			this.UserValues = userInputValues;
 
-			PrintCommit();
+			PrintHelper.View3DChangesCommit(UIDoc, UserValues);
+			PrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath);
 
 			return Result.Succeeded;
-		}
-
-		public void ViewChangesCommit()
-		{
-			try
-			{
-				RevitPrintHelper.View3DChangesCommit(UIDoc, UserValues);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
-			}
-		}
-
-		private void PrintCommit()
-		{
-			try
-			{
-				RevitPrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath, IsAuto);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
-			}
 		}
 	}
 }

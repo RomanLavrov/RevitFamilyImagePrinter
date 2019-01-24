@@ -30,48 +30,20 @@ namespace RevitFamilyImagePrinter.Commands
 		{
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
-			RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
+			PrintHelper.CreateEmptyProject(commandData.Application.Application);
 
-			RevitPrintHelper.SetActive2DView(UIDoc);
+			PrintHelper.SetActive2DView(UIDoc);
 
-			if (!message.Equals("FolderPrint"))
-			{
-				UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
-				if (userInputValues == null)
-					return Result.Cancelled;
-				this.UserValues = userInputValues;
-			}
 
-			ViewChangesCommit();
-			PrintCommit();
+			UserImageValues userInputValues = PrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
+			if (userInputValues == null)
+				return Result.Cancelled;
+			this.UserValues = userInputValues;
+
+			PrintHelper.View2DChangesCommit(UIDoc, UserValues);
+			PrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath, IsAuto);
 
 			return Result.Succeeded;
-		}
-
-		public void ViewChangesCommit()
-		{
-			try
-			{
-				RevitPrintHelper.View2DChangesCommit(UIDoc, UserValues);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
-			}
-		}
-
-		private void PrintCommit()
-		{
-			try
-			{
-				RevitPrintHelper.PrintImageTransaction(UIDoc, UserValues, UserImagePath, IsAuto);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
-			}
 		}
 	}
 }

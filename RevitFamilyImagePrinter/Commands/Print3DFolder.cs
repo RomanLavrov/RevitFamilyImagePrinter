@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Autodesk.Revit.Attributes;
@@ -46,74 +47,54 @@ namespace RevitFamilyImagePrinter.Commands
 				_uiApp = commandData.Application;
 				_uiDoc = _uiApp.ActiveUIDocument;
 				var initProjectPath = _uiDoc.Document.PathName;
-				RevitPrintHelper.CreateEmptyProject(commandData.Application.Application);
+				PrintHelper.CreateEmptyProject(commandData.Application.Application);
 
 				DirectoryInfo familiesFolder =
-					RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogFromTitle)}");
+					PrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogFromTitle)}");
 				if (familiesFolder == null)
 					return Result.Cancelled;
-				UserFolderTo = RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogToTitle)}");
+
+				UserFolderTo = PrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogToTitle)}");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
 
 				UserValues =
-					RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
+					PrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
 				if (UserValues == null)
+					return Result.Failed;
+
+				var families = GetFamilyFilesFromFolder(familiesFolder);
+				if (families == null)
 					return Result.Failed;
 
 				progressHelper = new PrintProgressHelper(familiesFolder,
 					$"{App.Translator.GetValue(Translator.Keys.textBlockProcessCreatingProjects)}");
 				progressHelper.Show(true);
 				progressHelper.SubscribeOnLoadedFamily(_uiApp);
-				progressHelper.SetProgressBarMaximum(familiesFolder.GetFiles().Count(x => x.Extension.Equals(".rfa")));
+				progressHelper.SetProgressBarMaximum(families.Count);
 
-				if (!CreateProjects(commandData, elements, familiesFolder))
-					return Result.Failed;
+				UserFolderFrom = new DirectoryInfo(Path.Combine(familiesFolder.FullName,
+					App.Translator.GetValue(Translator.Keys.folderProjectsName)));
 
-				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
-				progressHelper.SetProgressText($"{App.Translator.GetValue(Translator.Keys.textBlockProcessPreparingPrinting)}");
-				progressHelper.SetProgressBarMaximum(UserFolderFrom.GetFiles().Count(x => x.Extension.Equals(".rvt")));
-				progressHelper.SubscribeOnViewActivated(_uiApp, true);
-
-				//int createdImages = 0;
-				
-				foreach (var item in fileList)
+				foreach (var i in families)
 				{
-					try
+					PathData pathData = new PathData()
 					{
-						FileInfo fileInfo = new FileInfo(item);
-						if (!fileInfo.Extension.Equals(".rvt"))
-							continue;
-						RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-						_uiDoc = commandData.Application.OpenAndActivateDocument(item);
-						if (fileInfo.Length > maxSizeLength)
-							RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-					    RevitPrintHelper.SetActive3DView(_uiDoc);
-						ViewChangesCommit();
-						PrintCommit(_uiDoc.Document);
-					}
-					catch (CorruptModelException exc)
-					{
-						RevitPrintHelper.ProcessError(exc,
-							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger, false);
-					}
-					catch (Exception exc)
-					{
-						RevitPrintHelper.ProcessError(exc,
-							$"{App.Translator.GetValue(Translator.Keys.errorMessage3dFolderPrintingCycle)}", _logger, false);
-					}
+						FamilyPath = i.FullName,
+						ProjectsPath = UserFolderFrom.FullName,
+						ImagesPath = UserFolderTo.FullName
+					};
+					ProjectHelper.CreateProjectsFromFamily(_uiDoc, pathData, UserValues, true);
 				}
 
-				//RevitPrintHelper.CheckImagesAmount(UserFolderFrom, createdImages);
-
 				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
-					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+					_uiDoc = PrintHelper.OpenDocument(_uiDoc, initProjectPath);
 				else
-					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
+					_uiDoc = PrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessage3dFolderPrinting)}", _logger);
 
 				return Result.Failed;
@@ -125,46 +106,17 @@ namespace RevitFamilyImagePrinter.Commands
 			return Result.Succeeded;
 		}
 
-	    private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
-		{
-			ProjectCreator creator = new ProjectCreator()
-			{
-				FamiliesFolder = familiesFolder,
-				UserValues = this.UserValues
-			};
-			string tmp = string.Empty;
-			var result = creator.Execute(commandData, ref tmp, elements);
-			if (result != Result.Succeeded)
-				return false;
-			UserFolderFrom = creator.ProjectsFolder;
-			return true;
-		}
-
-		public void ViewChangesCommit()
+		private List<FileInfo> GetFamilyFilesFromFolder(DirectoryInfo familiesFolder)
 		{
 			try
 			{
-				RevitPrintHelper.View3DChangesCommit(_uiDoc, UserValues);
+				return ProjectHelper.GetFamilyFilesFromFolder(familiesFolder);
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
-			}
-		}
-
-		private void PrintCommit(Document doc)
-		{
-			try
-			{
-				string initialName = RevitPrintHelper.GetFileName(doc);
-				string filePath = Path.Combine(UserFolderTo.FullName, initialName);
-				RevitPrintHelper.PrintImageTransaction(_uiDoc, UserValues, filePath, true);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
+				PrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamiliesRetrieving)}", App.Logger);
+				return null;
 			}
 		}
 	}

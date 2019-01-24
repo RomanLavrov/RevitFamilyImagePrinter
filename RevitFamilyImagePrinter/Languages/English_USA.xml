@@ -20,8 +20,9 @@
 	<buttonPrintView_ToolTip>Export Current View to image file</buttonPrintView_ToolTip>
 
 	<buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
+  <folderProjectsName>Projects</folderProjectsName>
 
-	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
+  <windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
 	<labelParameters_Text>Parameters</labelParameters_Text>
 	<labelSize_Text>Image height (px):</labelSize_Text>
 	<labelScale_Text>Scale:</labelScale_Text>

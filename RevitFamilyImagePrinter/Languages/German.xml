@@ -20,6 +20,7 @@
   <buttonPrintView_ToolTip>Aktuelle Ansicht in Bilddatei exportieren</buttonPrintView_ToolTip>
 
   <buttonLink_ToolTip>Besuchen Sie die Website building360.ch</buttonLink_ToolTip>
+  <folderProjectsName>Projekte</folderProjectsName>
 
   <windowPrintSettingsTitle>Bilddruckeinstellungen</windowPrintSettingsTitle>
   <labelParameters_Text>Parameter</labelParameters_Text>

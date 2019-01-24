@@ -99,7 +99,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private void ApplicationOnViewActivated(object sender, ViewActivatedEventArgs e)
 	    {
-		    string viewName = RevitPrintHelper.GetFileName(e.CurrentActiveView.Document);
+		    string viewName = PrintHelper.GetFileName(e.CurrentActiveView.Document);
 		    if (PreviousViewName.Equals(viewName) || viewName.ToLower().Equals("empty")) return;
 		    _printProgressBar.Value++;
 		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessPrinting)}" +
@@ -117,7 +117,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private void ApplicationOnFamilyLoadedIntoDocument(object sender, FamilyLoadedIntoDocumentEventArgs e) 
 	    {
 		    _printProgressBar.Value++;
-		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessLoadingFamilies)}" +
+		    _processTextBlock.Text = $"{App.Translator.GetValue(Translator.Keys.textBlockProcessPrinting)}" +
 		                             $" {_printProgressBar.Value} / {_familiesAmount}";
 		    Threading_HotFix();
 	    }

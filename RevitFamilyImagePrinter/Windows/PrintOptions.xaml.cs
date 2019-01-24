@@ -217,7 +217,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesRetrieving)}", _logger);
 				return null;
 			}
@@ -295,7 +295,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesCorrection)}", _logger);
 			}
 		}
@@ -304,7 +304,7 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			try
 			{
-				//RevitPrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
+				//PrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
 				IList<UIView> uiviews = UIDoc.GetOpenUIViews();
 				foreach (var item in uiviews)
 				{
@@ -323,7 +323,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc, 
+				PrintHelper.ProcessError(exc, 
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}", _logger);
 			}
 		}
@@ -343,7 +343,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesSaving)}", _logger);
 			}
 		}
@@ -373,7 +373,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}", _logger);
 			}
 		}

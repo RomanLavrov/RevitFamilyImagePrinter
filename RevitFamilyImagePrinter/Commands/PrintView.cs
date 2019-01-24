@@ -34,13 +34,13 @@ namespace RevitFamilyImagePrinter.Commands
 			UIApplication uiapp = commandData.Application;
 			UIDoc = uiapp.ActiveUIDocument;
 
-			UserImageValues userInputValues = RevitPrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, false, false, false);
+			UserImageValues userInputValues = PrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset, false, false, false);
 			if (userInputValues == null)
 				return Result.Cancelled;
 			this.UserValues = userInputValues;
 
-			string initialName = RevitPrintHelper.GetFileName(doc);
-			string filePath = RevitPrintHelper.SelectFileNameDialog(initialName);
+			string initialName = PrintHelper.GetFileName(doc);
+			string filePath = PrintHelper.SelectFileNameDialog(initialName);
 			if (filePath == initialName) return Result.Failed;
 
 			IList<ElementId> views = new List<ElementId>();
@@ -56,7 +56,7 @@ namespace RevitFamilyImagePrinter.Commands
 					ViewName = "temporary",
 					FilePath = filePath,
 					FitDirection = FitDirectionType.Vertical,
-					HLRandWFViewsFileType = RevitPrintHelper.GetImageFileType(UserValues.UserExtension),
+					HLRandWFViewsFileType = PrintHelper.GetImageFileType(UserValues.UserExtension),
 					ImageResolution = UserValues.UserImageResolution,
 					ShouldCreateWebSite = false,
 					PixelSize = UserValues.UserImageHeight

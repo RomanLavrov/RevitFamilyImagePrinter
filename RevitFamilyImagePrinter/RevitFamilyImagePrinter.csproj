@@ -83,7 +83,9 @@
     <Compile Include="Commands\RemoveEmptyFamilies.cs" />
     <Compile Include="Infrastructure\FamilyData.cs" />
     <Compile Include="Infrastructure\Logger.cs" />
+    <Compile Include="Infrastructure\PathData.cs" />
     <Compile Include="Infrastructure\PrintProgressHelper.cs" />
+    <Compile Include="Infrastructure\ProjectHelper.cs" />
     <Compile Include="Infrastructure\Translator.cs" />
     <Compile Include="Windows\PrintProgress.xaml.cs">
       <DependentUpon>PrintProgress.xaml</DependentUpon>
@@ -94,7 +96,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="Infrastructure\RevitPrintHelper.cs" />
+    <Compile Include="Infrastructure\PrintHelper.cs" />
     <Compile Include="Windows\PrintOptions.xaml.cs">
       <DependentUpon>PrintOptions.xaml</DependentUpon>
     </Compile>
