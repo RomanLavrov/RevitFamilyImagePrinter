@@ -2,21 +2,20 @@
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using RevitFamilyImagePrinter.Infrastructure;
 using System.Linq;
-using Autodesk.Revit.Exceptions;
 
 namespace RevitFamilyImagePrinter.Commands
 {
 	[Transaction(TransactionMode.Manual)]
 	class Print2DFolder : IExternalCommand
 	{
-
 		#region Properties
 		public UserImageValues UserValues { get; set; } = new UserImageValues();
-		public DirectoryInfo UserFolderFrom { get; set; } = new DirectoryInfo(@"D:\WebTypes\TestTypes");
-		public DirectoryInfo UserFolderTo { get; set; } = new DirectoryInfo(@"D:\TypeImages");
+		public DirectoryInfo UserFolderFrom { get; set; }
+		public DirectoryInfo UserFolderTo { get; set; }
 		#endregion
 
 		#region Variables
@@ -38,76 +37,54 @@ namespace RevitFamilyImagePrinter.Commands
 				UIApplication uiApp = commandData.Application;
 				_uiDoc = uiApp.ActiveUIDocument;
 				var initProjectPath = _uiDoc.Document.PathName;
-				RevitPrintHelper.CreateEmptyProject(uiApp.Application);
+				PrintHelper.CreateEmptyProject(uiApp.Application);
 
 				DirectoryInfo familiesFolder =
-					RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogFromTitle)}");
+					PrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogFromTitle)}");
 				if (familiesFolder == null)
 					return Result.Cancelled;
 
 				UserFolderTo = 
-					RevitPrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogToTitle)}");
+					PrintHelper.SelectFolderDialog($"{App.Translator.GetValue(Translator.Keys.folderDialogToTitle)}");
 				if (UserFolderTo == null)
 					return Result.Cancelled;
 
 				UserValues =
-					RevitPrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
+					PrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
 				if (UserValues == null)
+					return Result.Failed;
+
+				var families = GetFamilyFilesFromFolder(familiesFolder);
+				if (families == null)
 					return Result.Failed;
 
 				progressHelper = new PrintProgressHelper(familiesFolder,
 					$"{App.Translator.GetValue(Translator.Keys.textBlockProcessCreatingProjects)}");
 				progressHelper.Show();
 				progressHelper.SubscribeOnLoadedFamily(uiApp);
-				progressHelper.SetProgressBarMaximum(familiesFolder.GetFiles().Count(x => x.Extension.Equals(".rfa")));
+				progressHelper.SetProgressBarMaximum(families.Count);
 
-				if (!CreateProjects(commandData, elements, familiesFolder))
-					return Result.Failed;
-
-				var fileList = Directory.GetFiles(UserFolderFrom.FullName);
-				progressHelper.SetProgressText($"{App.Translator.GetValue(Translator.Keys.textBlockProcessPreparingPrinting)}");
-				progressHelper.SetProgressBarMaximum(UserFolderFrom.GetFiles().Count(x => x.Extension.Equals(".rvt")));
-				progressHelper.SubscribeOnViewActivated(uiApp);
-
-				foreach (var item in fileList)
+				UserFolderFrom = new DirectoryInfo(Path.Combine(familiesFolder.FullName,
+					App.Translator.GetValue(Translator.Keys.folderProjectsName)));
+				foreach (var i in families)
 				{
-					try
+					PathData pathData = new PathData()
 					{
-						FileInfo info = new FileInfo(item);
-						if (!info.Extension.Equals(".rvt"))
-							continue;
-						RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
-						_uiDoc = uiApp.OpenAndActivateDocument(item);
-
-						if (info.Length > maxSizeLength)
-						{
-							RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-						}
-
-						RevitPrintHelper.SetActive2DView(_uiDoc);
-						ViewChangesCommit();
-						PrintCommit(_uiDoc.Document);
-					}
-					catch (CorruptModelException exc)
-					{
-						RevitPrintHelper.ProcessError(exc,
-							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger);
-					}
-					catch (Exception exc)
-					{
-						RevitPrintHelper.ProcessError(exc,
-							$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrintingCycle)}", _logger);
-					}
+						FamilyPath = i.FullName,
+						ProjectsPath = UserFolderFrom.FullName,
+						ImagesPath = UserFolderTo.FullName
+					};
+					ProjectHelper.CreateProjectsFromFamily(_uiDoc, pathData, UserValues);
 				}
 
 				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
-					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
+					_uiDoc = PrintHelper.OpenDocument(_uiDoc, initProjectPath);
 				else
-					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
+					_uiDoc = PrintHelper.OpenDocument(_uiDoc, App.DefaultProject);
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrinting)}", _logger);
 				return Result.Failed;
 			}
@@ -118,46 +95,17 @@ namespace RevitFamilyImagePrinter.Commands
 			return Result.Succeeded;
 		}
 
-		private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
-		{
-			ProjectCreator creator = new ProjectCreator()
-			{
-				FamiliesFolder = familiesFolder,
-				UserValues = this.UserValues
-			};
-			string tmp = string.Empty;
-			var result = creator.Execute(commandData, ref tmp, elements);
-			if (result != Result.Succeeded)
-				return false;
-			UserFolderFrom = creator.ProjectsFolder;
-			return true;
-		}
-
-		public void ViewChangesCommit()
+		private List<FileInfo> GetFamilyFilesFromFolder(DirectoryInfo familiesFolder)
 		{
 			try
 			{
-				RevitPrintHelper.View2DChangesCommit(_uiDoc, UserValues);
+				return ProjectHelper.GetFamilyFilesFromFolder(familiesFolder);
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
-			}
-		}
-
-		private void PrintCommit(Document _doc)
-		{
-			try
-			{
-				string initialName = RevitPrintHelper.GetFileName(_doc);
-				string filePath = Path.Combine(UserFolderTo.FullName, initialName);
-				RevitPrintHelper.PrintImageTransaction(_uiDoc, UserValues, filePath, true);
-			}
-			catch (Exception exc)
-			{
-				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
+				PrintHelper.ProcessError(exc,
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageFamiliesRetrieving)}", App.Logger);
+				return null;
 			}
 		}
 	}

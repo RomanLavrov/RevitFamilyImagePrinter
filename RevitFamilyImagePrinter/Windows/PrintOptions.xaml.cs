@@ -203,10 +203,11 @@ namespace RevitFamilyImagePrinter.Windows
 			{
 				string strResolution = (this.comboBoxResolutionValue.SelectedItem as FrameworkElement)?.Tag.ToString();
 				string strDetailLevel = (this.comboBoxDetailLevelValue.SelectedItem as FrameworkElement)?.Tag.ToString();
+				string strScale = (this.comboBoxScaleValue.SelectedItem as FrameworkElement)?.Tag.ToString();
 				return new UserImageValues()
 				{
 					UserImageHeight = int.Parse(this.SizeValue.Text),
-					UserScale = int.Parse(this.ScaleValue.Text),
+					UserScale = int.Parse(strScale),
 					UserZoomValue = double.Parse(this.ZoomValue.Text),
 					UserImageResolution = GetImageResolution(strResolution),
 					UserDetailLevel = GetUserDetailLevel(strDetailLevel),
@@ -216,34 +217,34 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesRetrieving)}", _logger);
 				return null;
 			}
 		}
 
-		private void FitUserScale()
-		{
-			if (UserScale > 512)
-			{
-				UserScale = 50;
-				return;
-			}
+		//private void FitUserScale()
+		//{
+		//	if (UserScale > 512)
+		//	{
+		//		UserScale = 50;
+		//		return;
+		//	}
 
-			if (UserScale > 256)
-			{
-				UserScale = 25;
-				return;
-			}
+		//	if (UserScale > 256)
+		//	{
+		//		UserScale = 25;
+		//		return;
+		//	}
 
-			if (UserScale > 32)
-			{
-				UserScale = 10;
-				return;
-			}
+		//	if (UserScale > 32)
+		//	{
+		//		UserScale = 10;
+		//		return;
+		//	}
 
-			UserScale = 1;
-		}
+		//	UserScale = 1;
+		//}
 
 		private ViewDetailLevel GetUserDetailLevel(string strDetailLevel)
 		{
@@ -290,11 +291,11 @@ namespace RevitFamilyImagePrinter.Windows
 				if (UserScale < 1 || UserImageHeight < 1 || UserZoomValue <= 0)
 					throw new InvalidCastException("The value cannot be zero or less than zero.");
 				UserZoomValue = Math.Round(UserZoomValue) / 100;
-				FitUserScale();
+				//FitUserScale();
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesCorrection)}", _logger);
 			}
 		}
@@ -303,7 +304,7 @@ namespace RevitFamilyImagePrinter.Windows
 		{
 			try
 			{
-				//RevitPrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
+				//PrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
 				IList<UIView> uiviews = UIDoc.GetOpenUIViews();
 				foreach (var item in uiviews)
 				{
@@ -322,7 +323,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc, 
+				PrintHelper.ProcessError(exc, 
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}", _logger);
 			}
 		}
@@ -342,7 +343,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesSaving)}", _logger);
 			}
 		}
@@ -372,7 +373,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 			catch (Exception exc)
 			{
-				RevitPrintHelper.ProcessError(exc,
+				PrintHelper.ProcessError(exc,
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}", _logger);
 			}
 		}
@@ -391,7 +392,7 @@ namespace RevitFamilyImagePrinter.Windows
 		private void SetInitialFieldValues()
 		{
 			SizeValue.Text = UserImageHeight.ToString();
-			ScaleValue.Text = UserScale.ToString();
+			comboBoxScaleValue.SelectedIndex = GetScaleItemIndex();
 			ZoomValue.Text = UserZoomValue.ToString(CultureInfo.InvariantCulture);
 			comboBoxResolutionValue.SelectedIndex = GetResolutionItemIndex();
 			comboBoxDetailLevelValue.SelectedIndex = GetDetailingItemIndex();
@@ -421,6 +422,20 @@ namespace RevitFamilyImagePrinter.Windows
 				case ImageAspectRatio.Ratio_4to3: btn = RadioButton4to3; break;
 			}
 			btn.IsChecked = true;
+		}
+
+		private int GetScaleItemIndex()
+		{
+			switch (UserScale)
+			{
+				default: case 25: return 5;
+				case 1: return 0;
+				case 2: return 1;
+				case 5: return 2;
+				case 10: return 3;
+				case 20: return 4;
+				case 50: return 6;
+			}
 		}
 
 		private int GetResolutionItemIndex()

@@ -20,13 +20,14 @@
 	<buttonPrintView_ToolTip>Export Current View to image file</buttonPrintView_ToolTip>
 
 	<buttonLink_ToolTip>Visit building360.ch website</buttonLink_ToolTip>
+  <folderProjectsName>Projects</folderProjectsName>
 
 	<windowPrintSettingsTitle>Image Print Settings</windowPrintSettingsTitle>
 	<labelParameters_Text>Parameters</labelParameters_Text>
-	<labelSize_Text>Image height:</labelSize_Text>
+	<labelSize_Text>Image height (px):</labelSize_Text>
 	<labelScale_Text>Scale:</labelScale_Text>
 	<labelZoom_Text>Zoom (%):</labelZoom_Text>
-	<labelResolution_Text>Image resolution:</labelResolution_Text>
+	<labelResolution_Text>Image resolution (DPI):</labelResolution_Text>
 	<labelDetailLevel_Text>Detail level:</labelDetailLevel_Text>
 	<labelFormat_Text>Image format:</labelFormat_Text>
 	<labelAspectRatio_Text>Aspect ratio:</labelAspectRatio_Text>
@@ -63,6 +64,7 @@
 	<errorMessageViewUpdating>Error occurred during view updating</errorMessageViewUpdating>
 	<errorMessageValuesSaving>Error occurred during saving user input values</errorMessageValuesSaving>
 	<errorMessageValuesLoading>Error occurred during loading user input values</errorMessageValuesLoading>
+  <errorMessageDuringPrinting>Errors occurred during printing images. %amount% images are missed.#Check log file for details</errorMessageDuringPrinting>
 
 	<textBlockProcess_Text>Processing...</textBlockProcess_Text>
 	<buttonCancel_Text>Cancel</buttonCancel_Text>

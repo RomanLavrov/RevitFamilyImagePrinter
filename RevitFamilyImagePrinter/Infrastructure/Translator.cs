@@ -86,6 +86,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	        errorMessageInstanceRemoving,
 	        errorMessageInstanceInserting,
 	        errorMessageTypeRemoving,
+            errorMessageDuringPrinting,
+	        folderProjectsName,
 			warningMessageTitle,
 	        warningMessageProjectsAmount,
 			folderDialogFromTitle,
