@@ -24,8 +24,25 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		private void BeginLogSession()
 		{
 			string paddingSymb = new string('~', 30);
-			string header = $"{endl}{paddingSymb} LOGGER STARTED [{DateTime.Now.ToString()}] {paddingSymb}";
+			string pcInfo =
+				$"{endl}{endl}Operating system: {GetOsName()} ({(Environment.Is64BitOperatingSystem ? "x64" : "x86")})";
+			string header = $"{endl}{paddingSymb} LOGGER STARTED [{DateTime.Now.ToString()}] {paddingSymb}{pcInfo}";
 			File.AppendAllText(_logFile, header);
+		}
+
+		private string GetOsName()
+		{
+			OperatingSystem osInfo = System.Environment.OSVersion;
+			string version = $"{osInfo.Version.Major}.{osInfo.Version.Minor}";
+			switch (version)
+			{
+				case "10.0": return "Windows 10 / Server 2016";
+				case "6.3": return "Windows 8.1 / Server 2012 R2";
+				case "6.1": return "Windows 7 / Server 2008 R2";
+				case "6.0": return "Server 2008 / Windows Vista";
+				case "5.2": return "Server 2003 R2 / Server 2003 / XP 64-Bit Edition";
+			}
+			return "Unknown";
 		}
 
 		private void ConvertTabSymbols(ref string text)
@@ -44,18 +61,18 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			return _instance;
 		}
 
-		public void Write(string text)
+		public void Write(string text, bool isTimeLog = true)
 		{
 			ConvertTabSymbols(ref text);
-			text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
+			if (isTimeLog) text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
 			File.AppendAllText(_logFile, text);
 		}
 
-		public void WriteLine(string text)
+		public void WriteLine(string text, bool isTimeLog = true)
 		{
 			ConvertTabSymbols(ref text);
-			text = text.Insert(0, $"{endl}[{DateTime.Now.ToString()}]: ");
-			File.AppendAllText(_logFile, $"{text}{endl}");
+			if (isTimeLog) text = text.Insert(0, $"[{DateTime.Now.ToString()}]: ");
+			File.AppendAllText(_logFile, $"{endl}{text}{endl}");
 		}
 
 		public void EndLogSession()

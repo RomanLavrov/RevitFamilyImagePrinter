@@ -58,30 +58,31 @@
 
 
 	<errorMessageTitle>Fehler</errorMessageTitle>
-  <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten</errorMessageValuesCorrection>
-  <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten</errorMessageValuesRetrieving>
-  <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten</errorMessageViewUpdating>
-  <errorMessageValuesSaving>Beim Speichern der Benutzereingabewerte ist ein Fehler aufgetreten</errorMessageValuesSaving>
-  <errorMessageValuesLoading>Fehler beim Laden der Benutzereingabewerte</errorMessageValuesLoading>
+  <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten.</errorMessageValuesCorrection>
+  <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten.</errorMessageValuesRetrieving>
+  <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten.</errorMessageViewUpdating>
+  <errorMessageValuesSaving>Beim Speichern der Benutzereingabewerte ist ein Fehler aufgetreten.</errorMessageValuesSaving>
+  <errorMessageValuesLoading>Fehler beim Laden der Benutzereingabewerte.</errorMessageValuesLoading>
+  <errorMessageDuringPrinting>Beim Drucken von Bildern sind Fehler aufgetreten. % amount% Bilder fehlen. # Weitere Informationen finden Sie in der Protokolldatei.</errorMessageDuringPrinting>
 
   <textBlockProcess_Text>Wird bearbeitet...</textBlockProcess_Text>
   <buttonCancel_Text>Beenden</buttonCancel_Text>
 
-  <errorMessageViewCorrecting>Bei der Korrektur der aktuellen Ansicht ist ein Fehler aufgetreten</errorMessageViewCorrecting>
-  <errorMessageViewPrinting>Beim Drucken der aktuellen Ansicht ist ein Fehler aufgetreten</errorMessageViewPrinting>
-  <errorMessage2dFolderPrintingCycle>Während des 2D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten</errorMessage2dFolderPrintingCycle>
-  <errorMessage2dFolderPrinting>Beim Drucken von 2D-Ordnern ist ein Fehler aufgetreten</errorMessage2dFolderPrinting>
-  <errorMessage3dFolderPrintingCycle>Während des 3D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten</errorMessage3dFolderPrintingCycle>
-  <errorMessage3dFolderPrinting>Beim Drucken von 3D-Ordnern ist ein Fehler aufgetreten</errorMessage3dFolderPrinting>
+  <errorMessageViewCorrecting>Bei der Korrektur der aktuellen Ansicht ist ein Fehler aufgetreten.</errorMessageViewCorrecting>
+  <errorMessageViewPrinting>Beim Drucken der aktuellen Ansicht ist ein Fehler aufgetreten.</errorMessageViewPrinting>
+  <errorMessage2dFolderPrintingCycle>Während des 2D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten.</errorMessage2dFolderPrintingCycle>
+  <errorMessage2dFolderPrinting>Beim Drucken von 2D-Ordnern ist ein Fehler aufgetreten.</errorMessage2dFolderPrinting>
+  <errorMessage3dFolderPrintingCycle>Während des 3D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten.</errorMessage3dFolderPrintingCycle>
+  <errorMessage3dFolderPrinting>Beim Drucken von 3D-Ordnern ist ein Fehler aufgetreten.</errorMessage3dFolderPrinting>
 
-  <errorMessageNoProjectsFolder>Der Ordner "Projekte" ist nicht vorhanden</errorMessageNoProjectsFolder>
-  <errorMessageFamiliesRetrieving>Fehler beim Abrufen von Familien aus dem Ordner</errorMessageFamiliesRetrieving>
-  <errorMessageProjectProcessing>Fehler beim Verarbeiten des Projekts</errorMessageProjectProcessing>
-  <errorMessageFamilyRemoving>Beim Entfernen der Familie aus dem Projekt ist ein Fehler aufgetreten</errorMessageFamilyRemoving>
-  <errorMessageFamilyLoading>Beim Laden der Familie aus der Datei ist ein Fehler aufgetreten</errorMessageFamilyLoading>
-  <errorMessageInstanceRemoving>Beim Entfernen der Instanz aus dem Projekt ist ein Fehler aufgetreten</errorMessageInstanceRemoving>
-  <errorMessageInstanceInserting>Beim Einfügen der Instanz ist ein Fehler aufgetreten</errorMessageInstanceInserting>
-  <errorMessageTypeRemoving>Beim Entfernen des Typs aus dem Projekt ist ein Fehler aufgetreten</errorMessageTypeRemoving>
+  <errorMessageNoProjectsFolder>Der Ordner "Projekte" ist nicht vorhanden.</errorMessageNoProjectsFolder>
+  <errorMessageFamiliesRetrieving>Fehler beim Abrufen von Familien aus dem Ordner.</errorMessageFamiliesRetrieving>
+  <errorMessageProjectProcessing>Fehler beim Verarbeiten des Projekts.</errorMessageProjectProcessing>
+  <errorMessageFamilyRemoving>Beim Entfernen der Familie aus dem Projekt ist ein Fehler aufgetreten.</errorMessageFamilyRemoving>
+  <errorMessageFamilyLoading>Beim Laden der Familie aus der Datei ist ein Fehler aufgetreten.</errorMessageFamilyLoading>
+  <errorMessageInstanceRemoving>Beim Entfernen der Instanz aus dem Projekt ist ein Fehler aufgetreten.</errorMessageInstanceRemoving>
+  <errorMessageInstanceInserting>Beim Einfügen der Instanz ist ein Fehler aufgetreten.</errorMessageInstanceInserting>
+  <errorMessageTypeRemoving>Beim Entfernen des Typs aus dem Projekt ist ein Fehler aufgetreten.</errorMessageTypeRemoving>
 
   <warningMessageTitle>Warnung</warningMessageTitle>
   <warningMessageProjectsAmount>Beachtung! Die Anzahl der erstellten Projekte entspricht nicht der Anzahl der Typen in Familien. Überprüfen Sie die Protokolldatei.</warningMessageProjectsAmount>

@@ -6,13 +6,14 @@ using System.IO;
 using RevitFamilyImagePrinter.Infrastructure;
 using System.Linq;
 using Autodesk.Revit.Exceptions;
+using Autodesk.Revit.UI.Events;
+using System.Diagnostics;
 
 namespace RevitFamilyImagePrinter.Commands
 {
 	[Transaction(TransactionMode.Manual)]
 	class Print2DFolder : IExternalCommand
 	{
-
 		#region Properties
 		public UserImageValues UserValues { get; set; } = new UserImageValues();
 		public DirectoryInfo UserFolderFrom { get; set; } = new DirectoryInfo(@"D:\WebTypes\TestTypes");
@@ -91,14 +92,15 @@ namespace RevitFamilyImagePrinter.Commands
 					catch (CorruptModelException exc)
 					{
 						RevitPrintHelper.ProcessError(exc,
-							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger);
+							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger, false);
 					}
 					catch (Exception exc)
 					{
 						RevitPrintHelper.ProcessError(exc,
-							$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrintingCycle)}", _logger);
+							$"{App.Translator.GetValue(Translator.Keys.errorMessage2dFolderPrintingCycle)}", _logger, false);
 					}
 				}
+				//RevitPrintHelper.CheckImagesAmount(UserFolderFrom, createdImages);
 
 				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
 					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
@@ -142,7 +144,7 @@ namespace RevitFamilyImagePrinter.Commands
 			catch (Exception exc)
 			{
 				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger);
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewCorrecting)}", _logger, false);
 			}
 		}
 
@@ -157,7 +159,7 @@ namespace RevitFamilyImagePrinter.Commands
 			catch (Exception exc)
 			{
 				RevitPrintHelper.ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger);
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", _logger, false);
 			}
 		}
 	}

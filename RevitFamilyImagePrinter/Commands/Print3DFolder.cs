@@ -5,6 +5,7 @@ using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.Exceptions;
 using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Events;
 using RevitFamilyImagePrinter.Infrastructure;
 
 namespace RevitFamilyImagePrinter.Commands
@@ -74,6 +75,8 @@ namespace RevitFamilyImagePrinter.Commands
 				progressHelper.SetProgressBarMaximum(UserFolderFrom.GetFiles().Count(x => x.Extension.Equals(".rvt")));
 				progressHelper.SubscribeOnViewActivated(_uiApp, true);
 
+				//int createdImages = 0;
+				
 				foreach (var item in fileList)
 				{
 					try
@@ -85,21 +88,23 @@ namespace RevitFamilyImagePrinter.Commands
 						_uiDoc = commandData.Application.OpenAndActivateDocument(item);
 						if (fileInfo.Length > maxSizeLength)
 							RevitPrintHelper.RemoveEmptyFamilies(_uiDoc);
-						RevitPrintHelper.SetActive3DView(_uiDoc);
+					    RevitPrintHelper.SetActive3DView(_uiDoc);
 						ViewChangesCommit();
 						PrintCommit(_uiDoc.Document);
 					}
 					catch (CorruptModelException exc)
 					{
 						RevitPrintHelper.ProcessError(exc,
-							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger);
+							$"{exc.Message}{Environment.NewLine}{new FileInfo(item).Name}", _logger, false);
 					}
 					catch (Exception exc)
 					{
 						RevitPrintHelper.ProcessError(exc,
-							$"{App.Translator.GetValue(Translator.Keys.errorMessage3dFolderPrintingCycle)}", _logger);
+							$"{App.Translator.GetValue(Translator.Keys.errorMessage3dFolderPrintingCycle)}", _logger, false);
 					}
 				}
+
+				//RevitPrintHelper.CheckImagesAmount(UserFolderFrom, createdImages);
 
 				if (!string.IsNullOrEmpty(initProjectPath) && File.Exists(initProjectPath))
 					_uiDoc = RevitPrintHelper.OpenDocument(_uiDoc, initProjectPath);
@@ -120,7 +125,7 @@ namespace RevitFamilyImagePrinter.Commands
 			return Result.Succeeded;
 		}
 
-		private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
+	    private bool CreateProjects(ExternalCommandData commandData, ElementSet elements, DirectoryInfo familiesFolder)
 		{
 			ProjectCreator creator = new ProjectCreator()
 			{

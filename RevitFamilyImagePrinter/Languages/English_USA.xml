@@ -63,8 +63,9 @@
 	<errorMessageViewUpdating>Error occurred during view updating</errorMessageViewUpdating>
 	<errorMessageValuesSaving>Error occurred during saving user input values</errorMessageValuesSaving>
 	<errorMessageValuesLoading>Error occurred during loading user input values</errorMessageValuesLoading>
+  <errorMessageDuringPrinting>Errors occurred during printing images. %amount% images are missed.#Check log file for details</errorMessageDuringPrinting>
 
-	<textBlockProcess_Text>Processing...</textBlockProcess_Text>
+  <textBlockProcess_Text>Processing...</textBlockProcess_Text>
 	<buttonCancel_Text>Cancel</buttonCancel_Text>
 
 	<errorMessageViewCorrecting>Error occurred during current view correction</errorMessageViewCorrecting>

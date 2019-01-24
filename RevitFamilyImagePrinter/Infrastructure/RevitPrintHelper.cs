@@ -8,9 +8,11 @@ using System.Linq;
 using System.Windows;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.UI;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Windows;
 using Image = System.Drawing.Image;
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
@@ -157,17 +159,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				}
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
-			}
-		}
-
-		private static void ActiveViewChangeTransaction(Document doc, UserImageValues userValues, bool is3D = false)
-		{
-			using (Transaction transaction = new Transaction(doc))
-			{
-				transaction.Start("SetView");
-				doc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
-				doc.ActiveView.Scale = userValues.UserScale;
-				transaction.Commit();
 			}
 		}
 
@@ -436,6 +427,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					filePath = SelectFileNameDialog(initialName);
 				if (filePath == initialName) return;
 				IList<ElementId> views = new List<ElementId>();
+
 				views.Add(doc.ActiveView.Id);
 
 				//CorrectFileName(ref filePath);
@@ -471,6 +463,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 				ZoomOpenUIViews(uiDoc, (double)scale, false);
 
+				R2019_HotFix();
 				if (ImageExportOptions.IsValidFileName(filePath))
 				{
 					doc.ExportImage(exportOptions);
@@ -482,7 +475,18 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			doc.Dispose();
 		}
 
-		public static void SetActive2DView(UIDocument uiDoc)
+	    private static void ActiveViewChangeTransaction(Document doc, UserImageValues userValues, bool is3D = false)
+	    {
+	        using (Transaction transaction = new Transaction(doc))
+	        {
+	            transaction.Start("SetView");
+	            doc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+	            doc.ActiveView.Scale = userValues.UserScale;
+	            transaction.Commit();
+	        }
+	    }
+
+        public static void SetActive2DView(UIDocument uiDoc)
 		{
 			using (Document doc = uiDoc.Document)
 			{
@@ -634,23 +638,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
-			//FileStream stream = null;
-			//try
-			//{
-			//	stream = File.Open(newDocPath, FileMode.Open);
-			//}
-			//catch (IOException)
-			//{
-			//	//the file is unavailable because it is:
-			//	//still being written to
-			//	//or being processed by another thread
-			//	//or does not exist (has already been processed)
-			//	return null;
-			//}
-			//finally
-			//{
-			//	stream?.Close();
-			//}
 			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if (!IsDocumentActive(uiDoc))
@@ -677,14 +664,33 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			return true;
 		}
 
-		public static void ProcessError(Exception exc, string errorMessage, Logger logger)
+	   // public static void CheckImagesAmount(DirectoryInfo projectsDir, int imagesCreated)
+	   // {
+	   //     var projectsCreated = projectsDir.GetFiles().Where(x => x.Extension.Equals(".rvt")).ToList();
+    //        try
+	   //     {
+	   //         Assert.AreEqual(projectsCreated.Count, imagesCreated);
+	   //     }
+	   //     catch (AssertFailedException exc)
+	   //     {
+		  //      uint difference = (uint) (projectsCreated.Count - imagesCreated);
+		  //      string errorMsg = App.Translator.GetValue(Translator.Keys.errorMessageDuringPrinting)
+			 //       .Replace("%amount%", difference.ToString());
+				//ProcessError(exc, $"{errorMsg}", App.Logger);
+	   //     }
+    //    }
+
+	    public static void ProcessError(Exception exc, string errorMessage, Logger logger, bool isDialog = true)
 		{
-			new Autodesk.Revit.UI.TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
-			{
-				TitleAutoPrefix = false,
-				MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,
-				MainContent = errorMessage
-			}.Show();
+		    if (isDialog)
+		    {
+		        new Autodesk.Revit.UI.TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
+		        {
+		            TitleAutoPrefix = false,
+		            MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,
+		            MainContent = errorMessage
+		        }.Show();
+            }
 			logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 		}
 
