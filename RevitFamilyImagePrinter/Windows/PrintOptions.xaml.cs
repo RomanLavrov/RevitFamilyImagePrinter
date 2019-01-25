@@ -288,7 +288,7 @@ namespace RevitFamilyImagePrinter.Windows
 					UserImageHeight = 32;
 				if (UserZoomValue > 100)
 					UserZoomValue = 100;
-				if (UserScale < 1 || UserImageHeight < 1 || UserZoomValue <= 0)
+				if (UserScale < 1 ||  UserZoomValue <= 0)
 					throw new InvalidCastException("The value cannot be zero or less than zero.");
 				UserZoomValue = Math.Round(UserZoomValue) / 100;
 				//FitUserScale();
