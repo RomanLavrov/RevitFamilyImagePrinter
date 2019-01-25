@@ -155,7 +155,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				if (isToFit)
 				{
 					item.ZoomToFit();
-					uiDoc.RefreshActiveView();
 				}
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
@@ -235,7 +234,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void R2019_HotFix()
 		{
-			if (App.Version != "2019") return;
 			//TODO - Rewrite with updated Revit 2019 Documentation!
 			var window = new Window()
 			{
