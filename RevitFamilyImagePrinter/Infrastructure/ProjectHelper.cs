@@ -179,7 +179,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-		private static View CreateEngineeringPlane(Document doc)
+		public static View CreateEngineeringPlane(Document doc)
 		{
 			FilteredElementCollector vftCollector = new FilteredElementCollector(doc);
 			vftCollector.OfClass(typeof(ViewFamilyType));

@@ -289,6 +289,7 @@ namespace RevitFamilyImagePrinter.Windows
 				UserScale = this.UserScale,
 				UserZoomValue = this.UserZoomValue
 			};
+			PrintHelper.SetActive2DView(UIDoc);
 			PrintHelper.View2DChangesCommit(UIDoc, userValues);
 		}
 

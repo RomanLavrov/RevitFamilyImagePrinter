@@ -481,33 +481,37 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-	    private static void ActiveViewChangeTransaction(Document doc, UserImageValues userValues, bool is3D = false)
+	    private static void ActiveViewChangeTransaction(UIDocument uiDoc, UserImageValues userValues, bool is3D = false)
 	    {
-	        using (Transaction transaction = new Transaction(doc))
-	        {
-	            transaction.Start("SetView");
-	            doc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
-	            doc.ActiveView.Scale = userValues.UserScale;
-	            transaction.Commit();
-	        }
+		    using (Transaction transaction = new Transaction(uiDoc.Document))
+		    {
+			    transaction.Start("SetView");
+			    uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+			    uiDoc.ActiveView.Scale = userValues.UserScale;
+			    transaction.Commit();
+		    }
 	    }
 
         public static void SetActive2DView(UIDocument uiDoc)
 		{
 			using (Document doc = uiDoc.Document)
 			{
+				View view = null;
 				FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
 				viewCollector.OfClass(typeof(View));
 
 				foreach (Element viewElement in viewCollector)
 				{
-					View view = (View)viewElement;
+					View tmpView = (View)viewElement;
 
-					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+					if (tmpView.Name.Equals("Level 1") && tmpView.ViewType == ViewType.EngineeringPlan)
 					{
-						uiDoc.ActiveView = view;
+						view = tmpView;
 					}
 				}
+				if(view == null)
+					view = ProjectHelper.CreateEngineeringPlane(doc);
+				uiDoc.ActiveView = view;
 			}
 		}
 
@@ -546,7 +550,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				using (Document doc = uiDoc.Document)
 				{
 					ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
-					ActiveViewChangeTransaction(doc, userValues);
+					ActiveViewChangeTransaction(uiDoc, userValues);
 					R2019_HotFix();
 				}
 			}
@@ -568,7 +572,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				foreach (View3D view3D in collector)
 				{
 					if (view3D == null) continue;
-					ActiveViewChangeTransaction(doc, userValues, true);
+					ActiveViewChangeTransaction(uiDoc, userValues, true);
 				}
 			}
 			R2019_3DViewFix(uiDoc);
