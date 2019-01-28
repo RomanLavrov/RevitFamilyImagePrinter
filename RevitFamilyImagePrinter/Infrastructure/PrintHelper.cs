@@ -153,7 +153,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				if (isToFit)
 				{
 					item.ZoomToFit();
-					uiDoc.RefreshActiveView();
 				}
 				item.Zoom(zoomValue);
 				uiDoc.RefreshActiveView();
@@ -233,7 +232,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void R2019_HotFix()
 		{
-			if (App.Version != "2019") return;
 			//TODO - Rewrite with updated Revit 2019 Documentation!
 			var window = new Window()
 			{
@@ -249,7 +247,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void R2019_3DViewFix(UIDocument uiDoc)
 		{
-			if (App.Version != "2019") return;
+			if (!App.Version.Contains("2019")) return;
 			FilteredElementCollector collector = new FilteredElementCollector(uiDoc.Document);
 			collector.OfClass(typeof(Level));
 			var levelsToHide = new List<ElementId>();
@@ -481,33 +479,38 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-	    private static void ActiveViewChangeTransaction(Document doc, UserImageValues userValues, bool is3D = false)
+	    private static void ActiveViewChangeTransaction(UIDocument uiDoc, UserImageValues userValues, bool is3D = false)
 	    {
-	        using (Transaction transaction = new Transaction(doc))
-	        {
-	            transaction.Start("SetView");
-	            doc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
-	            doc.ActiveView.Scale = userValues.UserScale;
-	            transaction.Commit();
-	        }
+		    using (Transaction transaction = new Transaction(uiDoc.Document))
+		    {
+			    transaction.Start("SetView");
+			    uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+			    uiDoc.ActiveView.Scale = userValues.UserScale;
+			    transaction.Commit();
+		    }
 	    }
 
         public static void SetActive2DView(UIDocument uiDoc)
 		{
 			using (Document doc = uiDoc.Document)
 			{
+				View view = null;
 				FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
 				viewCollector.OfClass(typeof(View));
 
 				foreach (Element viewElement in viewCollector)
 				{
-					View view = (View)viewElement;
+					View tmpView = (View)viewElement;
 
-					if (view.Name.Equals("Level 1") && view.ViewType == ViewType.EngineeringPlan)
+					if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}")
+					    && tmpView.ViewType == ViewType.EngineeringPlan)
 					{
-						uiDoc.ActiveView = view;
+						view = tmpView;
 					}
 				}
+				if(view == null)
+					view = ProjectHelper.CreateStructuralPlan(doc);
+				uiDoc.ActiveView = view;
 			}
 		}
 
@@ -546,7 +549,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				using (Document doc = uiDoc.Document)
 				{
 					ZoomOpenUIViews(uiDoc, userValues.UserZoomValue);
-					ActiveViewChangeTransaction(doc, userValues);
+					ActiveViewChangeTransaction(uiDoc, userValues);
 					R2019_HotFix();
 				}
 			}
@@ -568,7 +571,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				foreach (View3D view3D in collector)
 				{
 					if (view3D == null) continue;
-					ActiveViewChangeTransaction(doc, userValues, true);
+					ActiveViewChangeTransaction(uiDoc, userValues, true);
 				}
 			}
 			R2019_3DViewFix(uiDoc);
@@ -577,20 +580,20 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static string GetFileName(Document doc)
 		{
-			switch (App.Version)
+			if (App.Version.Contains("2018"))
 			{
-				case "2018":
-					{
-						int indexDot = doc.Title.IndexOf('.');
-						var name = doc.Title.Substring(0, indexDot);
-						return name;
-					}
-				case "2019":
-					{
-						return doc.Title;
-					}
-				default: throw new Exception("Unknown Revit Version");
+				int indexDot = doc.Title.IndexOf('.');
+				var name = doc.Title.Substring(0, indexDot);
+				return name;
 			}
+
+			if (App.Version.Contains("2019"))
+			{
+				return doc.Title;
+			}
+
+			throw new Exception("Unknown Revit Version");
+
 		}
 
 		public static ImageFileType GetImageFileType(string userImagePath)
@@ -652,7 +655,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
-			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
+			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName) ||
+			    !File.Exists(newDocPath)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if (!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);

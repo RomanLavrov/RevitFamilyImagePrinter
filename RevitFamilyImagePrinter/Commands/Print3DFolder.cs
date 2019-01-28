@@ -59,7 +59,7 @@ namespace RevitFamilyImagePrinter.Commands
 					return Result.Cancelled;
 
 				UserValues =
-					PrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false);
+					PrintHelper.ShowOptionsDialog(_uiDoc, windowHeightOffset, windowWidthOffset, false, false, false);
 				if (UserValues == null)
 					return Result.Failed;
 

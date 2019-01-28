@@ -223,29 +223,6 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 		}
 
-		//private void FitUserScale()
-		//{
-		//	if (UserScale > 512)
-		//	{
-		//		UserScale = 50;
-		//		return;
-		//	}
-
-		//	if (UserScale > 256)
-		//	{
-		//		UserScale = 25;
-		//		return;
-		//	}
-
-		//	if (UserScale > 32)
-		//	{
-		//		UserScale = 10;
-		//		return;
-		//	}
-
-		//	UserScale = 1;
-		//}
-
 		private ViewDetailLevel GetUserDetailLevel(string strDetailLevel)
 		{
 			switch (strDetailLevel)
@@ -278,7 +255,7 @@ namespace RevitFamilyImagePrinter.Windows
 			}
 		}
 
-		private void CorrectValues()
+		private void CorrectValues(UserImageValues userValues = null)
 		{
 			try
 			{
@@ -288,10 +265,10 @@ namespace RevitFamilyImagePrinter.Windows
 					UserImageHeight = 32;
 				if (UserZoomValue > 100)
 					UserZoomValue = 100;
-				if (UserScale < 1 ||  UserZoomValue <= 0)
+				if (UserScale < 1 || UserZoomValue <= 0)
 					throw new InvalidCastException("The value cannot be zero or less than zero.");
 				UserZoomValue = Math.Round(UserZoomValue) / 100;
-				//FitUserScale();
+				
 			}
 			catch (Exception exc)
 			{
@@ -302,29 +279,25 @@ namespace RevitFamilyImagePrinter.Windows
 
 		private void UpdateView()
 		{
-			try
+			UserImageValues userValues = new UserImageValues
 			{
-				//PrintHelper.View2DChangesCommit(UIDoc, UserImageValues);
-				IList<UIView> uiviews = UIDoc.GetOpenUIViews();
-				foreach (var item in uiviews)
-				{
-					item.ZoomToFit();
-					item.Zoom(UserZoomValue);
-					UIDoc.RefreshActiveView();
-				}
-
-				using (Transaction transaction = new Transaction(Doc))
-				{
-					transaction.Start("SetView");
-					Doc.ActiveView.DetailLevel = Is3D ? ViewDetailLevel.Fine : UserDetailLevel;
-					Doc.ActiveView.Scale = UserScale;
-					transaction.Commit();
-				}
+				UserAspectRatio = this.UserAspectRatio,
+				UserDetailLevel = this.UserDetailLevel,
+				UserExtension = this.UserExtension,
+				UserImageHeight = this.UserImageHeight,
+				UserImageResolution = this.UserImageResolution,
+				UserScale = this.UserScale,
+				UserZoomValue = this.UserZoomValue
+			};
+			if (Is3D)
+			{
+				PrintHelper.SetActive3DView(UIDoc);
+				PrintHelper.View3DChangesCommit(UIDoc, userValues);
 			}
-			catch (Exception exc)
+			else
 			{
-				PrintHelper.ProcessError(exc, 
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewUpdating)}", _logger);
+				PrintHelper.SetActive2DView(UIDoc);
+				PrintHelper.View2DChangesCommit(UIDoc, userValues);
 			}
 		}
 
@@ -377,6 +350,7 @@ namespace RevitFamilyImagePrinter.Windows
 					$"{App.Translator.GetValue(Translator.Keys.errorMessageValuesLoading)}", _logger);
 			}
 		}
+		
 
 		private void InitializeUserFields(UserImageValues userValues)
 		{

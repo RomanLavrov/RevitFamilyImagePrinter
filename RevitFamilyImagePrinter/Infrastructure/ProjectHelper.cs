@@ -147,7 +147,24 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public static void InsertInstanceIntoProject(UIDocument uiDoc, FamilySymbol symbol)
 		{
 			Document doc = uiDoc.Document;
-			View view = uiDoc.ActiveView;
+			View view = null;
+
+			FilteredElementCollector viewCollector = new FilteredElementCollector(doc);
+			viewCollector.OfClass(typeof(View));
+			foreach (Element viewElement in viewCollector)
+			{
+				View tmpView = (View)viewElement;
+				if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}") && tmpView.ViewType == ViewType.EngineeringPlan)
+				{
+					view = tmpView;
+				}
+			}
+
+			if (view == null)
+			{
+				view = CreateStructuralPlan(doc);
+			}
+
 			using (var transaction = new Transaction(doc, "Insert Symbol"))
 			{
 				transaction.Start();
@@ -158,6 +175,31 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				doc.Create.NewFamilyInstance(point, symbol, host, StructuralType.NonStructural);
 				transaction.Commit();
 			}
+		}
+
+		public static View CreateStructuralPlan(Document doc)
+		{
+			FilteredElementCollector vftCollector = new FilteredElementCollector(doc);
+			vftCollector.OfClass(typeof(ViewFamilyType));
+			ViewFamilyType viewFamType = vftCollector
+				.Cast<ViewFamilyType>()
+				.FirstOrDefault(vftype => vftype.ViewFamily.Equals(ViewFamily.StructuralPlan));
+
+			FilteredElementCollector lvlCollector = new FilteredElementCollector(doc);
+			lvlCollector.OfClass(typeof(Level));
+			Level level1 = lvlCollector
+				.Cast<Level>()
+				.FirstOrDefault(lvl => lvl.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}"));
+
+			ViewPlan vp = null;
+			using (Transaction transaction = new Transaction(doc, "Create Plan"))
+			{
+				transaction.Start();
+				vp = ViewPlan.Create(doc, viewFamType.Id, level1.Id);
+				transaction.Commit();
+			}
+
+			return vp;
 		}
 
 		public static void RemoveExistingInstances(Document doc, ElementId id)
