@@ -1,4 +1,8 @@
-﻿using System;
+﻿using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Ookii.Dialogs.Wpf;
+using RevitFamilyImagePrinter.Windows;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -6,17 +10,11 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.UI;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Ookii.Dialogs.Wpf;
-using RevitFamilyImagePrinter.Windows;
 using Image = System.Drawing.Image;
-using TaskDialog = Autodesk.Revit.UI.TaskDialog;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
-	public static class PrintHelper
+    public static class PrintHelper
 	{
 		#region Private
 

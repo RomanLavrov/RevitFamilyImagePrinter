@@ -33,13 +33,14 @@
   <labelAspectRatio_Text>Seitenverhältnis:</labelAspectRatio_Text>
   <buttonApply_Text>Anwenden</buttonApply_Text>
   <buttonPrint_Text>Drucken</buttonPrint_Text>
-  <textBlockResolutionWebLow_Text>Web Nieder</textBlockResolutionWebLow_Text>
+  <textBlockResolutionWebLow_Text>Web Niedrig</textBlockResolutionWebLow_Text>
   <textBlockResolutionWebHigh_Text>Web Hoch</textBlockResolutionWebHigh_Text>
-  <textBlockResolutionPrintLow_Text>Drucken Nieder</textBlockResolutionPrintLow_Text>
+  <textBlockResolutionPrintLow_Text>Drucken Niedrig</textBlockResolutionPrintLow_Text>
   <textBlockResolutionPrintHigh_Text>Drucken Hoch</textBlockResolutionPrintHigh_Text>
   <textBlockDetailLevelCoarse_Text>Grob</textBlockDetailLevelCoarse_Text>
   <textBlockDetailLevelMedium_Text>Mittel</textBlockDetailLevelMedium_Text>
   <textBlockDetailLevelFine_Text>Fein</textBlockDetailLevelFine_Text>
+
   <labelSize_ToolTip>Definiert den Höhenanteil des exportierten Bildes in Pixel.</labelSize_ToolTip>
   <labelSize_ToolTip_Example>Beispiel: Bildhöhe = 1080 bei einem Seitenverhältnis von 16: 9 ergibt ein Bild mit einer Auflösung von 1920: 1080.</labelSize_ToolTip_Example>
   <labelScale_ToolTip>Definiert die Skalierung der exportierten Ansicht auf folgende Weise: Ein größerer Skalenwert erzeugt eine genauere Skalierung der exportierten Ansicht (dünnere Linien).</labelScale_ToolTip>
@@ -101,6 +102,4 @@
   <textBlockProcessPrinting>Drucken: </textBlockProcessPrinting>
   <textBlockProcessLoadingFamilies>Familien laden: </textBlockProcessLoadingFamilies>
   <textBlockProcessProjectCreated> wurde erschaffen</textBlockProcessProjectCreated>
-
-  <level1Name>Ebene 1</level1Name>
 </Data>
