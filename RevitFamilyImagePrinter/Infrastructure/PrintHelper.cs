@@ -249,7 +249,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void R2019_3DViewFix(UIDocument uiDoc)
 		{
-			if (App.Version != "2019") return;
+			if (!App.Version.Contains("2019")) return;
 			FilteredElementCollector collector = new FilteredElementCollector(uiDoc.Document);
 			collector.OfClass(typeof(Level));
 			var levelsToHide = new List<ElementId>();
@@ -504,13 +504,14 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				{
 					View tmpView = (View)viewElement;
 
-					if (tmpView.Name.Equals("Level 1") && tmpView.ViewType == ViewType.EngineeringPlan)
+					if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}")
+					    && tmpView.ViewType == ViewType.EngineeringPlan)
 					{
 						view = tmpView;
 					}
 				}
 				if(view == null)
-					view = ProjectHelper.CreateEngineeringPlane(doc);
+					view = ProjectHelper.CreateStructuralPlan(doc);
 				uiDoc.ActiveView = view;
 			}
 		}
@@ -581,20 +582,20 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static string GetFileName(Document doc)
 		{
-			switch (App.Version)
+			if (App.Version.Contains("2018"))
 			{
-				case "2018":
-					{
-						int indexDot = doc.Title.IndexOf('.');
-						var name = doc.Title.Substring(0, indexDot);
-						return name;
-					}
-				case "2019":
-					{
-						return doc.Title;
-					}
-				default: throw new Exception("Unknown Revit Version");
+				int indexDot = doc.Title.IndexOf('.');
+				var name = doc.Title.Substring(0, indexDot);
+				return name;
 			}
+
+			if (App.Version.Contains("2019"))
+			{
+				return doc.Title;
+			}
+
+			throw new Exception("Unknown Revit Version");
+
 		}
 
 		public static ImageFileType GetImageFileType(string userImagePath)
@@ -656,7 +657,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
-			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName)) return uiDoc;
+			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName) ||
+			    !File.Exists(newDocPath)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if (!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);

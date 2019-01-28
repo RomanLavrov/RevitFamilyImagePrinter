@@ -100,6 +100,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	        textBlockProcessProjectCreated,
 			textBlockProcessCreatingProjects,
 	        textBlockProcessPreparingPrinting,
+			level1Name
 		}
 
         public Translator(string language)

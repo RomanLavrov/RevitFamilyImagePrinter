@@ -133,7 +133,7 @@ namespace RevitFamilyImagePrinter
 			DefaultProject = Path.Combine(DefaultFolder, "Empty.rvt");
 			Logger = Logger.GetLogger();
 
-			Version = cApp.VersionNumber;
+		    Version = cApp.SubVersionNumber;
 		    Language = cApp.Language.ToString();
 		    Logger.WriteLine($"\nRevit Version: {Version}\nRevit Language: {Language}", false);
 		    Translator = new Translator(Language);
