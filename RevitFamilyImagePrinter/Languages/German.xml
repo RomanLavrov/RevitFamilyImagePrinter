@@ -33,32 +33,35 @@
   <labelAspectRatio_Text>Seitenverhältnis:</labelAspectRatio_Text>
   <buttonApply_Text>Anwenden</buttonApply_Text>
   <buttonPrint_Text>Drucken</buttonPrint_Text>
-  <textBlockResolutionWebLow_Text>Web Nieder</textBlockResolutionWebLow_Text>
+  <textBlockResolutionWebLow_Text>Web Niedrig</textBlockResolutionWebLow_Text>
   <textBlockResolutionWebHigh_Text>Web Hoch</textBlockResolutionWebHigh_Text>
-  <textBlockResolutionPrintLow_Text>Drucken Nieder</textBlockResolutionPrintLow_Text>
+  <textBlockResolutionPrintLow_Text>Drucken Niedrig</textBlockResolutionPrintLow_Text>
   <textBlockResolutionPrintHigh_Text>Drucken Hoch</textBlockResolutionPrintHigh_Text>
   <textBlockDetailLevelCoarse_Text>Grob</textBlockDetailLevelCoarse_Text>
   <textBlockDetailLevelMedium_Text>Mittel</textBlockDetailLevelMedium_Text>
   <textBlockDetailLevelFine_Text>Fein</textBlockDetailLevelFine_Text>
-	<labelSize_ToolTip></labelSize_ToolTip>
-	<labelScale_ToolTip></labelScale_ToolTip>
-	<labelZoom_ToolTip></labelZoom_ToolTip>
-	<labelResolution_ToolTip></labelResolution_ToolTip>
-	<labelDetailLevel_ToolTip></labelDetailLevel_ToolTip>
-	<labelFormat_ToolTip></labelFormat_ToolTip>
-	<labelAspectRatio_ToolTip></labelAspectRatio_ToolTip>
-	<buttonApply_ToolTip></buttonApply_ToolTip>
-	<buttonPrint_ToolTip></buttonPrint_ToolTip>
-	<labelSize_ToolTip_Example></labelSize_ToolTip_Example>
-	<labelZoom_ToolTip_Note></labelZoom_ToolTip_Note>
-	<labelZoom_ToolTip_Example></labelZoom_ToolTip_Example>
-	<labelDetailLevel_ToolTip_Note></labelDetailLevel_ToolTip_Note>
-	<labelAspectRatio_ToolTip_Note></labelAspectRatio_ToolTip_Note>
-	<labelAspectRatio_ToolTip_Example></labelAspectRatio_ToolTip_Example>
-	<buttonApply_ToolTip_Note></buttonApply_ToolTip_Note>
+
+  <labelSize_ToolTip>Definiert den Höhenanteil des exportierten Bildes in Pixel.</labelSize_ToolTip>
+  <labelSize_ToolTip_Example>Beispiel: Bildhöhe = 1080 bei einem Seitenverhältnis von 16: 9 ergibt ein Bild mit einer Auflösung von 1920: 1080.</labelSize_ToolTip_Example>
+  <labelScale_ToolTip>Definiert die Skalierung der exportierten Ansicht auf folgende Weise: Ein größerer Skalenwert erzeugt eine genauere Skalierung der exportierten Ansicht (dünnere Linien).</labelScale_ToolTip>
+  <labelZoom_ToolTip>Definiert die Einzüge der exportierten Ansicht in Prozent.</labelZoom_ToolTip>
+  <labelZoom_ToolTip_Note>Hinweis: Diese Option wird im Befehl „Aktuelle Ansicht exportieren“ ignoriert und das Ergebnisbild wird nicht gezoomt. Das Bild hat standardmäßig einen Einzug von 5% und kann nicht geändert werden.</labelZoom_ToolTip_Note>
+  <labelZoom_ToolTip_Example>Beispiel: Zoom = 100 erzeugt ein Bild mit einem gemeinsamen Einzug von 5%, ein Zoom = 50 ergibt ein Bild mit einem Einzug von 55%.</labelZoom_ToolTip_Example>
+  <labelResolution_ToolTip>Definiert die Auflösung des exportierten Bildes in Punkten pro Zoll.</labelResolution_ToolTip>
+  <labelResolution_ToolTip_Note>“Web Niedrig” = 72 DPI,#“Web Hoch” = 150 DPI,#“Drucken Niedrig” = 300 DPI,#“Drucken Hoch” = 600 DPI.</labelResolution_ToolTip_Note>
+  <labelDetailLevel_ToolTip>Entspricht der Detailebene in Revit.</labelDetailLevel_ToolTip>
+  <labelDetailLevel_ToolTip_Note>Hinweis: Während des Exports der isometrischen Ansicht ist die Detailebene immer auf „Fein“ eingestellt und kann nicht geändert werden.</labelDetailLevel_ToolTip_Note>
+  <labelFormat_ToolTip>Definiert das Bildformat des exportierten Bildes.</labelFormat_ToolTip>
+  <labelAspectRatio_ToolTip>Legt das Seitenverhältnis des exportierten Bildes in Abhängigkeit vom Bildhöhenwert fest.</labelAspectRatio_ToolTip>
+  <labelAspectRatio_ToolTip_Note>Hinweis: Diese Option wird im Befehl „Aktuelle Ansicht exportieren“ ignoriert und die resultierende Auflösung entspricht der Auflösung der aktiven Ansicht.</labelAspectRatio_ToolTip_Note>
+  <labelAspectRatio_ToolTip_Example>Beispiel: Das Seitenverhältnis 4: 3 mit Bildhöhe = 768 ergibt ein Bild mit einer Auflösung von 1024: 768.</labelAspectRatio_ToolTip_Example>
+  <buttonApply_ToolTip>Schaltfläche "Übernehmen", um die Vorschau zu ändern, dh um die aktuelle Ansicht mit den eingegebenen Werten umzuwandeln. # Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip>
+  <buttonApply_ToolTip_Note>Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip_Note>
+  <buttonPrint_ToolTip>Die Schaltfläche "Drucken" ändert die aktuelle Ansicht mit den eingegebenen Werten und speichert diese Werte, um sie beim nächsten Öffnen des Fensters "Image Print Settings" anzuzeigen.</buttonPrint_ToolTip>
 
 
-	<errorMessageTitle>Fehler</errorMessageTitle>
+
+  <errorMessageTitle>Fehler</errorMessageTitle>
   <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten.</errorMessageValuesCorrection>
   <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten.</errorMessageValuesRetrieving>
   <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten.</errorMessageViewUpdating>
