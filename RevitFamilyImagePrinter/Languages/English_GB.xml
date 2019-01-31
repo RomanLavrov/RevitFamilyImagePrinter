@@ -87,8 +87,9 @@
 
 	<warningMessageTitle>Warning</warningMessageTitle>
 	<warningMessageProjectsAmount>Attention! The amount of projects created is not equal to the amount of types in families. Check the log file.</warningMessageProjectsAmount>
+  <warningMessageNotCompatible>This version of Revit is not compatible with Image Printer application.</warningMessageNotCompatible>
 
-	<fileDialogFilter>Image Files</fileDialogFilter>
+  <fileDialogFilter>Image Files</fileDialogFilter>
 	<fileDialogTitle>Select the directory to save the image</fileDialogTitle>
 	<folderDialogFromTitle>Select the directory with families to be printed</folderDialogFromTitle>
 	<folderDialogToTitle>Select the directory to save printed files</folderDialogToTitle>

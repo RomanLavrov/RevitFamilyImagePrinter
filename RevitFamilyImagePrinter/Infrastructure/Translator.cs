@@ -90,6 +90,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	        folderProjectsName,
 			warningMessageTitle,
 	        warningMessageProjectsAmount,
+	        warningMessageNotCompatible,
 			folderDialogFromTitle,
 	        folderDialogToTitle,
 	        windowProgressTitle,
