@@ -48,10 +48,10 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				string nameProject = $"{data.FamilyName}&{symbol.Name}";
 				allSymbols.Add(nameProject);
-
 				string pathProject = Path.Combine(pathData.ProjectsPath, $"{nameProject}.rvt");
 
 				RemoveExistingInstances(doc, symbol.Id);
+
 				try
 				{
 					InsertInstanceIntoProject(uiDoc, symbol);
@@ -154,7 +154,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			foreach (Element viewElement in viewCollector)
 			{
 				View tmpView = (View)viewElement;
-				if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}") && tmpView.ViewType == ViewType.EngineeringPlan)
+				if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}")
+				    && tmpView.ViewType == ViewType.EngineeringPlan)
 				{
 					view = tmpView;
 				}
@@ -165,6 +166,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				view = CreateStructuralPlan(doc);
 			}
 
+			FamilyInstance createdInstance = null;
 			using (var transaction = new Transaction(doc, "Insert Symbol"))
 			{
 				transaction.Start();
@@ -172,9 +174,43 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				XYZ point = new XYZ(0, 0, 0);
 				Level level = view.GenLevel;
 				Element host = level as Element;
+				createdInstance = doc.Create.NewFamilyInstance(point, symbol, host, StructuralType.NonStructural);
+				transaction.Commit();
+			}
+
+			if (createdInstance.get_BoundingBox(view) == null)
+			{
+				InsertInstanceIntoWall(uiDoc, view, symbol);
+			}
+
+		}
+
+		private static void InsertInstanceIntoWall(UIDocument uiDoc, View view, FamilySymbol symbol)
+		{
+			Document doc = uiDoc.Document;
+			Wall wall = null;
+			using (Transaction t = new Transaction(doc))
+			{
+				t.Start("Create Wall");
+				XYZ start = new XYZ(0, 0, 0);
+				XYZ end = new XYZ(10, 0, 0);
+				Line geomLine = Line.CreateBound(start, end);
+				wall = Wall.Create(doc, geomLine, view.GenLevel.Id, true);
+				t.Commit();
+			}
+			using (var transaction = new Transaction(doc, "Insert Symbol"))
+			{
+				transaction.Start();
+				symbol.Activate();
+				XYZ point = new XYZ(0, 0, 0);
+				Level level = view.GenLevel;
+				Element host = wall as Element;
 				doc.Create.NewFamilyInstance(point, symbol, host, StructuralType.NonStructural);
 				transaction.Commit();
 			}
+			List<ElementId> tmpList = new List<ElementId>();
+			tmpList.Add(wall.Id);
+			PrintHelper.HideElementsCommit(uiDoc, tmpList);
 		}
 
 		public static View CreateStructuralPlan(Document doc)
@@ -204,10 +240,20 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static void RemoveExistingInstances(Document doc, ElementId id)
 		{
-			var instances = new FilteredElementCollector(doc)
+			var familyInstances = new FilteredElementCollector(doc)
 				.OfClass(typeof(FamilyInstance))
 				.ToElements();
-			foreach (var i in instances)
+			foreach (var i in familyInstances)
+			{
+				if (i.Id != id)
+				{
+					DeleteElementCommit(doc, i);
+				}
+			}
+			var wallInstances = new FilteredElementCollector(doc)
+				.OfClass(typeof(Wall))
+				.ToElements();
+			foreach (var i in wallInstances)
 			{
 				if (i.Id != id)
 				{
