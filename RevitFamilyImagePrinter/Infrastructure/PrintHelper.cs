@@ -4,6 +4,7 @@ using Ookii.Dialogs.Wpf;
 using RevitFamilyImagePrinter.Windows;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -147,19 +148,30 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void ZoomOpenUIViews(UIDocument uiDoc, double zoomValue, bool isToFit = true)
 		{
-			IList<UIView> uiViews = uiDoc.GetOpenUIViews();
-			foreach (var item in uiViews)
+			//IList<UIView> uiViews = uiDoc.GetOpenUIViews();
+			var activeView = uiDoc
+				.GetOpenUIViews()
+				.FirstOrDefault(x => x.ViewId == uiDoc.ActiveView.Id);
+			if (isToFit)
 			{
-				if (isToFit)
-				{
-					item.ZoomToFit();
-				}
-				item.Zoom(zoomValue);
-				uiDoc.RefreshActiveView();
+				activeView.ZoomToFit();
 			}
+			activeView.Zoom(zoomValue);
+			uiDoc.RefreshActiveView();
+			//foreach (var item in uiViews)
+			//{
+			//	if(item.ViewId != uiDoc.ActiveView.Id) continue;
+			//	if (isToFit)
+			//	{
+			//		item.ZoomToFit();
+			//		uiDoc.RefreshActiveView();
+			//	}
+			//	item.Zoom(zoomValue);
+			//	uiDoc.RefreshActiveView();
+			//}
 		}
 
-		private static double? GetScaleFromElement(UIDocument uiDoc)
+		private static double GetScaleFromElement(UIDocument uiDoc)
 		{
 			Document doc = uiDoc.Document;
 			var viewType = uiDoc.ActiveView.ViewType;
@@ -170,7 +182,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				var box = item.get_BoundingBox(doc.ActiveView);
 				if (box == null)
-					return null;
+					continue;
 				if (viewType == ViewType.ThreeD)
 				{
 					Scale3DCalculation(box, ref scaleFactor);
@@ -259,11 +271,15 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				}
 			}
 			if (levelsToHide.Count < 1) return;
+			HideElementsCommit(uiDoc, levelsToHide);
+		}
 
+		public static void HideElementsCommit(UIDocument uiDoc, ICollection<ElementId> elements)
+		{
 			using (Transaction transaction = new Transaction(uiDoc.Document, "Level Isolating"))
 			{
 				transaction.Start();
-				uiDoc.ActiveView.HideElements(levelsToHide);
+				uiDoc.ActiveView.HideElements(elements);
 				transaction.Commit();
 			}
 		}
@@ -411,8 +427,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#endregion
 
-		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false)
-		{
+		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false){
 			try
 			{
 				Document doc = uiDoc.Document;
@@ -427,7 +442,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					IList<ElementId> views = new List<ElementId>();
 					views.Add(doc.ActiveView.Id);
 
-					//CorrectFileName(ref filePath);
 					FileInfo imageFile = new FileInfo($"{filePath}{userValues.UserExtension}");
 					var tmpFilePath = Path.Combine(imageFile.DirectoryName,
 						$"{Guid.NewGuid().ToString()}{imageFile.Extension}");
@@ -455,8 +469,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					}
 
 					var scale = GetScaleFromElement(uiDoc);
-					if (scale == null)
-						return;
 
 					ZoomOpenUIViews(uiDoc, (double) scale, false);
 
@@ -483,7 +495,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 	    {
 		    using (Transaction transaction = new Transaction(uiDoc.Document))
 		    {
-			    transaction.Start("SetView");
+			    transaction.Start("Set View");
 			    uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
 			    uiDoc.ActiveView.Scale = userValues.UserScale;
 			    transaction.Commit();
@@ -533,7 +545,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 						.FirstOrDefault(x => x.ViewFamily == ViewFamily.ThreeDimensional);
 					using (Transaction trans = new Transaction(doc))
 					{
-						trans.Start("Add view");
+						trans.Start("Add View");
 						view3D = View3D.CreateIsometric(doc, viewFamilyType.Id);
 						trans.Commit();
 					}
