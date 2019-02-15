@@ -15,7 +15,13 @@ using Image = System.Drawing.Image;
 
 namespace RevitFamilyImagePrinter.Infrastructure
 {
-    public static class PrintHelper
+	internal partial class XYZPoint
+	{
+		public double X { get; set; }
+		public double Y { get; set; }
+		public double Z { get; set; }
+	}
+	public static class PrintHelper
 	{
 		#region Private
 
@@ -61,7 +67,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				case ImageAspectRatio.Ratio_16to9:
 					resultWidth = resultHeight * 16 / 9;
 					break;
-				case ImageAspectRatio.Ratio_1to1: resultWidth = resultHeight;
+				case ImageAspectRatio.Ratio_1to1:
+					resultWidth = resultHeight;
 					break;
 				case ImageAspectRatio.Ratio_4to3:
 					resultWidth = resultHeight * 4 / 3;
@@ -173,59 +180,98 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static double GetScaleFromElement(UIDocument uiDoc)
 		{
-			Document doc = uiDoc.Document;
+
+			var minPoint = new XYZPoint();
+			var maxPoint = new XYZPoint();
 			var viewType = uiDoc.ActiveView.ViewType;
-			FilteredElementCollector collector = new FilteredElementCollector(doc);
-			collector.OfClass(typeof(FamilyInstance));
 			double scaleFactor = 1;
-			foreach (var item in collector)
-			{
-				var box = item.get_BoundingBox(doc.ActiveView);
-				if (box == null)
-					continue;
-				if (viewType == ViewType.ThreeD)
-				{
-					Scale3DCalculation(box, ref scaleFactor);
-				}
-				else
-				{
-					Scale2DCalculation(box, ref scaleFactor);
-				}
-			}
+
+			GetExtremePoints(uiDoc.Document, ref minPoint, ref maxPoint);
+			var rect = uiDoc.GetOpenUIViews()[0]?.GetWindowRectangle();
 
 			if (viewType == ViewType.ThreeD)
 			{
+				Scale3DCalculation(rect, minPoint, maxPoint, ref scaleFactor);
 				var coefficient = 1.4;
 				var finalScaleFactor = coefficient * scaleFactor;
 				if (finalScaleFactor < 1)
 					return finalScaleFactor;
 			}
+
+			Scale2DCalculation(rect, minPoint, maxPoint, ref scaleFactor);
+
 			scaleFactor *= 0.95;
 			return scaleFactor;
 		}
 
-		private static void Scale2DCalculation(BoundingBoxXYZ box, ref double scaleFactor)
+		private static void GetExtremePoints(Document doc, ref XYZPoint minPoint, ref XYZPoint maxPoint)
 		{
-			var width = box.Max.Y - box.Min.Y;
-			var height = box.Max.X - box.Min.X;
-			if (width / height < 1)
+			FilteredElementCollector collector = new FilteredElementCollector(doc);
+			collector.OfClass(typeof(FamilyInstance));
+			BoundingBoxXYZ initialBox = collector.ToElements()[0]?.get_BoundingBox(doc.ActiveView);
+			if (initialBox == null) return;
+			minPoint.X = initialBox.Min.X;
+			minPoint.Y = initialBox.Min.Y;
+			minPoint.Z = initialBox.Min.Z;
+			maxPoint.X = initialBox.Max.X;
+			maxPoint.Y = initialBox.Max.Y;
+			maxPoint.Z = initialBox.Max.Z;
+			foreach (var item in collector)
 			{
-				scaleFactor = (width / height);
+				var box = item.get_BoundingBox(doc.ActiveView);
+				if (box == null)
+					continue;
+
+				if (box.Max.X > maxPoint.X)
+					maxPoint.X = box.Max.X;
+				if (box.Max.Y > maxPoint.Y)
+					maxPoint.Y = box.Max.Y;
+				if (box.Max.Z > maxPoint.Z)
+					maxPoint.Z = box.Max.Z;
+
+				if (box.Min.X < minPoint.X)
+					minPoint.X = box.Min.X;
+				if (box.Min.Y < minPoint.Y)
+					minPoint.Y = box.Min.Y;
+				if (box.Min.Z < minPoint.Z)
+					minPoint.Z = box.Min.Z;
+
 			}
 		}
 
-		private static void Scale3DCalculation(BoundingBoxXYZ box, ref double scaleFactor)
+		private static double GetScaleFromView(Autodesk.Revit.DB.Rectangle rectangle)
 		{
-			var width = box.Max.Y - box.Min.Y;
-			var height = box.Max.X - box.Min.X;
-			var depth = box.Max.Z - box.Min.Z;
+			var viewWidth = rectangle.Right - rectangle.Left;
+			var viewHeight = rectangle.Bottom - rectangle.Top;
+			if (viewWidth > viewHeight)
+				return (double)viewHeight / viewWidth;
+			return 1d;
+		}
 
-			var widthTotal = Math.Abs(Math.Cos(Math.PI / 6) * width) + Math.Abs(Math.Cos(Math.PI / 6) * depth);
-			var heightTotal = Math.Abs(Math.Sin(Math.PI / 6) * width) + Math.Abs(Math.Sin(Math.PI / 6) * depth) + Math.Abs(height);
-
-			if (widthTotal / heightTotal < 1)
+		private static void Scale2DCalculation(Autodesk.Revit.DB.Rectangle rectangle, 
+			XYZPoint min, XYZPoint max, ref double scaleFactor)
+		{
+			double height = Math.Round(max.Y - min.Y, 3, MidpointRounding.AwayFromZero);
+			double width = Math.Round(max.X - min.X, 3, MidpointRounding.AwayFromZero);
+			if (height / width < 1)
 			{
-				scaleFactor = (widthTotal / heightTotal);
+				scaleFactor = GetScaleFromView(rectangle);
+			}
+		}
+
+		private static void Scale3DCalculation(Autodesk.Revit.DB.Rectangle rectangle, 
+			XYZPoint min, XYZPoint max, ref double scaleFactor)
+		{
+			double height = Math.Round(max.Y - min.Y, 3, MidpointRounding.AwayFromZero);
+			double width = Math.Round(max.X - min.X, 3, MidpointRounding.AwayFromZero);
+			double depth = Math.Round(max.Z - min.Z, 3, MidpointRounding.AwayFromZero);
+
+			var heightTotal  = Math.Abs(Math.Cos(Math.PI / 6) * width) + Math.Abs(Math.Cos(Math.PI / 6) * depth);
+			var widthTotal = Math.Abs(Math.Sin(Math.PI / 6) * width) + Math.Abs(Math.Sin(Math.PI / 6) * depth) + Math.Abs(height);
+
+			if (heightTotal / widthTotal < 1) // (widthTotal / heightTotal < 1)
+			{
+				scaleFactor = GetScaleFromView(rectangle); // (widthTotal / heightTotal)
 			}
 		}
 
@@ -286,60 +332,15 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void CorrectFileName(ref string fileName)
 		{
-			string item = fileName;
-			if (fileName.Contains("Ø"))
-			{
-				fileName = fileName.Replace("Ø", "D");
-			}
-
-			if (fileName.Contains("Ä"))
-			{
-				fileName = fileName.Replace("Ä", "AE");
-			}
-
-			if (fileName.Contains("Ö"))
-			{
-				fileName = fileName.Replace("Ö", "OE");
-			}
-
-			if (fileName.Contains("ö"))
-			{
-				fileName = fileName.Replace("ö", "oe");
-			}
-
-			if (fileName.Contains("Ü"))
-			{
-				fileName = fileName.Replace("Ü", "UE");
-			}
-
-			if (fileName.Contains("ä"))
-			{
-				fileName = fileName.Replace("ä", "ae");
-			}
-
-			if (fileName.Contains("ß"))
-			{
-				fileName = fileName.Replace("ß", "ss");
-			}
-
-			if (fileName.Contains("ü"))
-			{
-				fileName = fileName.Replace("ü", "ue");
-			}
-
-			if (item.Contains("von oben nach unten") ||
-				item.Contains("von unten nach oben") ||
-				item.Contains("von oben") ||
-				item.Contains("nach oben") ||
-				item.Contains("von unten") ||
-				item.Contains("nach unten") ||
-				item.Contains("von ob nach un") ||
-				item.Contains("von un nach ob") ||
-				item.Contains("nach unten von oben") ||
-				item.Contains("SCHWENKBAR MIT MOTORZOOM"))
-			{
-				fileName = fileName.Replace(' ', '_');
-			}
+			fileName = fileName.Replace("Ø", "D");
+			fileName = fileName.Replace("Ä", "AE");
+			fileName = fileName.Replace("ä", "ae");
+			fileName = fileName.Replace("Ö", "OE");
+			fileName = fileName.Replace("ö", "oe");
+			fileName = fileName.Replace("Ü", "UE");
+			fileName = fileName.Replace("ü", "ue");
+			fileName = fileName.Replace("ß", "ss");
+			fileName = fileName.Replace(' ', '_');
 		}
 
 		#endregion
@@ -427,7 +428,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		#endregion
 
-		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false){
+		public static void PrintImageTransaction(UIDocument uiDoc, UserImageValues userValues, string filePath, bool isAuto = false)
+		{
 			try
 			{
 				Document doc = uiDoc.Document;
@@ -470,7 +472,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 					var scale = GetScaleFromElement(uiDoc);
 
-					ZoomOpenUIViews(uiDoc, (double) scale, false);
+					ZoomOpenUIViews(uiDoc, scale, false);
 
 					R2019_HotFix();
 					if (ImageExportOptions.IsValidFileName(filePath))
@@ -491,18 +493,18 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-	    private static void ActiveViewChangeTransaction(UIDocument uiDoc, UserImageValues userValues, bool is3D = false)
-	    {
-		    using (Transaction transaction = new Transaction(uiDoc.Document))
-		    {
-			    transaction.Start("Set View");
-			    uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
-			    uiDoc.ActiveView.Scale = userValues.UserScale;
-			    transaction.Commit();
-		    }
-	    }
+		private static void ActiveViewChangeTransaction(UIDocument uiDoc, UserImageValues userValues, bool is3D = false)
+		{
+			using (Transaction transaction = new Transaction(uiDoc.Document))
+			{
+				transaction.Start("Set View");
+				uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+				uiDoc.ActiveView.Scale = userValues.UserScale;
+				transaction.Commit();
+			}
+		}
 
-        public static void SetActive2DView(UIDocument uiDoc)
+		public static void SetActive2DView(UIDocument uiDoc)
 		{
 			using (Document doc = uiDoc.Document)
 			{
@@ -515,12 +517,12 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					View tmpView = (View)viewElement;
 
 					if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}")
-					    && tmpView.ViewType == ViewType.EngineeringPlan)
+						&& tmpView.ViewType == ViewType.EngineeringPlan)
 					{
 						view = tmpView;
 					}
 				}
-				if(view == null)
+				if (view == null)
 					view = ProjectHelper.CreateStructuralPlan(doc);
 				uiDoc.ActiveView = view;
 			}
@@ -668,7 +670,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		public static UIDocument OpenDocument(UIDocument uiDoc, string newDocPath)
 		{
 			if (newDocPath.Equals(uiDoc.Application.ActiveUIDocument.Document?.PathName) ||
-			    !File.Exists(newDocPath)) return uiDoc;
+				!File.Exists(newDocPath)) return uiDoc;
 			UIDocument result = uiDoc.Application.OpenAndActivateDocument(newDocPath);
 			if (!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);
@@ -694,33 +696,33 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			return true;
 		}
 
-	   // public static void CheckImagesAmount(DirectoryInfo projectsDir, int imagesCreated)
-	   // {
-	   //     var projectsCreated = projectsDir.GetFiles().Where(x => x.Extension.Equals(".rvt")).ToList();
-    //        try
-	   //     {
-	   //         Assert.AreEqual(projectsCreated.Count, imagesCreated);
-	   //     }
-	   //     catch (AssertFailedException exc)
-	   //     {
-		  //      uint difference = (uint) (projectsCreated.Count - imagesCreated);
-		  //      string errorMsg = App.Translator.GetValue(Translator.Keys.errorMessageDuringPrinting)
-			 //       .Replace("%amount%", difference.ToString());
-				//ProcessError(exc, $"{errorMsg}", App.Logger);
-	   //     }
-    //    }
+		// public static void CheckImagesAmount(DirectoryInfo projectsDir, int imagesCreated)
+		// {
+		//     var projectsCreated = projectsDir.GetFiles().Where(x => x.Extension.Equals(".rvt")).ToList();
+		//        try
+		//     {
+		//         Assert.AreEqual(projectsCreated.Count, imagesCreated);
+		//     }
+		//     catch (AssertFailedException exc)
+		//     {
+		//      uint difference = (uint) (projectsCreated.Count - imagesCreated);
+		//      string errorMsg = App.Translator.GetValue(Translator.Keys.errorMessageDuringPrinting)
+		//       .Replace("%amount%", difference.ToString());
+		//ProcessError(exc, $"{errorMsg}", App.Logger);
+		//     }
+		//    }
 
-	    public static void ProcessError(Exception exc, string errorMessage, Logger logger, bool isDialog = true)
+		public static void ProcessError(Exception exc, string errorMessage, Logger logger, bool isDialog = true)
 		{
-		    if (isDialog)
-		    {
-		        new Autodesk.Revit.UI.TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
-		        {
-		            TitleAutoPrefix = false,
-		            MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,
-		            MainContent = errorMessage
-		        }.Show();
-            }
+			if (isDialog)
+			{
+				new Autodesk.Revit.UI.TaskDialog($"{App.Translator.GetValue(Translator.Keys.errorMessageTitle)}")
+				{
+					TitleAutoPrefix = false,
+					MainIcon = Autodesk.Revit.UI.TaskDialogIcon.TaskDialogIconError,
+					MainContent = errorMessage
+				}.Show();
+			}
 			logger.WriteLine($"### ERROR ### - {errorMessage}\n{exc.Message}\n{exc.StackTrace}");
 		}
 

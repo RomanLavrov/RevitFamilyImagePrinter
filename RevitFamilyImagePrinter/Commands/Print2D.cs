@@ -34,7 +34,6 @@ namespace RevitFamilyImagePrinter.Commands
 
 			PrintHelper.SetActive2DView(UIDoc);
 
-
 			UserImageValues userInputValues = PrintHelper.ShowOptionsDialog(UIDoc, windowHeightOffset, windowWidthOffset);
 			if (userInputValues == null)
 				return Result.Cancelled;
