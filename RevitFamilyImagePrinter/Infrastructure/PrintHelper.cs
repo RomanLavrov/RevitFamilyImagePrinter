@@ -93,7 +93,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				using (var resultBitmap = image.Clone(cropRectangle, image.PixelFormat))
 				{
 					Image resultImage = ResizeImage(resultBitmap, resultWidth, resultHeight);
-					resultImage.Save($"{imageFile.FullName}");
+					resultImage.Save($"{imageFile.Name}");
 					resultImage.Dispose();
 				}
 			}
@@ -330,7 +330,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			}
 		}
 
-		private static void CorrectFileName(ref string fileName)
+		private static string CorrectFileName(string fileName)
 		{
 			fileName = fileName.Replace("Ø", "D");
 			fileName = fileName.Replace("Ä", "AE");
@@ -341,6 +341,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			fileName = fileName.Replace("ü", "ue");
 			fileName = fileName.Replace("ß", "ss");
 			fileName = fileName.Replace(' ', '_');
+			return fileName;
 		}
 
 		#endregion
@@ -444,6 +445,10 @@ namespace RevitFamilyImagePrinter.Infrastructure
 					IList<ElementId> views = new List<ElementId>();
 					views.Add(doc.ActiveView.Id);
 
+					string umlautName = new FileInfo(filePath).Name;
+					string normalizedName = CorrectFileName(umlautName);
+					filePath = filePath.Replace(umlautName, normalizedName);
+					
 					FileInfo imageFile = new FileInfo($"{filePath}{userValues.UserExtension}");
 					var tmpFilePath = Path.Combine(imageFile.DirectoryName,
 						$"{Guid.NewGuid().ToString()}{imageFile.Extension}");
