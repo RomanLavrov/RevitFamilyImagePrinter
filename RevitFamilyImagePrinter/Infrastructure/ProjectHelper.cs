@@ -95,8 +95,12 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		public static void CreateProjectFromFamilySymbol(UIDocument uiDoc, FamilySymbol symbol, string pathProject)
 		{
+			string umlautName = new FileInfo(pathProject).Name;
+			string normalizedName = PrintHelper.CorrectFileName(umlautName);
+			pathProject = pathProject.Replace(umlautName, normalizedName);
 			if (File.Exists(pathProject) && PrintHelper.IsFileAccessible(pathProject))
 				File.Delete(pathProject);
+			Debug.WriteLine(pathProject);
 			uiDoc.Document.SaveAs(pathProject);
 		}
 
