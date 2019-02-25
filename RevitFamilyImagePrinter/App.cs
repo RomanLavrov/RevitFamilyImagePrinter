@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -23,6 +24,12 @@ namespace RevitFamilyImagePrinter
 
 		public Result OnStartup(UIControlledApplication a)
 		{
+			Debug.WriteLine(System.IO.Directory.GetCurrentDirectory());
+			Debug.WriteLine(Environment.CurrentDirectory);
+			Debug.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
+			Debug.WriteLine(Assembly.GetExecutingAssembly().Location);
+			
+
 			Initialize(a.ControlledApplication);
 			if (!IsCompatibleVersion(a.ControlledApplication.VersionNumber)) return Result.Failed;
 

@@ -320,30 +320,6 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			HideElementsCommit(uiDoc, levelsToHide);
 		}
 
-		public static void HideElementsCommit(UIDocument uiDoc, ICollection<ElementId> elements)
-		{
-			using (Transaction transaction = new Transaction(uiDoc.Document, "Level Isolating"))
-			{
-				transaction.Start();
-				uiDoc.ActiveView.HideElements(elements);
-				transaction.Commit();
-			}
-		}
-
-		private static string CorrectFileName(string fileName)
-		{
-			fileName = fileName.Replace("Ø", "D");
-			fileName = fileName.Replace("Ä", "AE");
-			fileName = fileName.Replace("ä", "ae");
-			fileName = fileName.Replace("Ö", "OE");
-			fileName = fileName.Replace("ö", "oe");
-			fileName = fileName.Replace("Ü", "UE");
-			fileName = fileName.Replace("ü", "ue");
-			fileName = fileName.Replace("ß", "ss");
-			fileName = fileName.Replace(' ', '_');
-			return fileName;
-		}
-
 		#endregion
 
 		#region Public
@@ -680,6 +656,30 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			if (!IsDocumentActive(uiDoc))
 				uiDoc.Document.Close(false);
 			return result;
+		}
+
+		public static void HideElementsCommit(UIDocument uiDoc, ICollection<ElementId> elements)
+		{
+			using (Transaction transaction = new Transaction(uiDoc.Document, "Level Isolating"))
+			{
+				transaction.Start();
+				uiDoc.ActiveView.HideElements(elements);
+				transaction.Commit();
+			}
+		}
+
+		public static string CorrectFileName(string fileName)
+		{
+			fileName = fileName.Replace("Ø", "D");
+			fileName = fileName.Replace("Ä", "AE");
+			fileName = fileName.Replace("ä", "ae");
+			fileName = fileName.Replace("Ö", "OE");
+			fileName = fileName.Replace("ö", "oe");
+			fileName = fileName.Replace("Ü", "UE");
+			fileName = fileName.Replace("ü", "ue");
+			fileName = fileName.Replace("ß", "ss");
+			fileName = fileName.Replace(' ', '_');
+			return fileName;
 		}
 
 		public static bool IsFileAccessible(string path)
