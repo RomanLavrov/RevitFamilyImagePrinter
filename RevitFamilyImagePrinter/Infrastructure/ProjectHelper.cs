@@ -232,6 +232,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				.Cast<Level>()
 				.FirstOrDefault(lvl => lvl.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}"));
 
+			if (level1 == null)
+				level1 = lvlCollector.Cast<Level>().FirstOrDefault();
+
 			ViewPlan vp = null;
 			using (Transaction transaction = new Transaction(doc, "Create Plan"))
 			{
