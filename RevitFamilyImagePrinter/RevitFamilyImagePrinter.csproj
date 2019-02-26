@@ -59,7 +59,7 @@
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="RevitAPI">
-      <HintPath>C:\Users\user\AppData\Roaming\Autodesk\Revit\Addins\2018\RevitAPI.dll</HintPath>
+      <HintPath>C:\Users\user\Downloads\RevitAPI.dll</HintPath>
     </Reference>
     <Reference Include="RevitAPIUI">
       <HintPath>C:\Program Files\Autodesk\Revit 2018\RevitAPIUI.dll</HintPath>
