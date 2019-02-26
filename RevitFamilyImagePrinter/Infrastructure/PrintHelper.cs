@@ -93,7 +93,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				using (var resultBitmap = image.Clone(cropRectangle, image.PixelFormat))
 				{
 					Image resultImage = ResizeImage(resultBitmap, resultWidth, resultHeight);
-					resultImage.Save($"{imageFile.Name}");
+					resultImage.Save($"{imageFile.FullName}");
 					resultImage.Dispose();
 				}
 			}
@@ -497,12 +497,16 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				{
 					View tmpView = (View)viewElement;
 
+					Debug.WriteLine($"Name: {tmpView.Name} ### ViewType: {tmpView.ViewType}");
 					if (tmpView.Name.Equals($"{App.Translator.GetValue(Translator.Keys.level1Name)}")
 						&& tmpView.ViewType == ViewType.EngineeringPlan)
 					{
 						view = tmpView;
 					}
 				}
+
+				if (view == null)
+					view = viewCollector.Cast<View>().FirstOrDefault(x => x.ViewType == ViewType.EngineeringPlan);
 				if (view == null)
 					view = ProjectHelper.CreateStructuralPlan(doc);
 				uiDoc.ActiveView = view;
@@ -678,6 +682,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			fileName = fileName.Replace("Ü", "UE");
 			fileName = fileName.Replace("ü", "ue");
 			fileName = fileName.Replace("ß", "ss");
+			fileName = fileName.Replace("°", "");
 			fileName = fileName.Replace(' ', '_');
 			return fileName;
 		}
