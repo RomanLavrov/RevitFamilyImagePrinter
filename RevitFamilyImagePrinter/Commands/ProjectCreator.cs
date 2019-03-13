@@ -1,6 +1,5 @@
 ﻿using Autodesk.Revit.Attributes;
 using Autodesk.Revit.DB;
-using Autodesk.Revit.DB.Structure;
 using Autodesk.Revit.UI;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RevitFamilyImagePrinter.Infrastructure;
@@ -11,7 +10,7 @@ using System.Linq;
 
 namespace RevitFamilyImagePrinter.Commands
 {
-	[Transaction(TransactionMode.Manual)]
+    [Transaction(TransactionMode.Manual)]
 	class ProjectCreator : IExternalCommand
 	{
 		#region Properties

@@ -15,7 +15,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>RevitFamilyImagePrinter</RootNamespace>
     <AssemblyName>RevitFamilyImagePrinter</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -81,6 +81,8 @@
     <Compile Include="Commands\PrintView.cs" />
     <Compile Include="Commands\ProjectCreator.cs" />
     <Compile Include="Commands\RemoveEmptyFamilies.cs" />
+    <Compile Include="Commands\Support.cs" />
+    <Compile Include="Commands\UserHelp.cs" />
     <Compile Include="Infrastructure\FamilyData.cs" />
     <Compile Include="Infrastructure\Logger.cs" />
     <Compile Include="Infrastructure\PathData.cs" />
@@ -120,8 +122,12 @@
       <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="Languages\German.xml" />
-    <EmbeddedResource Include="Languages\English_GB.xml" />
     <Content Include="imageprinter_blue_icon.ico" />
+    <None Include="Resources\support.png" />
+    <None Include="Resources\help.png" />
+    <EmbeddedResource Include="Languages\English_EN.xml">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Content Include="RevitFamilyImagePrinter.addin" />
   </ItemGroup>
   <ItemGroup>

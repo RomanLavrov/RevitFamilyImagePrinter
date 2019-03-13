@@ -96,6 +96,15 @@ namespace RevitFamilyImagePrinter
 			PushButtonData buttonProjectCreator = new PushButtonData("Project creator", "Project creator", assembly, "RevitFamilyImagePrinter.Commands.ProjectCreator");
 			buttonProjectCreator.ToolTip = "Create .rvt files from .rfa files";
 
+            PushButtonData buttonSupport = new PushButtonData("ContactSupport", Translator.GetValue(Translator.Keys.buttonSupport_Name), assembly, "RevitFamilyImagePrinter.Commands.Support");
+            buttonSupport.ToolTip = Translator.GetValue(Translator.Keys.buttonSupport_ToolTip);
+            buttonSupport.LargeImage = GetImage(Resources.support.GetHbitmap());
+
+            PushButtonData buttonHelp = new PushButtonData("UserHelp", Translator.GetValue(Translator.Keys.buttonHelp_Name), assembly, "RevitFamilyImagePrinter.Commands.UserHelp");
+            buttonHelp.ToolTip = Translator.GetValue(Translator.Keys.buttonHelp_ToolTip);
+            buttonHelp.LargeImage = GetImage(Resources.help.GetHbitmap());
+
+
 			RibbonPanel printPanel = a.CreateRibbonPanel(tabName, Translator.GetValue(Translator.Keys.tabTitle));
 			printPanel.AddItem(buttonPrint2DSingle);
 			printPanel.AddItem(buttonPrint2DMulti);
@@ -105,8 +114,11 @@ namespace RevitFamilyImagePrinter
 			printPanel.AddItem(buttonPrintView);
 			printPanel.AddSeparator();
 			printPanel.AddItem(buttonLink);
+            printPanel.AddItem(buttonSupport);
+            printPanel.AddItem(buttonHelp);
 			//printPanel.AddItem(buttonRemoveEmptyFamilies);
 			//printPanel.AddItem(buttonProjectCreator);
+
 
 			return Result.Succeeded;
 		}

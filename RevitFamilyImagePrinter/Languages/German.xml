@@ -1,13 +1,13 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <!--Use #-symbol where NewLine required-->
 <Data>
-  <tabName>Bilddrucker</tabName>
+  <tabName>Image Printer</tabName>
   <tabTitle>Familienbilddrucker</tabTitle>
 
   <buttonPrint2DSingle_Name>2D-Ansicht#exportieren</buttonPrint2DSingle_Name>
   <buttonPrint2DSingle_ToolTip>Exportieren Sie die 2D-Ansicht der Familie in eine Bilddatei</buttonPrint2DSingle_ToolTip>
 
-  <buttonPrint2DMulti_Name> 2D Aus Ordner# exportieren </buttonPrint2DMulti_Name>
+  <buttonPrint2DMulti_Name> 2D aus Ordner# exportieren </buttonPrint2DMulti_Name>
   <buttonPrint2DMulti_ToolTip>Exportieren Sie die 2D-Ansicht der Familienliste aus dem Ordner in Bilder</buttonPrint2DMulti_ToolTip>
 
   <buttonPrint3DSingle_Name>Isometrische Ansicht#exportieren</buttonPrint3DSingle_Name>
@@ -58,6 +58,12 @@
   <buttonApply_ToolTip>Schaltfläche "Übernehmen", um die Vorschau zu ändern, dh um die aktuelle Ansicht mit den eingegebenen Werten umzuwandeln. # Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip>
   <buttonApply_ToolTip_Note>Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip_Note>
   <buttonPrint_ToolTip>Die Schaltfläche "Drucken" ändert die aktuelle Ansicht mit den eingegebenen Werten und speichert diese Werte, um sie beim nächsten Öffnen des Fensters "Image Print Settings" anzuzeigen.</buttonPrint_ToolTip>
+
+  <buttonSupport_Name>Support</buttonSupport_Name>
+  <buttonSupport_ToolTip>Senden Sie das Problem an den Support</buttonSupport_ToolTip>
+
+  <buttonHelp_Name>Hilfe</buttonHelp_Name>
+  <buttonHelp_ToolTip>Webseite mit Hilfedokumentation</buttonHelp_ToolTip>
 
 
 

@@ -1,17 +1,14 @@
-﻿using System;
+﻿using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using RevitFamilyImagePrinter.Infrastructure;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Autodesk.Revit.Attributes;
-using Autodesk.Revit.DB;
-using Autodesk.Revit.Exceptions;
-using Autodesk.Revit.UI;
-using Autodesk.Revit.UI.Events;
-using RevitFamilyImagePrinter.Infrastructure;
 
 namespace RevitFamilyImagePrinter.Commands
 {
-	[Transaction(TransactionMode.Manual)]
+    [Transaction(TransactionMode.Manual)]
 	class Print3DFolder : IExternalCommand
 	{
 		#region Properties
