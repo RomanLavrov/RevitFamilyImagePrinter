@@ -305,7 +305,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 
 		private static void R2019_3DViewFix(UIDocument uiDoc)
 		{
-			if (!App.Version.Contains("2019")) return;
+			if (App.Version.Contains("2018")) return;
 			FilteredElementCollector collector = new FilteredElementCollector(uiDoc.Document);
 			collector.OfClass(typeof(Level));
 			var levelsToHide = new List<ElementId>();
@@ -586,13 +586,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				return name;
 			}
 
-			if (App.Version.Contains("2019"))
-			{
-				return doc.Title;
-			}
-
-			throw new Exception("Unknown Revit Version");
-
+			return doc.Title;
 		}
 
 		public static ImageFileType GetImageFileType(string userImagePath)

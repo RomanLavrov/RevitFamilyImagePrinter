@@ -45,16 +45,16 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.4.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions, Version=14.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\MSTest.TestFramework.1.4.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
+      <HintPath>..\packages\MSTest.TestFramework.2.0.0\lib\net45\Microsoft.VisualStudio.TestPlatform.TestFramework.Extensions.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf">
-      <HintPath>C:\Users\user\AppData\Roaming\Autodesk\Revit\Addins\2018\Ookii.Dialogs.Wpf.dll</HintPath>
+    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -65,7 +65,9 @@
       <HintPath>C:\Program Files\Autodesk\Revit 2018\RevitAPIUI.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Security" />
     <Reference Include="System.Xaml" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
@@ -143,19 +145,23 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2020"
+    <PostBuildEvent>call "C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe" sign /tr http://timestamp.digicert.com  /f  "D:\building360_2020.pfx" /p "uKBdCwnkP59DGhb5" "$(ProjectDir)bin\debug\RevitFamilyImagePrinter.dll"
+call "C:\Program Files (x86)\Windows Kits\10\bin\x64\signtool.exe" sign /tr http://timestamp.digicert.com  /f  "D:\building360_2020.pfx" /p "uKBdCwnkP59DGhb5" "$(ProjectDir)bin\release\RevitFamilyImagePrinter.dll"
+
+copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2020"
 copy "$(ProjectDir)bin\debug\*.dll" "$(AppData)\Autodesk\REVIT\Addins\2020"
 copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2019"
 copy "$(ProjectDir)bin\debug\*.dll" "$(AppData)\Autodesk\REVIT\Addins\2019"
 copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2018"
 copy "$(ProjectDir)bin\debug\*.dll" "$(AppData)\Autodesk\REVIT\Addins\2018"
 
+copy "$(ProjectDir)*.addin" "$(ProgramData)\Autodesk\REVIT\Addins\2017"
+copy "$(ProjectDir)bin\debug\*.dll" "$(ProgramData)\Autodesk\REVIT\Addins\2017"
 </PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>tasklist /fi "imagename eq revit.exe" |find ":" &gt; nul
-if errorlevel 1 taskkill /f /im "revit.exe"
-exit</PreBuildEvent>
+    <PreBuildEvent>
+    </PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
        Other similar extension points exist, see Microsoft.Common.targets.
