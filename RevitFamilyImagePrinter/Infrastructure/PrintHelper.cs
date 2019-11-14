@@ -470,7 +470,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			catch (Exception exc)
 			{
 				ProcessError(exc,
-					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", App.Logger, false);
+					$"{App.Translator.GetValue(Translator.Keys.errorMessageViewPrinting)}", App.Logger, !isAuto);
 			}
 		}
 
@@ -684,6 +684,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			fileName = fileName.Replace("ß", "ss");
 			fileName = fileName.Replace("°", "");
 			fileName = fileName.Replace(' ', '_');
+			fileName = fileName.Replace('/', '_');
 			return fileName;
 		}
 

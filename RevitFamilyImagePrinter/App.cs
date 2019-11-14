@@ -1,15 +1,14 @@
+using Autodesk.Revit.ApplicationServices;
+using Autodesk.Revit.UI;
+using RevitFamilyImagePrinter.Infrastructure;
+using RevitFamilyImagePrinter.Properties;
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Threading;
 using System.Windows;
 using System.Windows.Media.Imaging;
-using Autodesk.Revit.ApplicationServices;
-using Autodesk.Revit.UI;
-using RevitFamilyImagePrinter.Infrastructure;
-using RevitFamilyImagePrinter.Properties;
 
 namespace RevitFamilyImagePrinter
 {
@@ -24,12 +23,6 @@ namespace RevitFamilyImagePrinter
 
 		public Result OnStartup(UIControlledApplication a)
 		{
-			Debug.WriteLine(System.IO.Directory.GetCurrentDirectory());
-			Debug.WriteLine(Environment.CurrentDirectory);
-			Debug.WriteLine(AppDomain.CurrentDomain.BaseDirectory);
-			Debug.WriteLine(Assembly.GetExecutingAssembly().Location);
-			
-
 			Initialize(a.ControlledApplication);
 			if (!IsCompatibleVersion(a.ControlledApplication.VersionNumber)) return Result.Failed;
 
@@ -47,7 +40,7 @@ namespace RevitFamilyImagePrinter
 				LargeImage = GetImage(Resources._2D_Single.GetHbitmap()),
 
 			};
-			ContextualHelp contextualHelp = new ContextualHelp(ContextualHelpType.Url, "https://www.building360.ch/ImagePrinter/index.html");
+			ContextualHelp contextualHelp = new ContextualHelp(ContextualHelpType.Url, "https://help.building360.ch/ImagePrinter/");
 			buttonPrint2DSingle.SetContextualHelp(contextualHelp);
 
 
@@ -105,8 +98,6 @@ namespace RevitFamilyImagePrinter
 			printPanel.AddItem(buttonPrintView);
 			printPanel.AddSeparator();
 			printPanel.AddItem(buttonLink);
-			//printPanel.AddItem(buttonRemoveEmptyFamilies);
-			//printPanel.AddItem(buttonProjectCreator);
 
 			return Result.Succeeded;
 		}

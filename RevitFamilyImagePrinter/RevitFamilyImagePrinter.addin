@@ -9,7 +9,7 @@
     <VendorId>ch.building360</VendorId>
     <VendorDescription>
       IHR PORTAL FÜR DIGITALES PLANEN,
-      BAUEN UND BEWIRTSCHAFTENhttps://www.building360.ch/</VendorDescription>
+      BAUEN UND BEWIRTSCHAFTEN https://www.building360.ch/ </VendorDescription>
   </AddIn>
   <AddIn Type="Application">
     <Name>Application RevitFamilyImagePrinter</Name>
@@ -19,6 +19,6 @@
     <VendorId>ch.building360</VendorId>
     <VendorDescription>
       IHR PORTAL FÜR DIGITALES PLANEN,
-      BAUEN UND BEWIRTSCHAFTEN https://www.building360.ch/</VendorDescription>
+      BAUEN UND BEWIRTSCHAFTEN https://www.building360.ch/ </VendorDescription>
   </AddIn>
 </RevitAddIns>

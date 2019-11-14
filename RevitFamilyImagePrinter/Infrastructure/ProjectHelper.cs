@@ -49,7 +49,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			{
 				string nameProject = $"{data.FamilyName}&{symbol.Name}";
 				allSymbols.Add(nameProject);
-				string pathProject = Path.Combine(pathData.ProjectsPath, $"{nameProject}.rvt");
+
+				string pathProject = Path.Combine(pathData.ProjectsPath, $"{PrintHelper.CorrectFileName(nameProject)}.rvt");
 
 				RemoveExistingInstances(doc, symbol.Id);
 
@@ -290,6 +291,7 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				new TaskDialog("Fail")
 				{
 					TitleAutoPrefix = false,
+					MainIcon = TaskDialogIcon.TaskDialogIconWarning,
 					MainContent = ".rfa files have not been found in specified folder."
 				}.Show();
 				return null;
