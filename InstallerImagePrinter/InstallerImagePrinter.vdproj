@@ -584,7 +584,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0c15020868fd6249, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_3882C3E3FBC745DC93509181AC87C5BC"
@@ -728,7 +728,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_558E2155D8394593AD8B727544398612"
@@ -1279,15 +1279,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Revit Image Printer"
-        "ProductCode" = "8:{7DB01B66-6E83-48BA-8F72-F9FA08C1D9A9}"
-        "PackageCode" = "8:{A0834E53-B5C2-4F98-9519-76DEC447EAA8}"
+        "ProductCode" = "8:{CD244A39-BA84-40D5-B588-38E9D5A97747}"
+        "PackageCode" = "8:{2AD85825-D213-4A81-9A29-757E50EDA19B}"
         "UpgradeCode" = "8:{CAA4C2D1-EFE0-44D5-AA36-B83DC2B4D6BC}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:0.9.1"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:Building360"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
