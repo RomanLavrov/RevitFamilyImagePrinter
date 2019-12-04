@@ -581,8 +581,10 @@ namespace RevitFamilyImagePrinter.Infrastructure
 		{
 			if (App.Version.Contains("2018"))
 			{
+				string name = string.Empty;
 				int indexDot = doc.Title.IndexOf('.');
-				var name = doc.Title.Substring(0, indexDot);
+				if (indexDot > 0)
+					name = doc.Title.Substring(0, indexDot);
 				return name;
 			}
 
