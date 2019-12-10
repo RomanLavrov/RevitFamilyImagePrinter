@@ -154,7 +154,7 @@ namespace RevitFamilyImagePrinter
 
 			string loggerCompInfo = string.Empty;
 			loggerCompInfo += $"\nImagePrinter version: {Assembly.GetExecutingAssembly().GetName().Version.ToString(3)}";
-			loggerCompInfo += $"\nRevit Version: {cApp.SubVersionNumber}";
+			loggerCompInfo += $"\nRevit Version: {cApp.VersionNumber}";
 			loggerCompInfo += $"\nRevit Language: {Language}";
 
 			Logger.WriteLine(loggerCompInfo, false);
