@@ -1,0 +1,363 @@
+﻿<UserControl
+    x:Class="RevitFamilyImagePrinter.Windows.PrintOptions"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:RevitFamilyImagePrinter"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="330"
+    Height="360"
+    mc:Ignorable="d"
+    Loaded="UserControl_Loaded"
+    DataContext="{Binding RelativeSource={RelativeSource Self}}">
+    <Grid
+        HorizontalAlignment="Stretch"
+        VerticalAlignment="Stretch"
+        Margin="3">
+		<Grid.Resources>
+			<Style TargetType="ToolTip">
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="ToolTip">
+							<Border Name="Border" BorderThickness="1"
+                                                    Width="{TemplateBinding Width}"
+                                                    Height="{TemplateBinding Height}">
+								<Grid DataContext="{TemplateBinding Content}">
+									<Border BorderThickness="3"
+                                                                Background="#f1f2f7"
+                                                                Padding="5"
+                                                                MaxWidth="230">
+										<Border.Effect>
+											<DropShadowEffect Color="#a2a2a2" 
+                                                                                  Opacity="0.5" 
+                                                                                  ShadowDepth="1"
+                                                                                  BlurRadius="5"/>
+										</Border.Effect>
+										<StackPanel Orientation="Vertical">
+											<StackPanel.Resources>
+												<Style TargetType="TextBlock">
+													<Setter Property="TextWrapping" Value="Wrap"/>
+													<Style.Triggers>
+														<Trigger Property="Text" Value="">
+															<Setter Property="Visibility" Value="Collapsed" />
+														</Trigger>
+														<Trigger Property="Text" Value="{x:Null}">
+															<Setter Property="Visibility" Value="Collapsed" />
+														</Trigger>
+													</Style.Triggers>
+												</Style>
+											</StackPanel.Resources>
+											<TextBlock FontWeight="DemiBold" Text="{Binding Text}"/>
+											<TextBlock Text="{Binding Note}"/>
+											<TextBlock FontStyle="Italic" Text="{Binding Example}"/>
+										</StackPanel>
+									</Border>
+								</Grid>
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+			</Style>
+			<Style TargetType="HeaderedContentControl">
+				<Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+			</Style>
+		</Grid.Resources>
+	    <Grid.RowDefinitions>
+            <RowDefinition Height="6*"/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+        <Grid
+                    Grid.Row="0"
+                    Margin="5 5 5 0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition Height="0.3*"/>
+                <RowDefinition Height="0.3*"/>
+            </Grid.RowDefinitions>
+            <Grid.Resources>
+                <Style TargetType="GroupBox">
+                    <Setter Property="BorderBrush" Value="#cee8ff"/>
+                </Style>
+            </Grid.Resources>
+            <GroupBox Grid.Row="0"
+                          Header="{Binding Path=labelParameters_Text}">
+                <Grid
+                    Margin="3"
+                    HorizontalAlignment="Stretch">
+                    <Grid.Resources>
+						<Style TargetType="Label">
+							<Setter Property="Margin" Value="0 0 5 0"/>
+							<Setter Property="HorizontalAlignment" Value="Left"/>
+							<Setter Property="VerticalAlignment" Value="Center"/>
+							<Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+						</Style>
+						<Style TargetType="TextBox">
+                            <Setter Property="MinHeight" Value="20"/>
+                            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                            <Setter Property="VerticalAlignment" Value="Center"/>
+                            <Setter Property="TextWrapping" Value="Wrap"/>
+                            <Setter Property="MaxLength" Value="5"/>
+                            <EventSetter Event="KeyDown" Handler="TextBox_KeyDown"/>
+                        </Style>
+                    </Grid.Resources>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition Width="120"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <Label
+                        x:Name="labelSize"
+                        Grid.Column="0"
+                        Grid.Row="0"
+                        Content="{Binding Path=labelSize_Text}"
+                        ToolTip="{Binding Path=labelSizeToolTip}"/>
+					<TextBox
+                    Grid.Column="1"
+                    Grid.Row="0"
+                    x:Name="SizeValue"
+                    Text="64"
+                    MinHeight="20"/>
+					<Label
+                    x:Name="labelZoom"
+                    Grid.Column="0"
+                    Grid.Row="1"
+                    Content="{Binding Path=labelZoom_Text}"
+                    ToolTip="{Binding Path=labelZoomToolTip}"/>
+                    <TextBox
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    x:Name="ZoomValue"
+                    Text="90"
+                    MaxLength="3"/>
+	                <Label
+		                x:Name="labelScale"
+		                Grid.Column="0"
+		                Grid.Row="2"
+		                Content="{Binding Path=labelScale_Text}" 
+		                ToolTip="{Binding Path=labelScale_ToolTip}"/>
+	                <!--<TextBox
+                    Grid.Column="1"
+                    Grid.Row="1"
+                    x:Name="ScaleValue"
+                    Text="64"
+                    MaxLength="3"/>-->
+	                <ComboBox 
+		                Grid.Column="1"
+		                Grid.Row="2"
+		                x:Name="comboBoxScaleValue"
+		                Height="23" 
+		                SelectedIndex="5"
+		                VerticalAlignment="Center"
+		                SelectionChanged="ComboBox_SelectionChanged">
+		                <TextBlock Tag="1" x:Name="textBlockScale1" Text="1 : 1"/>
+		                <TextBlock Tag="2" x:Name="textBlockScale2" Text="1 : 2"/>
+		                <TextBlock Tag="5" x:Name="textBlockScale5" Text="1 : 5"/>
+		                <TextBlock Tag="10" x:Name="textBlockScale10" Text="1 : 10"/>
+		                <TextBlock Tag="20" x:Name="textBlockScale20" Text="1 : 20"/>
+		                <TextBlock Tag="25" x:Name="textBlockScale25" Text="1 : 25"/>
+		                <TextBlock Tag="50" x:Name="textBlockScale50" Text="1 : 50"/>
+	                </ComboBox>
+					<Label
+                    x:Name="labelResolution"
+                    Grid.Column="0"
+                    Grid.Row="3"
+                    Content="{Binding Path=labelResolution_Text}"
+                    ToolTip="{Binding Path=labelResolutionToolTip}"/>
+                    <ComboBox 
+                    Grid.Row="3"
+                    Grid.Column="1"
+                    x:Name="comboBoxResolutionValue"
+                    Height="23" 
+                    SelectedIndex="0"
+                    VerticalAlignment="Center"
+                    SelectionChanged="ComboBox_SelectionChanged">
+                        <TextBlock Tag="72" x:Name="textBlockResolutionWebLow" Text="{Binding Path=textBlockResolutionWebLow_Text}"/>
+                        <TextBlock Tag="150" x:Name="textBlockResolutionWebHigh" Text="{Binding Path=textBlockResolutionWebHigh_Text}"/>
+                        <TextBlock Tag="300" x:Name="textBlockResolutionPrintLow" Text="{Binding Path=textBlockResolutionPrintLow_Text}"/>
+                        <TextBlock Tag="600" x:Name="textBlockResolutionPrintHigh" Text="{Binding Path=textBlockResolutionPrintHigh_Text}"/>
+                    </ComboBox>
+                    <Label
+                            x:Name="labelDetailLevel"
+                            Grid.Column="0"
+                            Grid.Row="4"
+                            Content="{Binding Path=labelDetailLevel_Text}"
+                            ToolTip="{Binding Path=labelDetailLevelToolTip}"/>
+                    <ComboBox 
+                    Grid.Row="4"
+                    Grid.Column="1"
+                    Name="comboBoxDetailLevelValue"
+                    Height="23" 
+                    SelectedIndex="1"
+                    VerticalAlignment="Center"
+                    HorizontalContentAlignment="Left" 
+                    SelectionChanged="ComboBox_SelectionChanged">
+                        <ComboBox.Resources>
+                            <Style TargetType="StackPanel">
+                                <Setter Property="Orientation" Value="Horizontal"/>
+                            </Style>
+                            <Style TargetType="Image">
+                                <Setter Property="Width" Value="17"/>
+                                <Setter Property="Height" Value="13"/>
+                                <Setter Property="Margin" Value="0 0 5 0"/>
+                            </Style>
+                        </ComboBox.Resources>
+                        <ComboBoxItem Tag="Coarse">
+                            <StackPanel>
+                                <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/coarse.png"/>
+                                <TextBlock x:Name="textBlockDetailLevelCoarse" Text="{Binding Path=textBlockDetailLevelCoarse_Text}"/>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem  Tag="Medium">
+                            <StackPanel>
+                                <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/medium.png"/>
+                                <TextBlock x:Name="textBlockDetailLevelMedium" Text="{Binding Path=textBlockDetailLevelMedium_Text}"/>
+                            </StackPanel>
+                        </ComboBoxItem>
+                        <ComboBoxItem  Tag="Fine">
+                            <StackPanel>
+                                <Image Source="pack://application:,,,/RevitFamilyImagePrinter;component/Resources/fine.png"/>
+                                <TextBlock x:Name="textBlockDetailLevelFine" Text="{Binding Path=textBlockDetailLevelFine_Text}"/>
+                            </StackPanel>
+                        </ComboBoxItem>
+                    </ComboBox>
+                </Grid>
+            </GroupBox>
+            <GroupBox Grid.Row="1" 
+                          VerticalContentAlignment="Center">
+	            <GroupBox.Header>
+		            <HeaderedContentControl ToolTip="{Binding Path=labelAspectRatioToolTip}" 
+		                                    Content="{Binding Path=labelAspectRatio_Text}"/>
+	            </GroupBox.Header>
+				<Grid 
+                    VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="RadioButton">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="Height" Value="17"/>
+                            <Setter Property="MinWidth" Value="50"/>
+                            <EventSetter Event="Checked" Handler="RadioButtonRatio_Checked"/>
+                        </Style>
+                    </Grid.Resources>
+                    <RadioButton Grid.Column="0" Tag="1:1" IsChecked="True" Name="RadioButton1to1">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">1:1</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                    <RadioButton Grid.Column="1" Tag="16:9"  Name="RadioButton16to9">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">16:9</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                    <RadioButton Grid.Column="2"  Tag="4:3" Name="RadioButton4to3">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">4:3</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                </Grid>
+            </GroupBox>
+			<GroupBox Grid.Row="2"
+                      VerticalContentAlignment="Center">
+				<GroupBox.Header>
+					<HeaderedContentControl ToolTip="{Binding Path=labelFormat_ToolTip}" 
+					                        Content="{Binding Path=labelFormat_Text}"/>
+				</GroupBox.Header>
+				<Grid 
+                    VerticalAlignment="Center">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.Resources>
+                        <Style TargetType="RadioButton">
+                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                            <Setter Property="MinWidth" Value="50"/>
+                            <Setter Property="Height" Value="17"/>
+                            <EventSetter Event="Checked" Handler="RadioButtonExtension_Checked"/>
+                        </Style>
+                    </Grid.Resources>
+                    <RadioButton IsChecked="True" Tag=".png" Name="RadioButtonPng">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">PNG</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                    <RadioButton Grid.Column="1" Tag=".jpg"  Name="RadioButtonJpg">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">JPG</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                    <RadioButton Grid.Column="2" Tag=".bmp" Name="RadioButtonBmp"
+                                         Margin="0">
+                        <RadioButton.Content>
+                            <TextBlock Margin="3 0 0 0 ">BMP</TextBlock>
+                        </RadioButton.Content>
+                    </RadioButton>
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Row="1" Margin="3 3 3 0">
+            <Grid.Resources>
+                <Style TargetType="Button">
+                    <Setter Property="Padding" Value="5 0 5 0"></Setter>
+                    <Setter Property="Width" Value="85"/>
+                    <Setter Property="Height" Value="23"/>
+                    <Setter Property="HorizontalAlignment" Value="Center"/>
+                    <Setter Property="VerticalAlignment" Value="Center"/>
+                    <Setter Property="VerticalContentAlignment" Value="Center"/>
+	                <Setter Property="ToolTipService.InitialShowDelay" Value="1000"/>
+                </Style>
+            </Grid.Resources>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+			<Button
+                    Grid.Column="0"
+                    HorizontalContentAlignment="Center"
+                    x:Name="buttonApply"
+                    Click="Button_Click_Apply"
+					ToolTip="{Binding buttonApplyToolTip}">
+				<StackPanel Orientation="Horizontal">
+                    <Viewbox Width="12" Height="12" Margin="0 0 5 0">
+                        <Path Fill="Black" Data="m.3,14c-0.2-0.2-0.3-0.5-0.3-0.7s0.1-0.5 0.3-0.7l1.4-1.4c0.4-0.4 1-0.4 1.4,0l.1,.1 5.5,5.9c0.2,0.2 0.5,0.2
+                                  0.7,0l13.4-13.9h0.1v-8.88178e-16c0.4-0.4 1-0.4 1.4,0l1.4,1.4c0.4,0.4 0.4,1 
+                                  0,1.4l0,0-16,16.6c-0.2,0.2-0.4,0.3-0.7,0.3-0.3,0-0.5-0.1-0.7-0.3l-7.8-8.4-.2-.3z"/>
+                    </Viewbox>
+                    <TextBlock Text="{Binding Path=buttonApply_Text}"/>
+                </StackPanel>
+            </Button>
+            <Button
+                    Grid.Column="1"
+                    x:Name="buttonPrint"
+                    HorizontalContentAlignment="Center"
+                    Click="Button_Click_Print">
+                <StackPanel Orientation="Horizontal"
+                            ToolTip="{Binding buttonPrint_ToolTip}">
+                    <Viewbox Width="12" Height="12" Margin="0 0 5 0">
+                        <Path Fill="Black" Data="M399.25,98.9h-12.4V71.3c0-39.3-32-71.3-71.3-71.3h-149.7c-39.3,0-71.3,32-71.3,71.3v27.6h-11.3
+			                            c-39.3,0-71.3,32-71.3,71.3v115c0,39.3,32,71.3,71.3,71.3h11.2v90.4c0,19.6,16,35.6,35.6,35.6h221.1c19.6,0,35.6-16,35.6-35.6
+			                            v-90.4h12.5c39.3,0,71.3-32,71.3-71.3v-115C470.55,130.9,438.55,98.9,399.25,98.9z M121.45,71.3c0-24.4,19.9-44.3,44.3-44.3h149.6
+			                            c24.4,0,44.3,19.9,44.3,44.3v27.6h-238.2V71.3z M359.75,447.1c0,4.7-3.9,8.6-8.6,8.6h-221.1c-4.7,0-8.6-3.9-8.6-8.6V298h238.3
+			                            V447.1z M443.55,285.3c0,24.4-19.9,44.3-44.3,44.3h-12.4V298h17.8c7.5,0,13.5-6,13.5-13.5s-6-13.5-13.5-13.5h-330
+			                            c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h19.9v31.6h-11.3c-24.4,0-44.3-19.9-44.3-44.3v-115c0-24.4,19.9-44.3,44.3-44.3h316
+			                            c24.4,0,44.3,19.9,44.3,44.3V285.3z M154.15,364.4h171.9c7.5,0,13.5-6,13.5-13.5s-6-13.5-13.5-13.5h-171.9c-7.5,0-13.5,6-13.5,13.5S146.75,364.4,154.15,364.4
+			                            z M327.15,392.6h-172c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h171.9c7.5,0,13.5-6,13.5-13.5S334.55,392.6,327.15,392.6z 
+                                        M398.95,151.9h-27.4c-7.5,0-13.5,6-13.5,13.5s6,13.5,13.5,13.5h27.4c7.5,0,13.5-6,13.5-13.5S406.45,151.9,398.95,151.9z"/>
+                    </Viewbox>
+                    <TextBlock Text="{Binding Path=buttonPrint_Text}"/>
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</UserControl>

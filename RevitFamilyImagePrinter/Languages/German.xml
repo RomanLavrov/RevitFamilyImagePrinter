@@ -1,0 +1,108 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--Use #-symbol where NewLine required-->
+<Data>
+  <tabName>Bilddrucker</tabName>
+  <tabTitle>Familienbilddrucker</tabTitle>
+
+  <buttonPrint2DSingle_Name>2D-Ansicht#exportieren</buttonPrint2DSingle_Name>
+  <buttonPrint2DSingle_ToolTip>Exportieren Sie die 2D-Ansicht der Familie in eine Bilddatei</buttonPrint2DSingle_ToolTip>
+
+  <buttonPrint2DMulti_Name> 2D Aus Ordner# exportieren </buttonPrint2DMulti_Name>
+  <buttonPrint2DMulti_ToolTip>Exportieren Sie die 2D-Ansicht der Familienliste aus dem Ordner in Bilder</buttonPrint2DMulti_ToolTip>
+
+  <buttonPrint3DSingle_Name>Isometrische Ansicht#exportieren</buttonPrint3DSingle_Name>
+  <buttonPrint3DSingle_ToolTip>Familien-Isometrieansicht in Bilddatei exportieren</buttonPrint3DSingle_ToolTip>
+
+  <buttonPrint3DMulti_Name> Isometrische Ansicht#aus Ordner exportieren </buttonPrint3DMulti_Name>
+  <buttonPrint3DMulti_ToolTip>Erstellen Sie ein 3D-Familienbild aus dem ausgewählten Ordner</buttonPrint3DMulti_ToolTip>
+
+  <buttonPrintView_Name> Aktuelle Ansicht# exportieren </buttonPrintView_Name>
+  <buttonPrintView_ToolTip>Aktuelle Ansicht in Bilddatei exportieren</buttonPrintView_ToolTip>
+
+  <buttonLink_ToolTip>Besuchen Sie die Website building360.ch</buttonLink_ToolTip>
+  <folderProjectsName>Projekte</folderProjectsName>
+
+  <windowPrintSettingsTitle>Bilddruckeinstellungen</windowPrintSettingsTitle>
+  <labelParameters_Text>Parameter</labelParameters_Text>
+  <labelSize_Text>Bildhöhe:</labelSize_Text>
+  <labelScale_Text>Massstab</labelScale_Text>
+  <labelZoom_Text>Zoom (%):</labelZoom_Text>
+  <labelResolution_Text>Bildauflösung:</labelResolution_Text>
+  <labelDetailLevel_Text>Detail-Ebene:</labelDetailLevel_Text>
+  <labelFormat_Text>Bildformat:</labelFormat_Text>
+  <labelAspectRatio_Text>Seitenverhältnis:</labelAspectRatio_Text>
+  <buttonApply_Text>Anwenden</buttonApply_Text>
+  <buttonPrint_Text>Drucken</buttonPrint_Text>
+  <textBlockResolutionWebLow_Text>Web Niedrig</textBlockResolutionWebLow_Text>
+  <textBlockResolutionWebHigh_Text>Web Hoch</textBlockResolutionWebHigh_Text>
+  <textBlockResolutionPrintLow_Text>Drucken Niedrig</textBlockResolutionPrintLow_Text>
+  <textBlockResolutionPrintHigh_Text>Drucken Hoch</textBlockResolutionPrintHigh_Text>
+  <textBlockDetailLevelCoarse_Text>Grob</textBlockDetailLevelCoarse_Text>
+  <textBlockDetailLevelMedium_Text>Mittel</textBlockDetailLevelMedium_Text>
+  <textBlockDetailLevelFine_Text>Fein</textBlockDetailLevelFine_Text>
+
+  <labelSize_ToolTip>Definiert den Höhenanteil des exportierten Bildes in Pixel.</labelSize_ToolTip>
+  <labelSize_ToolTip_Example>Beispiel: Bildhöhe = 1080 bei einem Seitenverhältnis von 16: 9 ergibt ein Bild mit einer Auflösung von 1920: 1080.</labelSize_ToolTip_Example>
+  <labelScale_ToolTip>Definiert die Skalierung der exportierten Ansicht auf folgende Weise: Ein größerer Skalenwert erzeugt eine genauere Skalierung der exportierten Ansicht (dünnere Linien).</labelScale_ToolTip>
+  <labelZoom_ToolTip>Definiert die Einzüge der exportierten Ansicht in Prozent.</labelZoom_ToolTip>
+  <labelZoom_ToolTip_Note>Hinweis: Diese Option wird im Befehl „Aktuelle Ansicht exportieren“ ignoriert und das Ergebnisbild wird nicht gezoomt. Das Bild hat standardmäßig einen Einzug von 5% und kann nicht geändert werden.</labelZoom_ToolTip_Note>
+  <labelZoom_ToolTip_Example>Beispiel: Zoom = 100 erzeugt ein Bild mit einem gemeinsamen Einzug von 5%, ein Zoom = 50 ergibt ein Bild mit einem Einzug von 55%.</labelZoom_ToolTip_Example>
+  <labelResolution_ToolTip>Definiert die Auflösung des exportierten Bildes in Punkten pro Zoll.</labelResolution_ToolTip>
+  <labelResolution_ToolTip_Note>“Web Niedrig” = 72 DPI,#“Web Hoch” = 150 DPI,#“Drucken Niedrig” = 300 DPI,#“Drucken Hoch” = 600 DPI.</labelResolution_ToolTip_Note>
+  <labelDetailLevel_ToolTip>Entspricht der Detailebene in Revit.</labelDetailLevel_ToolTip>
+  <labelDetailLevel_ToolTip_Note>Hinweis: Während des Exports der isometrischen Ansicht ist die Detailebene immer auf „Fein“ eingestellt und kann nicht geändert werden.</labelDetailLevel_ToolTip_Note>
+  <labelFormat_ToolTip>Definiert das Bildformat des exportierten Bildes.</labelFormat_ToolTip>
+  <labelAspectRatio_ToolTip>Legt das Seitenverhältnis des exportierten Bildes in Abhängigkeit vom Bildhöhenwert fest.</labelAspectRatio_ToolTip>
+  <labelAspectRatio_ToolTip_Note>Hinweis: Diese Option wird im Befehl „Aktuelle Ansicht exportieren“ ignoriert und die resultierende Auflösung entspricht der Auflösung der aktiven Ansicht.</labelAspectRatio_ToolTip_Note>
+  <labelAspectRatio_ToolTip_Example>Beispiel: Das Seitenverhältnis 4: 3 mit Bildhöhe = 768 ergibt ein Bild mit einer Auflösung von 1024: 768.</labelAspectRatio_ToolTip_Example>
+  <buttonApply_ToolTip>Schaltfläche "Übernehmen", um die Vorschau zu ändern, dh um die aktuelle Ansicht mit den eingegebenen Werten umzuwandeln. # Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip>
+  <buttonApply_ToolTip_Note>Diese Schaltfläche ist nur während des Exports eines einzelnen Bildes verfügbar.</buttonApply_ToolTip_Note>
+  <buttonPrint_ToolTip>Die Schaltfläche "Drucken" ändert die aktuelle Ansicht mit den eingegebenen Werten und speichert diese Werte, um sie beim nächsten Öffnen des Fensters "Image Print Settings" anzuzeigen.</buttonPrint_ToolTip>
+
+
+
+  <errorMessageTitle>Fehler</errorMessageTitle>
+  <errorMessageValuesCorrection>Fehler während der Wertkorrektur aufgetreten.</errorMessageValuesCorrection>
+  <errorMessageValuesRetrieving>Beim Abrufen des Werts ist ein Fehler aufgetreten.</errorMessageValuesRetrieving>
+  <errorMessageViewUpdating>Beim Aktualisieren der Ansicht ist ein Fehler aufgetreten.</errorMessageViewUpdating>
+  <errorMessageValuesSaving>Beim Speichern der Benutzereingabewerte ist ein Fehler aufgetreten.</errorMessageValuesSaving>
+  <errorMessageValuesLoading>Fehler beim Laden der Benutzereingabewerte.</errorMessageValuesLoading>
+  <errorMessageDuringPrinting>Beim Drucken von Bildern sind Fehler aufgetreten. % amount% Bilder fehlen. # Weitere Informationen finden Sie in der Protokolldatei.</errorMessageDuringPrinting>
+
+  <textBlockProcess_Text>Wird bearbeitet...</textBlockProcess_Text>
+  <buttonCancel_Text>Beenden</buttonCancel_Text>
+
+  <errorMessageViewCorrecting>Bei der Korrektur der aktuellen Ansicht ist ein Fehler aufgetreten.</errorMessageViewCorrecting>
+  <errorMessageViewPrinting>Beim Drucken der aktuellen Ansicht ist ein Fehler aufgetreten.</errorMessageViewPrinting>
+  <errorMessage2dFolderPrintingCycle>Während des 2D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten.</errorMessage2dFolderPrintingCycle>
+  <errorMessage2dFolderPrinting>Beim Drucken von 2D-Ordnern ist ein Fehler aufgetreten.</errorMessage2dFolderPrinting>
+  <errorMessage3dFolderPrintingCycle>Während des 3D-Ordnerdrucks ist ein Fehler im Zyklus aufgetreten.</errorMessage3dFolderPrintingCycle>
+  <errorMessage3dFolderPrinting>Beim Drucken von 3D-Ordnern ist ein Fehler aufgetreten.</errorMessage3dFolderPrinting>
+
+  <errorMessageNoProjectsFolder>Der Ordner "Projekte" ist nicht vorhanden.</errorMessageNoProjectsFolder>
+  <errorMessageFamiliesRetrieving>Fehler beim Abrufen von Familien aus dem Ordner.</errorMessageFamiliesRetrieving>
+  <errorMessageProjectProcessing>Fehler beim Verarbeiten des Projekts.</errorMessageProjectProcessing>
+  <errorMessageFamilyRemoving>Beim Entfernen der Familie aus dem Projekt ist ein Fehler aufgetreten.</errorMessageFamilyRemoving>
+  <errorMessageFamilyLoading>Beim Laden der Familie aus der Datei ist ein Fehler aufgetreten.</errorMessageFamilyLoading>
+  <errorMessageInstanceRemoving>Beim Entfernen der Instanz aus dem Projekt ist ein Fehler aufgetreten.</errorMessageInstanceRemoving>
+  <errorMessageInstanceInserting>Beim Einfügen der Instanz ist ein Fehler aufgetreten.</errorMessageInstanceInserting>
+  <errorMessageTypeRemoving>Beim Entfernen des Typs aus dem Projekt ist ein Fehler aufgetreten.</errorMessageTypeRemoving>
+
+  <warningMessageTitle>Warnung</warningMessageTitle>
+  <warningMessageProjectsAmount>Beachtung! Die Anzahl der erstellten Projekte entspricht nicht der Anzahl der Typen in Familien. Überprüfen Sie die Protokolldatei.</warningMessageProjectsAmount>
+  <warningMessageNotCompatible>Diese Version von Revit ist nicht mit der Image Printer-Anwendung kompatibel.</warningMessageNotCompatible>
+
+  <fileDialogFilter>Bilder Datei</fileDialogFilter>
+	<fileDialogTitle>Wählen Sie den Ordner zum Speichern des Bildes</fileDialogTitle>
+  <folderDialogFromTitle>Wählen Sie den Ordner mit den benötigten Familien zum Drucken aus</folderDialogFromTitle>
+  <folderDialogToTitle>Wählen Sie den Ordner, in dem die gedruckten Dateien gespeichert werden sollen</folderDialogToTitle>
+
+  <windowProgressTitle> Drucken der %folderName% Ordner</windowProgressTitle>
+  <textBlockProcessCreatingProjects>Beim Erstellen von .rvt-Projekten aus .rfa-Dateien kann dies einige Zeit dauern ...</textBlockProcessCreatingProjects>
+  <textBlockProcessPreparingPrinting>Vorbereitung zum Drucken ...</textBlockProcessPreparingPrinting>
+  <textBlockProcessPrinting>Drucken: </textBlockProcessPrinting>
+  <textBlockProcessLoadingFamilies>Familien laden: </textBlockProcessLoadingFamilies>
+  <textBlockProcessProjectCreated> wurde erschaffen</textBlockProcessProjectCreated>
+
+  <level1Name>Ebene 1</level1Name>
+</Data>
