@@ -151,7 +151,9 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2020"
+    <PostBuildEvent>call "D:\SigningScript.bat" "$(ProjectDir)bin\Debug\Planning 4.0.dll"
+
+copy "$(ProjectDir)*.addin" "$(AppData)\Autodesk\REVIT\Addins\2020"
 copy "$(ProjectDir)bin\debug\*.dll" "$(AppData)\Autodesk\REVIT\Addins\2020"
 
 </PostBuildEvent>
