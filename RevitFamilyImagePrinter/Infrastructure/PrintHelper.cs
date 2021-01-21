@@ -451,6 +451,9 @@ namespace RevitFamilyImagePrinter.Infrastructure
 						exportOptions.SetViewsAndSheets(views);
 					}
 
+					var levelsId =new FilteredElementCollector(doc).OfClass(typeof(Level)).Select(x=>x.Id).ToList();                    
+					doc.ActiveView.HideElements(levelsId);
+
 					var scale = GetScaleFromElement(uiDoc);
 
 					ZoomOpenUIViews(uiDoc, scale, false);
@@ -479,7 +482,8 @@ namespace RevitFamilyImagePrinter.Infrastructure
 			using (Transaction transaction = new Transaction(uiDoc.Document))
 			{
 				transaction.Start("Set View");
-				uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+				//uiDoc.ActiveView.DetailLevel = is3D ? ViewDetailLevel.Fine : userValues.UserDetailLevel;
+				uiDoc.ActiveView.DetailLevel = ViewDetailLevel.Coarse;
 				uiDoc.ActiveView.Scale = userValues.UserScale;
 				transaction.Commit();
 			}
@@ -584,12 +588,17 @@ namespace RevitFamilyImagePrinter.Infrastructure
 				int indexDot = doc.Title.IndexOf('.');
 				var name = doc.Title.Substring(0, indexDot);
 				return name;
+            }
+            else
+            {
+				return doc.Title;
 			}
 
+			/*
 			if (App.Version.Contains("2019"))
 			{
 				return doc.Title;
-			}
+			}*/
 
 			throw new Exception("Unknown Revit Version");
 
